@@ -2,14 +2,15 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>DreamTeam - Calculadora de Pitágoras</title>
 <style>
   :root { color-scheme: dark; }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   html, body {
     margin: 0;
     height: 100%;
+    overflow: hidden;
     font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
     background: #000000;
     color: #ffffff;
@@ -25,9 +26,9 @@
     width: 100%;
     max-width: 380px;
     height: 100vh;
-    max-height: 780px;
+    height: 100dvh;
     background: #000000;
-    padding: 16px 14px;
+    padding: 16px 14px calc(14px + env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
   }
@@ -74,6 +75,7 @@
   /* Pantalla: sin recuadro, números flotando sobre negro */
   .screen {
     flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -127,22 +129,22 @@
   .keypad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: 1fr;
-    gap: 14px;
-    height: 300px;
+    justify-items: center;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
   }
   .keypad button {
     border: none;
     background: #333333;
     color: #ffffff;
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 400;
     cursor: pointer;
     user-select: none;
-    aspect-ratio: 1 / 1;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
-    width: 100%;
-    justify-self: center;
     display: flex;
     align-items: center;
     justify-content: center;
