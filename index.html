@@ -2,147 +2,323 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>DreamTeam - Calculadora de Pitágoras</title>
 <style>
-  :root {
-    color-scheme: light dark;
-  }
-  * { box-sizing: border-box; }
-  body {
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
     margin: 0;
-    min-height: 100vh;
+    height: 100%;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #0f172a;
+    color: #f1f5f9;
+  }
+  body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: linear-gradient(135deg, #1e293b, #0f172a);
-    color: #f1f5f9;
-    padding: 24px;
-  }
-  .card {
-    background: #1e293bcc;
-    border: 1px solid #334155;
-    border-radius: 16px;
-    padding: 32px;
-    width: 100%;
-    max-width: 420px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-  }
-  h1 {
-    font-size: 1.4rem;
-    margin: 0 0 4px;
-    text-align: center;
-  }
-  p.subtitle {
-    margin: 0 0 24px;
-    text-align: center;
-    color: #94a3b8;
-    font-size: 0.9rem;
-  }
-  .field {
-    margin-bottom: 16px;
-  }
-  label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 0.9rem;
-    color: #cbd5e1;
-  }
-  input[type="number"] {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #475569;
-    background: #0f172a;
-    color: #f1f5f9;
-    font-size: 1rem;
-  }
-  input[type="number"]:focus {
-    outline: none;
-    border-color: #38bdf8;
-  }
-  button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    background: #38bdf8;
-    color: #0f172a;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-top: 8px;
-  }
-  button:hover {
-    background: #0ea5e9;
-  }
-  .result {
-    margin-top: 20px;
     padding: 16px;
-    border-radius: 8px;
-    background: #0f172a;
-    text-align: center;
-    font-size: 1.1rem;
-    min-height: 1.4em;
   }
-  .result strong {
-    color: #4ade80;
+  .tpv {
+    width: 100%;
+    max-width: 380px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
   }
-  .error {
-    color: #f87171;
-  }
-  footer {
-    margin-top: 20px;
+  .brand {
     text-align: center;
     font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .steps {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #334155;
+    transition: background 0.2s;
+  }
+  .dot.active { background: #38bdf8; }
+  .dot.done { background: #4ade80; }
+
+  .screen {
+    background: #020617;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 18px 16px;
+    margin-bottom: 16px;
+    min-height: 96px;
+  }
+  .screen .label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-bottom: 6px;
+  }
+  .screen .value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    text-align: right;
+    color: #f1f5f9;
+    min-height: 1.2em;
+    word-break: break-all;
+  }
+  .screen .value .cursor {
+    color: #38bdf8;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px solid #1e293b;
+    font-size: 1rem;
+    color: #cbd5e1;
+  }
+  .summary-row:last-of-type { border-bottom: none; }
+  .summary-row span.v { font-weight: 600; color: #f1f5f9; }
+
+  .result-box {
+    text-align: center;
+    margin-top: 8px;
+  }
+  .result-box .r-label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-bottom: 4px;
+  }
+  .result-box .r-value {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #4ade80;
+    line-height: 1.1;
+  }
+
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .keypad button {
+    padding: 18px 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    background: #334155;
+    color: #f1f5f9;
+    cursor: pointer;
+    user-select: none;
+  }
+  .keypad button:active { background: #475569; }
+  .keypad button.op { background: #475569; }
+  .keypad button.enter {
+    grid-row: span 2;
+    background: #38bdf8;
+    color: #0f172a;
+    font-size: 1.1rem;
+  }
+  .keypad button.enter:active { background: #0ea5e9; }
+  .keypad button.clear {
+    background: #7f1d1d;
+    color: #fecaca;
+  }
+  .keypad button.clear:active { background: #991b1b; }
+  .keypad button.restart {
+    background: #38bdf8;
+    color: #0f172a;
+  }
+  .keypad button.restart:active { background: #0ea5e9; }
+
+  .error {
+    color: #f87171;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: -6px;
+    margin-bottom: 10px;
+    min-height: 1.1em;
+  }
+
+  footer {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 0.7rem;
     color: #64748b;
   }
 </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Calculadora de Pitágoras</h1>
-    <p class="subtitle">Calcula la hipotenusa a partir de los catetos</p>
+  <div class="tpv">
+    <div class="brand">DreamTeam · Pitágoras</div>
 
-    <div class="field">
-      <label for="a">Cateto a</label>
-      <input type="number" id="a" placeholder="Ej: 3" step="any" min="0">
+    <div class="steps">
+      <div class="dot" id="dot1"></div>
+      <div class="dot" id="dot2"></div>
+      <div class="dot" id="dot3"></div>
     </div>
 
-    <div class="field">
-      <label for="b">Cateto b</label>
-      <input type="number" id="b" placeholder="Ej: 4" step="any" min="0">
+    <!-- Pantalla principal (pasos 1 y 2) -->
+    <div class="screen" id="entryScreen">
+      <div class="label" id="entryLabel">Introduce el lado A</div>
+      <div class="value" id="entryValue">0<span class="cursor">|</span></div>
+    </div>
+    <div class="error" id="errorMsg">&nbsp;</div>
+
+    <!-- Pantalla resumen (paso 3) -->
+    <div class="screen" id="resultScreen" style="display:none;">
+      <div class="summary-row"><span>Lado A</span><span class="v" id="sumA">0</span></div>
+      <div class="summary-row"><span>Lado B</span><span class="v" id="sumB">0</span></div>
+      <div class="result-box">
+        <div class="r-label">Hipotenusa</div>
+        <div class="r-value" id="sumC">0</div>
+      </div>
     </div>
 
-    <button onclick="calcularHipotenusa()">Calcular hipotenusa</button>
+    <!-- Teclado numérico tipo TPV (pasos 1 y 2) -->
+    <div class="keypad" id="entryPad">
+      <button data-key="7">7</button>
+      <button data-key="8">8</button>
+      <button data-key="9">9</button>
+      <button data-key="4">4</button>
+      <button data-key="5">5</button>
+      <button data-key="6">6</button>
+      <button data-key="1">1</button>
+      <button data-key="2">2</button>
+      <button data-key="3">3</button>
+      <button data-key="." class="op">,</button>
+      <button data-key="0">0</button>
+      <button data-key="back" class="clear">⌫</button>
+      <button data-key="enter" class="enter">Siguiente ➜</button>
+    </div>
 
-    <div class="result" id="resultado"></div>
+    <!-- Teclado del paso final -->
+    <div class="keypad" id="resultPad" style="display:none; grid-template-columns: 1fr;">
+      <button class="restart" id="restartBtn">🔁 Nuevo cálculo</button>
+    </div>
 
-    <footer>DreamTeam &middot; a&sup2; + b&sup2; = c&sup2;</footer>
+    <footer>a&sup2; + b&sup2; = c&sup2;</footer>
   </div>
 
-  <script>
-    function calcularHipotenusa() {
-      const a = parseFloat(document.getElementById('a').value);
-      const b = parseFloat(document.getElementById('b').value);
-      const resultado = document.getElementById('resultado');
+<script>
+  const state = { step: 1, a: '', b: '' };
 
-      if (isNaN(a) || isNaN(b) || a < 0 || b < 0) {
-        resultado.innerHTML = '<span class="error">Ingresa dos números válidos y positivos.</span>';
-        return;
-      }
+  const entryScreen = document.getElementById('entryScreen');
+  const resultScreen = document.getElementById('resultScreen');
+  const entryPad = document.getElementById('entryPad');
+  const resultPad = document.getElementById('resultPad');
+  const entryLabel = document.getElementById('entryLabel');
+  const entryValue = document.getElementById('entryValue');
+  const errorMsg = document.getElementById('errorMsg');
+  const dots = [document.getElementById('dot1'), document.getElementById('dot2'), document.getElementById('dot3')];
 
+  function currentBuffer() {
+    return state.step === 1 ? state.a : state.b;
+  }
+  function setBuffer(v) {
+    if (state.step === 1) state.a = v; else state.b = v;
+  }
+
+  function render() {
+    dots.forEach((d, i) => {
+      d.classList.remove('active', 'done');
+      if (i + 1 < state.step) d.classList.add('done');
+      else if (i + 1 === state.step) d.classList.add('active');
+    });
+
+    if (state.step <= 2) {
+      entryScreen.style.display = '';
+      resultScreen.style.display = 'none';
+      entryPad.style.display = '';
+      resultPad.style.display = 'none';
+      entryLabel.textContent = state.step === 1 ? 'Introduce el lado A' : 'Introduce el lado B';
+      const buf = currentBuffer();
+      entryValue.innerHTML = (buf === '' ? '0' : buf) + '<span class="cursor">|</span>';
+      errorMsg.textContent = ' ';
+    } else {
+      entryScreen.style.display = 'none';
+      resultScreen.style.display = '';
+      entryPad.style.display = 'none';
+      resultPad.style.display = '';
+      const a = parseFloat(state.a);
+      const b = parseFloat(state.b);
       const c = Math.sqrt(a * a + b * b);
-      resultado.innerHTML = `La hipotenusa es <strong>${c.toFixed(4)}</strong>`;
+      document.getElementById('sumA').textContent = a;
+      document.getElementById('sumB').textContent = b;
+      document.getElementById('sumC').textContent = c.toFixed(4);
+    }
+  }
+
+  function handleKey(key) {
+    if (state.step > 2) return;
+    let buf = currentBuffer();
+
+    if (key === 'back') {
+      buf = buf.slice(0, -1);
+      setBuffer(buf);
+      render();
+      return;
     }
 
-    document.getElementById('b').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') calcularHipotenusa();
-    });
-    document.getElementById('a').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') calcularHipotenusa();
-    });
-  </script>
+    if (key === 'enter') {
+      const n = parseFloat(buf);
+      if (buf === '' || isNaN(n) || n <= 0) {
+        errorMsg.textContent = 'Introduce un número válido mayor que 0';
+        return;
+      }
+      state.step += 1;
+      render();
+      return;
+    }
+
+    if (key === '.') {
+      if (buf.includes('.')) return;
+      buf = (buf === '' ? '0' : buf) + '.';
+      setBuffer(buf);
+      render();
+      return;
+    }
+
+    // dígito
+    if (buf.length >= 10) return;
+    buf = buf === '0' ? key : buf + key;
+    setBuffer(buf);
+    render();
+  }
+
+  entryPad.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    handleKey(btn.dataset.key);
+  });
+
+  document.getElementById('restartBtn').addEventListener('click', () => {
+    state.step = 1;
+    state.a = '';
+    state.b = '';
+    render();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (state.step > 2) return;
+    if (/^[0-9]$/.test(e.key)) handleKey(e.key);
+    else if (e.key === '.' || e.key === ',') handleKey('.');
+    else if (e.key === 'Backspace') handleKey('back');
+    else if (e.key === 'Enter') handleKey('enter');
+  });
+
+  render();
+</script>
 </body>
 </html>
