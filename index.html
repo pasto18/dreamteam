@@ -21,7 +21,7 @@
   .wrap {
     width: 100%;
     max-width: 480px;
-    padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+    padding: 18px 16px calc(28px + env(safe-area-inset-bottom));
   }
 
   .topbar {
@@ -45,11 +45,15 @@
     background: none;
     border: none;
     color: #8e8e93;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     line-height: 1;
     cursor: pointer;
     text-decoration: none;
-    padding: 6px 8px;
+    padding: 10px;
+    margin: -10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .nav-btn:active { color: #ffffff; }
 
@@ -87,9 +91,9 @@
     border: none;
     background: #1c1c1e;
     color: #8e8e93;
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     font-weight: 500;
-    padding: 8px 14px;
+    padding: 10px 16px;
     border-radius: 20px;
     cursor: pointer;
   }
@@ -103,9 +107,9 @@
     border: 1px dashed #3a3a3c;
     background: none;
     color: #8e8e93;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 500;
-    padding: 12px;
+    padding: 15px;
     border-radius: 12px;
     cursor: pointer;
     margin-bottom: 14px;
@@ -128,12 +132,23 @@
     border: 1px solid #2c2c2e;
     border-radius: 8px;
     color: #ffffff;
-    font-size: 0.9rem;
-    padding: 10px 12px;
+    font-size: 16px;
+    padding: 12px 12px;
     font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
   }
   .form-input:focus { outline: none; border-color: #ff9f0a; }
   .form-input::placeholder { color: #555555; }
+  select.form-input {
+    color: #ffffff;
+    padding-right: 34px;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+  }
+  select.form-input option { background: #000000; color: #ffffff; }
   .form-actions {
     display: flex;
     gap: 10px;
@@ -142,8 +157,8 @@
     flex: 1;
     border: none;
     border-radius: 10px;
-    padding: 11px;
-    font-size: 0.9rem;
+    padding: 14px;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
   }
@@ -161,26 +176,26 @@
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    padding: 12px 4px;
+    padding: 14px 4px;
     border-bottom: 1px solid #1c1c1e;
   }
   .task.hidden { display: none; }
 
   .status-btn {
     flex-shrink: 0;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: 2px solid #48484a;
     background: transparent;
     color: #ffffff;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    margin-top: 2px;
+    margin-top: 1px;
   }
   .status-btn.progress {
     border-color: #ff9f0a;
@@ -197,8 +212,8 @@
     min-width: 0;
   }
   .task-text {
-    font-size: 0.98rem;
-    line-height: 1.35;
+    font-size: 1rem;
+    line-height: 1.4;
     color: #f2f2f7;
   }
   .task-text.done {
@@ -209,8 +224,8 @@
   .meta {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-top: 8px;
+    gap: 2px;
+    margin-top: 10px;
   }
   .meta-input {
     width: 100%;
@@ -218,25 +233,40 @@
     border: none;
     border-bottom: 1px solid #2c2c2e;
     color: #ffffff;
-    font-size: 0.83rem;
-    padding: 4px 0;
+    font-size: 16px;
+    padding: 9px 0;
     font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0;
   }
   .meta-input:focus { outline: none; border-bottom-color: #ff9f0a; }
   .meta-input::placeholder { color: #555555; }
   .meta-input.assignee { color: #ff9f0a; }
   .meta-input.tools { color: #64d2ff; }
   .meta-input.location { color: #ff6482; }
+  select.meta-input {
+    padding-right: 22px;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff9f0a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 14px;
+  }
+  select.meta-input option { background: #000000; color: #ffffff; }
 
   .delete-btn {
     flex-shrink: 0;
     background: none;
     border: none;
     color: #48484a;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     cursor: pointer;
-    padding: 4px 2px;
-    margin-top: 2px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -4px -4px 0 0;
   }
   .delete-btn:active { color: #ff453a; }
 
@@ -275,7 +305,7 @@
       <input class="form-input" id="newText" placeholder="Descripción de la tarea">
       <input class="form-input" id="newTools" placeholder="🧰 Herramientas necesarias">
       <input class="form-input" id="newLocation" placeholder="📍 Sitio / carpa">
-      <input class="form-input" id="newAssignee" placeholder="👤 Asignar a (opcional)">
+      <select class="form-input" id="newAssignee"></select>
       <div class="form-actions">
         <button class="form-cancel" id="cancelAddBtn" type="button">Cancelar</button>
         <button class="form-submit" id="submitAddBtn" type="button">Añadir</button>
@@ -330,6 +360,19 @@
 
   const STATUS_ORDER = ['pending', 'progress', 'done'];
   const DEFAULT_EMOJI = '📌';
+  const NAMES = ['German', 'Fran', 'Laura', 'Fabri', 'Felix', 'Flavia', 'Manda', 'Juani', 'Joan', 'Anto', 'Walid', 'Lisi', 'Helene']
+    .sort((a, b) => a.localeCompare(b, 'es'));
+
+  function assigneeOptionsHtml(selected) {
+    const opts = [`<option value="">👤 Sin asignar</option>`];
+    if (selected && !NAMES.includes(selected)) {
+      opts.push(`<option value="${escapeAttr(selected)}" selected>${escapeHtml(selected)}</option>`);
+    }
+    NAMES.forEach(n => {
+      opts.push(`<option value="${escapeAttr(n)}"${selected === n ? ' selected' : ''}>${escapeHtml(n)}</option>`);
+    });
+    return opts.join('');
+  }
 
   let tasks = [];
   let currentFilter = 'all';
@@ -416,7 +459,7 @@
             <div class="meta">
               <input class="meta-input tools" type="text" placeholder="🧰 Herramientas necesarias..." value="${escapeAttr(t.tools)}" data-field="tools" data-id="${t.id}">
               <input class="meta-input location" type="text" placeholder="📍 Sitio / carpa..." value="${escapeAttr(t.location)}" data-field="location" data-id="${t.id}">
-              <input class="meta-input assignee" type="text" placeholder="👤 Asignar a..." value="${escapeAttr(t.assignee)}" data-field="assignee" data-id="${t.id}">
+              <select class="meta-input assignee" data-field="assignee" data-id="${t.id}">${assigneeOptionsHtml(t.assignee)}</select>
             </div>
           </div>
           <button class="delete-btn" data-action="delete" data-id="${t.id}" title="Borrar tarea">🗑</button>
@@ -427,7 +470,9 @@
       const input = listEl.querySelector(`[data-field="${focusedField}"][data-id="${focusedId}"]`);
       if (input) {
         input.focus();
-        input.setSelectionRange(selStart, selStart);
+        if (input.tagName === 'INPUT' && selStart !== null && selStart !== undefined) {
+          input.setSelectionRange(selStart, selStart);
+        }
       }
     }
   }
@@ -468,7 +513,7 @@
     }
   });
 
-  listEl.addEventListener('input', (e) => {
+  function handleFieldChange(e) {
     const input = e.target.closest('[data-field]');
     if (!input) return;
     const id = input.dataset.id;
@@ -477,10 +522,13 @@
     if (task) task[field] = input.value;
     const key = id + ':' + field;
     clearTimeout(fieldTimers[key]);
+    const delay = input.tagName === 'SELECT' ? 0 : 500;
     fieldTimers[key] = setTimeout(() => {
       setDoc(doc(db, 'tasks', id), { [field]: input.value }, { merge: true }).catch(console.error);
-    }, 500);
-  });
+    }, delay);
+  }
+  listEl.addEventListener('input', handleFieldChange);
+  listEl.addEventListener('change', handleFieldChange);
 
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -498,6 +546,7 @@
   const newTools = document.getElementById('newTools');
   const newLocation = document.getElementById('newLocation');
   const newAssignee = document.getElementById('newAssignee');
+  newAssignee.innerHTML = assigneeOptionsHtml('');
 
   function resetAddForm() {
     newText.value = '';
