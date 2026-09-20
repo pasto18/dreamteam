@@ -593,7 +593,18 @@
     <div class="add-form" id="addForm">
       <input class="form-input" id="newText" placeholder="Task description">
       <input class="form-input" id="newTools" placeholder="🧰 Tools needed">
-      <input class="form-input" id="newLocation" placeholder="📍 Site / tent">
+      <select class="form-input select-input" id="newLocationSelect">
+        <option value="">📍 Select site...</option>
+        <option value="Konsum">Konsum</option>
+        <option value="Subardo">Subardo</option>
+        <option value="Container Dream Team">Container Dream Team</option>
+        <option value="Container White">Container White</option>
+        <option value="Palapa">Palapa</option>
+        <option value="Palapita">Palapita</option>
+        <option value="Ballena">Ballena</option>
+        <option value="Other">Other...</option>
+      </select>
+      <input class="form-input" id="newLocationOther" placeholder="📍 Enter site name..." style="display:none;">
       <div class="chip-wrap" id="newAssigneeChips"></div>
       <div class="form-actions">
         <button class="form-cancel" id="cancelAddBtn" type="button">Cancel</button>
@@ -626,7 +637,18 @@
       <input class="meta-input tools" type="text" id="detailTools" placeholder="e.g. hammer, nails, ladder...">
 
       <div class="section-label">Site / tent</div>
-      <input class="meta-input location" type="text" id="detailLocation" placeholder="e.g. Dream Team container...">
+      <select class="meta-input location select-input" id="detailLocationSelect">
+        <option value="">Select site...</option>
+        <option value="Konsum">Konsum</option>
+        <option value="Subardo">Subardo</option>
+        <option value="Container Dream Team">Container Dream Team</option>
+        <option value="Container White">Container White</option>
+        <option value="Palapa">Palapa</option>
+        <option value="Palapita">Palapita</option>
+        <option value="Ballena">Ballena</option>
+        <option value="Other">Other...</option>
+      </select>
+      <input class="meta-input location" type="text" id="detailLocationOther" placeholder="Enter site name..." style="display:none;">
 
       <div class="section-label">Shopping list</div>
       <div class="shop-list" id="detailShopList"></div>
@@ -709,6 +731,7 @@
 
   const STATUS_ORDER = ['pending', 'progress', 'done'];
   const DEFAULT_EMOJI = '📌';
+  const LOCATIONS = ['Konsum', 'Subardo', 'Container Dream Team', 'Container White', 'Palapa', 'Palapita', 'Ballena'];
   const NAMES = ['German', 'Fran', 'Laura', 'Fabri', 'Felix', 'Flavia', 'Manda', 'Juani', 'Joan', 'Anto', 'Walid', 'Lisi', 'Helene']
     .sort((a, b) => a.localeCompare(b, 'es'));
 
@@ -949,7 +972,12 @@
   const addForm = document.getElementById('addForm');
   const newText = document.getElementById('newText');
   const newTools = document.getElementById('newTools');
-  const newLocation = document.getElementById('newLocation');
+  const newLocationSelect = document.getElementById('newLocationSelect');
+  const newLocationOther = document.getElementById('newLocationOther');
+  newLocationSelect.addEventListener('change', () => {
+    newLocationOther.style.display = newLocationSelect.value === 'Other' ? '' : 'none';
+    if (newLocationSelect.value === 'Other') newLocationOther.focus();
+  });
   const newAssigneeChips = document.getElementById('newAssigneeChips');
   let newAssigneeSelection = [];
   newAssigneeChips.innerHTML = assigneeChipsHtml(newAssigneeSelection);
@@ -964,7 +992,9 @@
   function resetAddForm() {
     newText.value = '';
     newTools.value = '';
-    newLocation.value = '';
+    newLocationSelect.value = '';
+    newLocationOther.value = '';
+    newLocationOther.style.display = 'none';
     newAssigneeSelection = [];
     newAssigneeChips.innerHTML = assigneeChipsHtml(newAssigneeSelection);
   }
@@ -986,7 +1016,7 @@
       emoji: DEFAULT_EMOJI,
       text,
       tools: newTools.value.trim(),
-      location: newLocation.value.trim(),
+      location: newLocationSelect.value === 'Other' ? newLocationOther.value.trim() : newLocationSelect.value,
       assignees: newAssigneeSelection,
       status: 'pending',
       order: Date.now(),
@@ -1001,7 +1031,8 @@
   const detailTitleInput = document.getElementById('detailTitleInput');
   const detailAssigneeChips = document.getElementById('detailAssigneeChips');
   const detailTools = document.getElementById('detailTools');
-  const detailLocation = document.getElementById('detailLocation');
+  const detailLocationSelect = document.getElementById('detailLocationSelect');
+  const detailLocationOther = document.getElementById('detailLocationOther');
   const notesTextarea = document.getElementById('notesTextarea');
   const detailShopList = document.getElementById('detailShopList');
   const detailShopInput = document.getElementById('detailShopInput');
@@ -1036,7 +1067,11 @@
     if (active !== detailTitleInput) detailTitleInput.value = task.text;
     detailAssigneeChips.innerHTML = assigneeChipsHtml(task.assignees);
     if (active !== detailTools) detailTools.value = task.tools || '';
-    if (active !== detailLocation) detailLocation.value = task.location || '';
+    const loc = task.location || '';
+    const isPresetLoc = LOCATIONS.includes(loc);
+    if (active !== detailLocationSelect) detailLocationSelect.value = isPresetLoc ? loc : (loc ? 'Other' : '');
+    detailLocationOther.style.display = detailLocationSelect.value === 'Other' ? '' : 'none';
+    if (active !== detailLocationOther) detailLocationOther.value = isPresetLoc ? '' : loc;
     if (active !== notesTextarea) notesTextarea.value = task.notes || '';
     renderDetailShopList();
 
@@ -1142,12 +1177,28 @@
     scheduleFieldSave(id, 'tools', detailTools.value, 500);
   });
 
-  detailLocation.addEventListener('input', () => {
+  detailLocationSelect.addEventListener('change', () => {
     const id = currentDetailId;
     if (!id) return;
     const task = tasks.find(t => t.id === id);
-    if (task) task.location = detailLocation.value;
-    scheduleFieldSave(id, 'location', detailLocation.value, 500);
+    if (!task) return;
+    const isOther = detailLocationSelect.value === 'Other';
+    detailLocationOther.style.display = isOther ? '' : 'none';
+    if (isOther) {
+      detailLocationOther.focus();
+      task.location = detailLocationOther.value;
+    } else {
+      task.location = detailLocationSelect.value;
+    }
+    scheduleFieldSave(id, 'location', task.location, 0);
+  });
+
+  detailLocationOther.addEventListener('input', () => {
+    const id = currentDetailId;
+    if (!id) return;
+    const task = tasks.find(t => t.id === id);
+    if (task) task.location = detailLocationOther.value;
+    scheduleFieldSave(id, 'location', detailLocationOther.value, 500);
   });
 
   function compressImage(file, maxDim = 1600, quality = 0.75) {
