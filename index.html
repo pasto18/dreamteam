@@ -57,28 +57,6 @@
   }
   .nav-btn:active { color: #ffffff; }
 
-  .progress {
-    margin-bottom: 14px;
-  }
-  .progress-text {
-    font-size: 0.85rem;
-    color: #8e8e93;
-    margin-bottom: 6px;
-  }
-  .progress-bar {
-    height: 6px;
-    border-radius: 3px;
-    background: #1c1c1e;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: #4cd964;
-    border-radius: 3px;
-    width: 0%;
-    transition: width 0.25s;
-  }
-
   .filters-row {
     display: flex;
     align-items: center;
@@ -702,17 +680,11 @@
       <a href="pitagoras.html" class="nav-btn" title="Calculator">🧮</a>
     </div>
 
-    <div class="progress">
-      <div class="progress-text" id="progressText">0/0 completed</div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    </div>
-
     <div class="filters-row">
       <div class="filters" id="statusFilters">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="pending">Pending</button>
-        <button class="filter-btn" data-filter="progress">In progress</button>
-        <button class="filter-btn" data-filter="done">Done</button>
+        <button class="filter-btn active" data-status="pending">Pending</button>
+        <button class="filter-btn active" data-status="progress">In progress</button>
+        <button class="filter-btn active" data-status="done">Done</button>
       </div>
       <button class="filter-btn plan-toggle" id="planToggleBtn" title="Plan for the Day">Plan Day</button>
     </div>
@@ -931,7 +903,7 @@
   }
 
   let tasks = [];
-  let currentFilter = 'all';
+  let activeStatuses = { pending: true, progress: true, done: true };
   let currentPersonFilter = 'all';
   let currentDetailId = null;
   let shoppingOverlayOpen = false;
@@ -939,8 +911,6 @@
   let lastBerlinDate = getBerlinDateString();
 
   const listEl = document.getElementById('taskList');
-  const progressText = document.getElementById('progressText');
-  const progressFill = document.getElementById('progressFill');
   const personFilterSelect = document.getElementById('personFilterSelect');
 
   function renderPersonFilterOptions() {
@@ -1042,14 +1012,8 @@
     .then(() => onSnapshot(tasksCol, mergeSnapshot, (err) => console.error('Firestore error:', err)))
     .catch((err) => console.error('Error initializing Firestore:', err));
 
-  function renderProgress() {
-    const done = tasks.filter(t => t.status === 'done').length;
-    progressText.textContent = `${done}/${tasks.length} completed`;
-    progressFill.style.width = tasks.length ? `${(done / tasks.length) * 100}%` : '0%';
-  }
-
   function isTaskHidden(t) {
-    const statusHidden = currentFilter !== 'all' && t.status !== currentFilter;
+    const statusHidden = !activeStatuses[t.status];
     const personHidden = currentPersonFilter !== 'all' && !(t.assignees || []).includes(currentPersonFilter);
     const siteHidden = currentSiteFilter !== 'all' && t.location !== currentSiteFilter;
     return statusHidden || personHidden || siteHidden;
@@ -1111,7 +1075,6 @@
   }
 
   function render() {
-    renderProgress();
     renderList();
     if (currentDetailId) renderDetail();
     if (shoppingOverlayOpen) renderShoppingOverlay();
@@ -1220,9 +1183,9 @@
 
   document.querySelectorAll('#statusFilters .filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#statusFilters .filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentFilter = btn.dataset.filter;
+      const status = btn.dataset.status;
+      activeStatuses[status] = !activeStatuses[status];
+      btn.classList.toggle('active', activeStatuses[status]);
       renderList();
     });
   });
