@@ -192,7 +192,6 @@
   }
   .task.hidden { display: none; }
   .task.unassigned { border-left-color: #ffd60a; }
-  .task.priority-high { background: rgba(255, 159, 10, 0.08); }
 
   .status-btn {
     flex-shrink: 0;
@@ -257,8 +256,35 @@
   }
   .meta-input:focus { outline: none; border-bottom-color: #ff9f0a; }
   .meta-input::placeholder { color: #555555; }
-  .meta-input.tools { color: #64d2ff; }
   .meta-input.location { color: #ff6482; }
+
+  .tag-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #1c1c1e;
+    color: #64d2ff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 8px 8px 8px 14px;
+    border-radius: 20px;
+  }
+  .tag-remove {
+    background: none;
+    border: none;
+    color: #8e8e93;
+    font-size: 0.8rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px;
+  }
+  .tag-remove:active { color: #ff453a; }
 
   .chip-wrap {
     display: flex;
@@ -361,7 +387,8 @@
   .detail-title-input {
     flex: 1;
     min-height: 60px;
-    resize: vertical;
+    resize: none;
+    overflow: hidden;
     background: #1c1c1e;
     border: 1px solid #2c2c2e;
     border-radius: 12px;
@@ -613,7 +640,14 @@
     </div>
     <div class="add-form" id="addForm">
       <input class="form-input" id="newText" placeholder="Task description">
-      <input class="form-input" id="newTools" placeholder="🧰 Tools needed">
+      <div class="section-label">🧰 Tools needed</div>
+      <div class="tag-wrap" id="newToolsTags"></div>
+      <div class="chip-wrap" id="newToolSuggestions"></div>
+      <div class="shop-add-row" id="newToolOtherRow" style="display:none;">
+        <input class="form-input" type="text" id="newToolOtherInput" placeholder="Enter tool name...">
+        <button class="shop-add-btn" type="button" id="newToolOtherAddBtn">Add</button>
+      </div>
+
       <select class="form-input select-input" id="newLocationSelect">
         <option value="">📍 Select site...</option>
         <option value="Konsum">Konsum</option>
@@ -657,7 +691,12 @@
       <div class="chip-wrap" id="detailAssigneeChips"></div>
 
       <div class="section-label">Tools needed</div>
-      <input class="meta-input tools" type="text" id="detailTools" placeholder="e.g. hammer, nails, ladder...">
+      <div class="tag-wrap" id="detailToolsList"></div>
+      <div class="chip-wrap" id="detailToolSuggestions"></div>
+      <div class="shop-add-row" id="detailToolOtherRow" style="display:none;">
+        <input class="form-input" type="text" id="detailToolOtherInput" placeholder="Enter tool name...">
+        <button class="shop-add-btn" type="button" id="detailToolOtherAddBtn">Add</button>
+      </div>
 
       <div class="section-label">Site / tent</div>
       <select class="meta-input location select-input" id="detailLocationSelect">
@@ -755,6 +794,15 @@
   const STATUS_ORDER = ['pending', 'progress', 'done'];
   const DEFAULT_EMOJI = '📌';
   const LOCATIONS = ['Konsum', 'Subardo', 'Container Dream Team', 'Container White', 'Palapa', 'Palapita', 'Ballena'];
+  const TOOL_SUGGESTIONS = ['Forklift', 'Roto', 'Cherry picker', 'Hammer', 'Lever'];
+
+  function toolTagsHtml(list) {
+    return (list || []).map((tool, i) => `<span class="tag">${escapeHtml(tool)}<button type="button" class="tag-remove" data-index="${i}">✕</button></span>`).join('');
+  }
+  function toolSuggestionsHtml() {
+    return TOOL_SUGGESTIONS.map(s => `<button type="button" class="chip" data-tool="${escapeAttr(s)}">+ ${escapeHtml(s)}</button>`).join('')
+      + `<button type="button" class="chip" data-tool="__other__">+ Other</button>`;
+  }
   const NAMES = ['German', 'Fran', 'Laura', 'Fabri', 'Felix', 'Flavia', 'Manda', 'Juani', 'Joan', 'Anto', 'Walid', 'Lisi', 'Helene']
     .sort((a, b) => a.localeCompare(b, 'es'));
 
@@ -806,7 +854,7 @@
     renderList();
   });
 
-  function splitLegacyAssignee(str) {
+  function splitCommaList(str) {
     return String(str || '').split(',').map(s => s.trim()).filter(Boolean);
   }
 
@@ -818,8 +866,8 @@
         await setDoc(ref, {
           emoji: t.emoji,
           text: t.text,
-          assignees: splitLegacyAssignee(t.assignee),
-          tools: '',
+          assignees: splitCommaList(t.assignee),
+          toolsList: [],
           location: '',
           status: 'pending',
           order: t.id,
@@ -831,11 +879,13 @@
       const patch = {};
       if (data.text === undefined) patch.text = t.text;
       if (data.emoji === undefined) patch.emoji = t.emoji;
-      if (data.tools === undefined) patch.tools = '';
       if (data.location === undefined) patch.location = '';
       if (data.order === undefined) patch.order = t.id;
       if (data.assignees === undefined) {
-        patch.assignees = data.assignee !== undefined ? splitLegacyAssignee(data.assignee) : splitLegacyAssignee(t.assignee);
+        patch.assignees = data.assignee !== undefined ? splitCommaList(data.assignee) : splitCommaList(t.assignee);
+      }
+      if (data.toolsList === undefined) {
+        patch.toolsList = data.tools !== undefined ? splitCommaList(data.tools) : [];
       }
       if (Object.keys(patch).length) await setDoc(ref, patch, { merge: true });
     }));
@@ -849,8 +899,8 @@
         id: d.id,
         emoji: data.emoji || DEFAULT_EMOJI,
         text: data.text || '',
-        assignees: Array.isArray(data.assignees) ? data.assignees : splitLegacyAssignee(data.assignee),
-        tools: data.tools || '',
+        assignees: Array.isArray(data.assignees) ? data.assignees : splitCommaList(data.assignee),
+        toolsList: Array.isArray(data.toolsList) ? data.toolsList : splitCommaList(data.tools),
         location: data.location || '',
         status: data.status || 'pending',
         order: typeof data.order === 'number' ? data.order : 0,
@@ -1003,7 +1053,51 @@
   const addToggleBtn = document.getElementById('addToggleBtn');
   const addForm = document.getElementById('addForm');
   const newText = document.getElementById('newText');
-  const newTools = document.getElementById('newTools');
+  const newToolsTags = document.getElementById('newToolsTags');
+  const newToolSuggestions = document.getElementById('newToolSuggestions');
+  const newToolOtherRow = document.getElementById('newToolOtherRow');
+  const newToolOtherInput = document.getElementById('newToolOtherInput');
+  let newToolsList = [];
+
+  function renderNewTools() {
+    newToolsTags.innerHTML = toolTagsHtml(newToolsList);
+    newToolSuggestions.innerHTML = toolSuggestionsHtml();
+  }
+  renderNewTools();
+
+  newToolSuggestions.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    const tool = btn.dataset.tool;
+    if (tool === '__other__') {
+      newToolOtherRow.style.display = '';
+      newToolOtherInput.focus();
+      return;
+    }
+    newToolsList = [...newToolsList, tool];
+    renderNewTools();
+  });
+
+  newToolsTags.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tag-remove');
+    if (!btn) return;
+    newToolsList = newToolsList.filter((_, i) => i !== Number(btn.dataset.index));
+    renderNewTools();
+  });
+
+  function addNewToolOther() {
+    const text = newToolOtherInput.value.trim();
+    if (!text) return;
+    newToolsList = [...newToolsList, text];
+    newToolOtherInput.value = '';
+    newToolOtherRow.style.display = 'none';
+    renderNewTools();
+  }
+  document.getElementById('newToolOtherAddBtn').addEventListener('click', addNewToolOther);
+  newToolOtherInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addNewToolOther(); }
+  });
+
   const newLocationSelect = document.getElementById('newLocationSelect');
   const newLocationOther = document.getElementById('newLocationOther');
   newLocationSelect.addEventListener('change', () => {
@@ -1023,7 +1117,10 @@
 
   function resetAddForm() {
     newText.value = '';
-    newTools.value = '';
+    newToolsList = [];
+    renderNewTools();
+    newToolOtherRow.style.display = 'none';
+    newToolOtherInput.value = '';
     newLocationSelect.value = '';
     newLocationOther.value = '';
     newLocationOther.style.display = 'none';
@@ -1047,7 +1144,7 @@
     await addDoc(tasksCol, {
       emoji: DEFAULT_EMOJI,
       text,
-      tools: newTools.value.trim(),
+      toolsList: newToolsList,
       location: newLocationSelect.value === 'Other' ? newLocationOther.value.trim() : newLocationSelect.value,
       assignees: newAssigneeSelection,
       status: 'pending',
@@ -1063,7 +1160,11 @@
   const detailTitleInput = document.getElementById('detailTitleInput');
   const detailPriorityBtn = document.getElementById('detailPriorityBtn');
   const detailAssigneeChips = document.getElementById('detailAssigneeChips');
-  const detailTools = document.getElementById('detailTools');
+  const detailToolsList = document.getElementById('detailToolsList');
+  const detailToolSuggestions = document.getElementById('detailToolSuggestions');
+  const detailToolOtherRow = document.getElementById('detailToolOtherRow');
+  const detailToolOtherInput = document.getElementById('detailToolOtherInput');
+  const detailToolOtherAddBtn = document.getElementById('detailToolOtherAddBtn');
   const detailLocationSelect = document.getElementById('detailLocationSelect');
   const detailLocationOther = document.getElementById('detailLocationOther');
   const notesTextarea = document.getElementById('notesTextarea');
@@ -1098,10 +1199,11 @@
 
     detailEmoji.textContent = task.emoji;
     if (active !== detailTitleInput) detailTitleInput.value = task.text;
+    autoGrowTextarea(detailTitleInput);
     detailPriorityBtn.classList.toggle('active', !!task.highPriority);
     detailPriorityBtn.textContent = task.highPriority ? '🔥 High priority (tap to remove)' : '🔥 Mark as high priority';
     detailAssigneeChips.innerHTML = assigneeChipsHtml(task.assignees);
-    if (active !== detailTools) detailTools.value = task.tools || '';
+    renderDetailTools();
     const loc = task.location || '';
     const isPresetLoc = LOCATIONS.includes(loc);
     if (active !== detailLocationSelect) detailLocationSelect.value = isPresetLoc ? loc : (loc ? 'Other' : '');
@@ -1134,7 +1236,13 @@
     scheduleFieldSave(id, 'highPriority', task.highPriority, 0);
   });
 
+  function autoGrowTextarea(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
   detailTitleInput.addEventListener('input', () => {
+    autoGrowTextarea(detailTitleInput);
     const id = currentDetailId;
     if (!id) return;
     const task = tasks.find(t => t.id === id);
@@ -1215,12 +1323,59 @@
     scheduleFieldSave(id, 'assignees', task.assignees, 0);
   });
 
-  detailTools.addEventListener('input', () => {
+  function renderDetailTools() {
+    const task = tasks.find(t => t.id === currentDetailId);
+    if (!task) return;
+    detailToolsList.innerHTML = toolTagsHtml(task.toolsList);
+    detailToolSuggestions.innerHTML = toolSuggestionsHtml();
+  }
+
+  function addDetailTool(text) {
+    const id = currentDetailId;
+    if (!id || !text) return;
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    const list = [...(task.toolsList || []), text];
+    task.toolsList = list;
+    renderDetailTools();
+    scheduleFieldSave(id, 'toolsList', list, 0);
+  }
+
+  detailToolSuggestions.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    if (btn.dataset.tool === '__other__') {
+      detailToolOtherRow.style.display = '';
+      detailToolOtherInput.focus();
+      return;
+    }
+    addDetailTool(btn.dataset.tool);
+  });
+
+  detailToolsList.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tag-remove');
+    if (!btn) return;
     const id = currentDetailId;
     if (!id) return;
     const task = tasks.find(t => t.id === id);
-    if (task) task.tools = detailTools.value;
-    scheduleFieldSave(id, 'tools', detailTools.value, 500);
+    if (!task) return;
+    const idx = Number(btn.dataset.index);
+    const list = (task.toolsList || []).filter((_, i) => i !== idx);
+    task.toolsList = list;
+    renderDetailTools();
+    scheduleFieldSave(id, 'toolsList', list, 0);
+  });
+
+  function addDetailToolOther() {
+    const text = detailToolOtherInput.value.trim();
+    if (!text) return;
+    addDetailTool(text);
+    detailToolOtherInput.value = '';
+    detailToolOtherRow.style.display = 'none';
+  }
+  detailToolOtherAddBtn.addEventListener('click', addDetailToolOther);
+  detailToolOtherInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addDetailToolOther(); }
   });
 
   detailLocationSelect.addEventListener('change', () => {
