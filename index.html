@@ -3,41 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>DreamTeam - Calculadora de Pitágoras</title>
+<title>DreamTeam - Tareas</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   html, body {
     margin: 0;
-    height: 100%;
-    overflow: hidden;
+    min-height: 100%;
     font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
     background: #000000;
     color: #ffffff;
   }
   body {
     display: flex;
-    align-items: center;
     justify-content: center;
-    padding: 0;
   }
-  .tpv {
-    position: relative;
+  .wrap {
     width: 100%;
-    max-width: 380px;
-    height: 100vh;
-    height: 100dvh;
-    background: #000000;
-    padding: 16px 14px calc(14px + env(safe-area-inset-bottom));
-    display: flex;
-    flex-direction: column;
+    max-width: 480px;
+    padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
   }
 
   .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 6px;
+    margin-bottom: 14px;
   }
   .brand {
     font-size: 0.72rem;
@@ -45,424 +36,282 @@
     color: #555555;
     text-transform: uppercase;
   }
-  .history-btn {
+  .title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 2px 0 0;
+  }
+  .nav-btn {
     background: none;
     border: none;
     color: #8e8e93;
-    font-size: 1.35rem;
+    font-size: 1.5rem;
     line-height: 1;
     cursor: pointer;
-    padding: 4px 6px;
+    text-decoration: none;
+    padding: 6px 8px;
   }
-  .history-btn:active { color: #ffffff; }
+  .nav-btn:active { color: #ffffff; }
 
-  .steps {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
+  .progress {
+    margin-bottom: 14px;
+  }
+  .progress-text {
+    font-size: 0.85rem;
+    color: #8e8e93;
     margin-bottom: 6px;
   }
-  .dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #333333;
-    transition: background 0.2s;
+  .progress-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: #1c1c1e;
+    overflow: hidden;
   }
-  .dot.active { background: #ff9f0a; }
-  .dot.done { background: #4cd964; }
+  .progress-fill {
+    height: 100%;
+    background: #4cd964;
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.25s;
+  }
 
-  /* Pantalla: sin recuadro, números flotando sobre negro */
-  .screen {
-    flex: 1;
-    min-height: 0;
+  .filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .filter-btn {
+    flex-shrink: 0;
+    border: none;
+    background: #1c1c1e;
+    color: #8e8e93;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  .filter-btn.active {
+    background: #ff9f0a;
+    color: #000000;
+  }
+
+  .list {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    padding: 6px 8px 20px;
   }
-  .prev-rows { margin-bottom: 4px; }
-  .prev-rows .summary-row {
+
+  .task {
     display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-    font-size: 1rem;
-    color: #8e8e93;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 4px;
+    border-bottom: 1px solid #1c1c1e;
   }
-  .prev-rows .summary-row span.v { color: #ffffff; font-weight: 500; }
+  .task.hidden { display: none; }
 
-  .screen .label {
-    font-size: 0.95rem;
-    color: #8e8e93;
-    text-align: right;
-    margin-bottom: 6px;
-  }
-  .screen .value {
-    font-size: 4rem;
-    font-weight: 300;
-    text-align: right;
-    color: #ffffff;
-    min-height: 1.1em;
-    word-break: break-all;
-    line-height: 1;
-  }
-  .screen .value .cursor { color: #ff9f0a; }
-
-  .result-box { text-align: right; margin-top: 16px; }
-  .result-box .r-label { font-size: 0.95rem; color: #8e8e93; margin-bottom: 2px; }
-  .result-box .r-value {
-    font-size: 3.4rem;
-    font-weight: 300;
-    color: #ff9f0a;
-    line-height: 1.05;
-  }
-
-  .error {
-    color: #ff453a;
-    font-size: 0.85rem;
-    text-align: right;
-    padding: 0 6px;
-    min-height: 1.1em;
-  }
-
-  /* Teclado tipo iPhone: botones circulares, 3 columnas -> más anchos */
-  .keypad {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    justify-items: center;
-    align-items: center;
-    gap: 10px;
+  .status-btn {
     flex-shrink: 0;
-  }
-  .keypad button {
-    border: none;
-    background: #333333;
-    color: #ffffff;
-    font-size: 1.8rem;
-    font-weight: 400;
-    cursor: pointer;
-    user-select: none;
-    width: 72px;
-    height: 72px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
+    border: 2px solid #48484a;
+    background: transparent;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-  .keypad button:active { background: #575757; }
-  .keypad button.fn { background: #a5a5a5; color: #000000; }
-  .keypad button.fn:active { background: #cfcfcf; }
-
-  /* Botón de acción a todo lo ancho, abajo del todo */
-  .action-btn {
-    width: 100%;
-    border: none;
-    border-radius: 30px;
-    background: #ff9f0a;
-    color: #ffffff;
-    font-size: 1.25rem;
-    font-weight: 600;
-    padding: 17px 0;
-    margin-top: 14px;
     cursor: pointer;
+    margin-top: 2px;
   }
-  .action-btn:active { background: #ffb84d; }
+  .status-btn.progress {
+    border-color: #ff9f0a;
+    background: #ff9f0a;
+  }
+  .status-btn.done {
+    border-color: #4cd964;
+    background: #4cd964;
+    color: #04310f;
+  }
+
+  .task-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .task-text {
+    font-size: 0.98rem;
+    line-height: 1.35;
+    color: #f2f2f7;
+  }
+  .task-text.done {
+    color: #6d6d70;
+    text-decoration: line-through;
+  }
+
+  .assignee-input {
+    width: 100%;
+    margin-top: 6px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #2c2c2e;
+    color: #ff9f0a;
+    font-size: 0.85rem;
+    padding: 4px 0;
+    font-family: inherit;
+  }
+  .assignee-input:focus { outline: none; border-bottom-color: #ff9f0a; }
+  .assignee-input::placeholder { color: #555555; }
 
   footer {
-    margin-top: 10px;
+    margin-top: 18px;
     text-align: center;
     font-size: 0.68rem;
     color: #444444;
   }
-
-  /* Historial */
-  .history-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.97);
-    display: none;
-    flex-direction: column;
-    padding: 16px 14px;
-    z-index: 10;
-  }
-  .history-overlay.open { display: flex; }
-  .history-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .history-header h2 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0;
-  }
-  .history-header .close-btn {
-    background: none;
-    border: none;
-    color: #8e8e93;
-    font-size: 1.3rem;
-    cursor: pointer;
-  }
-  .history-clear {
-    background: none;
-    border: none;
-    color: #ff453a;
-    font-size: 0.85rem;
-    text-align: right;
-    cursor: pointer;
-    padding: 0 0 10px;
-  }
-  .history-list {
-    flex: 1;
-    overflow-y: auto;
-  }
-  .history-item {
-    padding: 12px 4px;
-    border-bottom: 1px solid #1c1c1e;
-  }
-  .history-item .hi-inputs {
-    font-size: 0.85rem;
-    color: #8e8e93;
-  }
-  .history-item .hi-result {
-    font-size: 1.4rem;
-    font-weight: 500;
-    color: #ff9f0a;
-    margin-top: 2px;
-  }
-  .history-empty {
-    color: #555555;
-    text-align: center;
-    margin-top: 40px;
-    font-size: 0.95rem;
-  }
 </style>
 </head>
 <body>
-  <div class="tpv">
+  <div class="wrap">
     <div class="topbar">
-      <div class="brand">DreamTeam · Pitágoras</div>
-      <button class="history-btn" id="historyOpenBtn" title="Historial">📖</button>
-    </div>
-
-    <div class="steps">
-      <div class="dot" id="dot1"></div>
-      <div class="dot" id="dot2"></div>
-      <div class="dot" id="dot3"></div>
-    </div>
-
-    <!-- Pantalla principal (pasos 1, 2 y 3) -->
-    <div class="screen" id="mainScreen">
-      <div class="prev-rows" id="prevRows"></div>
-
-      <div id="entryBlock">
-        <div class="label" id="entryLabel">Introduce el lado A</div>
-        <div class="value" id="entryValue">0<span class="cursor">|</span></div>
+      <div>
+        <div class="brand">DreamTeam</div>
+        <div class="title">Tareas</div>
       </div>
-
-      <div class="result-box" id="resultBlock" style="display:none;">
-        <div class="r-label">Hipotenusa</div>
-        <div class="r-value" id="sumC">0</div>
-      </div>
-    </div>
-    <div class="error" id="errorMsg">&nbsp;</div>
-
-    <!-- Teclado numérico tipo iPhone -->
-    <div class="keypad" id="entryPad">
-      <button data-key="7">7</button>
-      <button data-key="8">8</button>
-      <button data-key="9">9</button>
-      <button data-key="4">4</button>
-      <button data-key="5">5</button>
-      <button data-key="6">6</button>
-      <button data-key="1">1</button>
-      <button data-key="2">2</button>
-      <button data-key="3">3</button>
-      <button class="fn" data-key=".">,</button>
-      <button data-key="0">0</button>
-      <button class="fn" data-key="back">⌫</button>
+      <a href="pitagoras.html" class="nav-btn" title="Calculadora">🧮</a>
     </div>
 
-    <!-- Botón de acción a todo lo ancho -->
-    <button class="action-btn" id="actionBtn">Siguiente ➜</button>
-
-    <footer>a&sup2; + b&sup2; = c&sup2;</footer>
-
-    <!-- Panel de historial -->
-    <div class="history-overlay" id="historyOverlay">
-      <div class="history-header">
-        <h2>Historial</h2>
-        <button class="close-btn" id="historyCloseBtn">✕</button>
-      </div>
-      <button class="history-clear" id="historyClearBtn">Vaciar historial</button>
-      <div class="history-list" id="historyList"></div>
+    <div class="progress">
+      <div class="progress-text" id="progressText">0/0 completadas</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     </div>
+
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">Todas</button>
+      <button class="filter-btn" data-filter="pending">Pendientes</button>
+      <button class="filter-btn" data-filter="progress">A medias</button>
+      <button class="filter-btn" data-filter="done">Hechas</button>
+    </div>
+
+    <div class="list" id="taskList"></div>
+
+    <footer>Toca el círculo para cambiar el estado · Escribe quién la lleva</footer>
   </div>
 
 <script>
-  const state = { step: 1, a: '', b: '' };
-  const HISTORY_KEY = 'dreamteam_pitagoras_history';
+  const TASKS = [
+    { id: 1,  emoji: '🔨', text: 'Put new wood on trailer subardo', assignee: '' },
+    { id: 2,  emoji: '🔨', text: 'DT CONTAINER - set up scaffolding container dream team (ask Patrick to weld some parts?)', assignee: '' },
+    { id: 3,  emoji: '🔨', text: "make a roof outside the door of dream team container, where there is already wood and a shitty fabric on it, (something hard so it doesn't rip off with the wind)", assignee: '' },
+    { id: 4,  emoji: '🔧', text: 'konsum antenas upper parts need to be fixed by Patrick', assignee: 'Patrick' },
+    { id: 5,  emoji: '🔨', text: 'DT CONTAINER - make the door of the DT container (also we need Patrick to weld)', assignee: 'Patrick' },
+    { id: 6,  emoji: '🏷️', text: 'Label all the nails boxes for every tent', assignee: '' },
+    { id: 7,  emoji: '📏', text: 'measure konsum picas - LISI and..', assignee: 'Lisi' },
+    { id: 8,  emoji: '📏', text: 'measure subardo picas (puertas?) - LISI and..', assignee: 'Lisi' },
+    { id: 9,  emoji: '🧹', text: 'DT CONTAINER - clean entrance container dream team', assignee: '' },
+    { id: 10, emoji: '⛺', text: 'build down backstage of ballena', assignee: '' },
+    { id: 11, emoji: '⛺', text: 'take care of rosa platz', assignee: '' },
+    { id: 12, emoji: '⛺', text: 'take care of african tents (1 velvet soup, 2 behind salon de baile, 1 kitchen tanzwuste, 1 behind konsum)', assignee: '' },
+    { id: 13, emoji: '🪢', text: 'DT CONTAINER - change the rope in the roof of the arch (cherry picker, 2 people) - FELIX and FABRI', assignee: 'Felix, Fabri' },
+    { id: 14, emoji: '👀', text: 'Moltons LaBalena - find a solution to keep them safe - bags Fabri knows, same fabric as Palapa', assignee: '' },
+    { id: 15, emoji: '🚜', text: 'take the arch of ballena door to dream team container - MANDA - HELENE', assignee: 'Manda, Helene' },
+    { id: 16, emoji: '🚜', text: 'tapar trailer madera tribuna palapa', assignee: '' },
+    { id: 17, emoji: '🚜', text: 'put the lower parts of the antenas of konsum in rosa platz - MANDA - HELENE', assignee: 'Manda, Helene' },
+    { id: 18, emoji: '🚜', text: 'cargar trailer azul con metal de tribune de ballena - WALID-ANTO', assignee: 'Walid, Anto' },
+  ];
 
-  const prevRows = document.getElementById('prevRows');
-  const entryBlock = document.getElementById('entryBlock');
-  const resultBlock = document.getElementById('resultBlock');
-  const entryPad = document.getElementById('entryPad');
-  const entryLabel = document.getElementById('entryLabel');
-  const entryValue = document.getElementById('entryValue');
-  const errorMsg = document.getElementById('errorMsg');
-  const actionBtn = document.getElementById('actionBtn');
-  const dots = [document.getElementById('dot1'), document.getElementById('dot2'), document.getElementById('dot3')];
+  const STORAGE_KEY = 'dreamteam_tasks_v1';
+  const STATUS_ORDER = ['pending', 'progress', 'done'];
 
-  function currentBuffer() {
-    return state.step === 1 ? state.a : state.b;
-  }
-  function setBuffer(v) {
-    if (state.step === 1) state.a = v; else state.b = v;
+  function loadState() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch (e) { saved = {}; }
+    return TASKS.map(t => ({
+      ...t,
+      status: (saved[t.id] && saved[t.id].status) || 'pending',
+      assignee: (saved[t.id] && saved[t.id].assignee !== undefined) ? saved[t.id].assignee : t.assignee,
+    }));
   }
 
-  function loadHistory() {
-    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
-    catch (e) { return []; }
+  function saveState() {
+    const toSave = {};
+    tasks.forEach(t => { toSave[t.id] = { status: t.status, assignee: t.assignee }; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   }
-  function saveHistoryEntry(a, b, c) {
-    const list = loadHistory();
-    list.unshift({ a, b, c, ts: Date.now() });
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 50)));
+
+  let tasks = loadState();
+  let currentFilter = 'all';
+
+  const listEl = document.getElementById('taskList');
+  const progressText = document.getElementById('progressText');
+  const progressFill = document.getElementById('progressFill');
+
+  function renderProgress() {
+    const done = tasks.filter(t => t.status === 'done').length;
+    progressText.textContent = `${done}/${tasks.length} completadas`;
+    progressFill.style.width = tasks.length ? `${(done / tasks.length) * 100}%` : '0%';
   }
-  function renderHistory() {
-    const list = loadHistory();
-    const container = document.getElementById('historyList');
-    if (list.length === 0) {
-      container.innerHTML = '<div class="history-empty">Sin cálculos todavía</div>';
-      return;
-    }
-    container.innerHTML = list.map(item => {
-      const date = new Date(item.ts);
-      const fecha = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      return `<div class="history-item">
-        <div class="hi-inputs">A = ${item.a}  ·  B = ${item.b}  ·  ${fecha}</div>
-        <div class="hi-result">c = ${Number(item.c).toFixed(4)}</div>
-      </div>`;
+
+  function renderList() {
+    listEl.innerHTML = tasks.map(t => {
+      const isDone = t.status === 'done';
+      const checkIcon = isDone ? '✓' : '';
+      const prefix = isDone ? '✅ ' : '';
+      const hiddenClass = (currentFilter !== 'all' && t.status !== currentFilter) ? 'hidden' : '';
+      return `
+        <div class="task ${hiddenClass}" data-id="${t.id}">
+          <button class="status-btn ${t.status}" data-action="cycle" data-id="${t.id}">${checkIcon}</button>
+          <div class="task-body">
+            <div class="task-text ${isDone ? 'done' : ''}">${prefix}${t.emoji} ${escapeHtml(t.text)}</div>
+            <input class="assignee-input" type="text" placeholder="Asignar a..." value="${escapeAttr(t.assignee)}" data-action="assignee" data-id="${t.id}">
+          </div>
+        </div>`;
     }).join('');
   }
 
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function escapeAttr(str) {
+    return escapeHtml(str).replace(/"/g, '&quot;');
+  }
+
   function render() {
-    dots.forEach((d, i) => {
-      d.classList.remove('active', 'done');
-      if (i + 1 < state.step) d.classList.add('done');
-      else if (i + 1 === state.step) d.classList.add('active');
-    });
-
-    // Filas superiores con los valores ya introducidos
-    let rows = '';
-    if (state.step >= 2) {
-      rows += `<div class="summary-row"><span>Lado A</span><span class="v">${state.a}</span></div>`;
-    }
-    if (state.step >= 3) {
-      rows += `<div class="summary-row"><span>Lado B</span><span class="v">${state.b}</span></div>`;
-    }
-    prevRows.innerHTML = rows;
-
-    if (state.step <= 2) {
-      entryBlock.style.display = '';
-      resultBlock.style.display = 'none';
-      entryPad.style.display = '';
-      entryLabel.textContent = state.step === 1 ? 'Introduce el lado A' : 'Introduce el lado B';
-      const buf = currentBuffer();
-      entryValue.innerHTML = (buf === '' ? '0' : buf) + '<span class="cursor">|</span>';
-      errorMsg.textContent = ' ';
-      actionBtn.textContent = 'Siguiente ➜';
-    } else {
-      entryBlock.style.display = 'none';
-      resultBlock.style.display = '';
-      entryPad.style.display = 'none';
-      const a = parseFloat(state.a);
-      const b = parseFloat(state.b);
-      const c = Math.sqrt(a * a + b * b);
-      document.getElementById('sumC').textContent = c.toFixed(4);
-      actionBtn.textContent = '🔁 Nuevo cálculo';
-    }
+    renderProgress();
+    renderList();
   }
 
-  function handleKey(key) {
-    if (state.step > 2) return;
-    let buf = currentBuffer();
-
-    if (key === 'back') {
-      buf = buf.slice(0, -1);
-      setBuffer(buf);
-      render();
-      return;
-    }
-    if (key === '.') {
-      if (buf.includes('.')) return;
-      buf = (buf === '' ? '0' : buf) + '.';
-      setBuffer(buf);
-      render();
-      return;
-    }
-    if (buf.length >= 10) return;
-    buf = buf === '0' ? key : buf + key;
-    setBuffer(buf);
-    render();
-  }
-
-  function handleAction() {
-    if (state.step > 2) {
-      state.step = 1;
-      state.a = '';
-      state.b = '';
-      render();
-      return;
-    }
-    const buf = currentBuffer();
-    const n = parseFloat(buf);
-    if (buf === '' || isNaN(n) || n <= 0) {
-      errorMsg.textContent = 'Introduce un número válido mayor que 0';
-      return;
-    }
-    if (state.step === 2) {
-      const a = parseFloat(state.a);
-      const b = parseFloat(state.b);
-      const c = Math.sqrt(a * a + b * b);
-      saveHistoryEntry(a, b, c);
-    }
-    state.step += 1;
-    render();
-  }
-
-  entryPad.addEventListener('click', (e) => {
-    const btn = e.target.closest('button');
+  listEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action="cycle"]');
     if (!btn) return;
-    handleKey(btn.dataset.key);
-  });
-  actionBtn.addEventListener('click', handleAction);
-
-  document.addEventListener('keydown', (e) => {
-    if (document.getElementById('historyOverlay').classList.contains('open')) return;
-    if (state.step <= 2) {
-      if (/^[0-9]$/.test(e.key)) handleKey(e.key);
-      else if (e.key === '.' || e.key === ',') handleKey('.');
-      else if (e.key === 'Backspace') handleKey('back');
-      else if (e.key === 'Enter') handleAction();
-    } else if (e.key === 'Enter') {
-      handleAction();
-    }
+    const id = Number(btn.dataset.id);
+    const task = tasks.find(t => t.id === id);
+    const idx = STATUS_ORDER.indexOf(task.status);
+    task.status = STATUS_ORDER[(idx + 1) % STATUS_ORDER.length];
+    saveState();
+    render();
   });
 
-  // Historial: abrir / cerrar / vaciar
-  const historyOverlay = document.getElementById('historyOverlay');
-  document.getElementById('historyOpenBtn').addEventListener('click', () => {
-    renderHistory();
-    historyOverlay.classList.add('open');
+  listEl.addEventListener('input', (e) => {
+    const input = e.target.closest('[data-action="assignee"]');
+    if (!input) return;
+    const id = Number(input.dataset.id);
+    const task = tasks.find(t => t.id === id);
+    task.assignee = input.value;
+    saveState();
   });
-  document.getElementById('historyCloseBtn').addEventListener('click', () => {
-    historyOverlay.classList.remove('open');
-  });
-  document.getElementById('historyClearBtn').addEventListener('click', () => {
-    localStorage.removeItem(HISTORY_KEY);
-    renderHistory();
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderList();
+    });
   });
 
   render();
