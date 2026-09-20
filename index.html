@@ -405,6 +405,95 @@
     font-size: 1.4rem;
   }
 
+  .shop-list {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+  }
+  .shop-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid #1c1c1e;
+  }
+  .shop-check {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #48484a;
+    background: transparent;
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .shop-check.bought {
+    border-color: #4cd964;
+    background: #4cd964;
+    color: #04310f;
+  }
+  .shop-text {
+    flex: 1;
+    font-size: 0.95rem;
+    color: #f2f2f7;
+  }
+  .shop-text.bought {
+    color: #6d6d70;
+    text-decoration: line-through;
+  }
+  .shop-item-delete {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: #48484a;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 6px;
+  }
+  .shop-item-delete:active { color: #ff453a; }
+  .shop-empty {
+    color: #555555;
+    text-align: center;
+    margin-top: 40px;
+    font-size: 0.95rem;
+  }
+  .shop-add-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .shop-add-row .form-input { margin-bottom: 0; }
+  .shop-add-btn {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 8px;
+    background: #ff9f0a;
+    color: #000000;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0 18px;
+    cursor: pointer;
+  }
+  .shop-add-btn:active { background: #ffb84d; }
+  .shop-summary {
+    color: #8e8e93;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+  }
+  .shop-task-title {
+    font-size: 0.8rem;
+    color: #8e8e93;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 20px 0 8px;
+  }
+  .shop-task-title:first-of-type { margin-top: 0; }
+
   .add-photo-btn {
     width: 100%;
     border: 1px dashed #3a3a3c;
@@ -443,6 +532,7 @@
         <div class="brand">DreamTeam</div>
         <div class="title">Tasks</div>
       </div>
+      <button class="nav-btn" id="shoppingOpenBtn" title="Shopping list">🛒</button>
       <a href="pitagoras.html" class="nav-btn" title="Calculator">🧮</a>
     </div>
 
@@ -493,6 +583,13 @@
       <div class="section-label">Site / tent</div>
       <input class="meta-input location" type="text" id="detailLocation" placeholder="e.g. Dream Team container...">
 
+      <div class="section-label">Shopping list</div>
+      <div class="shop-list" id="detailShopList"></div>
+      <div class="shop-add-row">
+        <input class="form-input" type="text" id="detailShopInput" placeholder="Add item to buy...">
+        <button class="shop-add-btn" id="detailShopAddBtn">Add</button>
+      </div>
+
       <div class="section-label">Notes</div>
       <textarea class="notes-textarea" id="notesTextarea" placeholder="Private notes for this task (not shown in the main list)..."></textarea>
 
@@ -506,6 +603,17 @@
   <!-- Full-screen photo viewer -->
   <div class="lightbox" id="lightbox">
     <img id="lightboxImg" src="" alt="">
+  </div>
+
+  <!-- Shopping list: everything to buy, from every task, in one place -->
+  <div class="detail-overlay" id="shoppingOverlay">
+    <div class="detail-inner">
+      <div class="detail-header">
+        <button class="detail-back" id="shoppingBackBtn">←</button>
+        <h2>Shopping List</h2>
+      </div>
+      <div id="shoppingBody"></div>
+    </div>
   </div>
 
 <script type="module">
@@ -585,6 +693,7 @@
   let tasks = [];
   let currentFilter = 'all';
   let currentDetailId = null;
+  let shoppingOverlayOpen = false;
 
   const listEl = document.getElementById('taskList');
   const progressText = document.getElementById('progressText');
@@ -640,6 +749,7 @@
         order: typeof data.order === 'number' ? data.order : 0,
         notes: data.notes || '',
         photos: Array.isArray(data.photos) ? data.photos : [],
+        shopping: Array.isArray(data.shopping) ? data.shopping : [],
       });
     });
     list.sort((a, b) => a.order - b.order);
@@ -685,6 +795,44 @@
     renderProgress();
     renderList();
     if (currentDetailId) renderDetail();
+    if (shoppingOverlayOpen) renderShoppingOverlay();
+  }
+
+  function genId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function shopItemHtml(taskId, item) {
+    return `
+      <div class="shop-item">
+        <button class="shop-check ${item.bought ? 'bought' : ''}" data-action="toggle-item" data-task-id="${taskId}" data-item-id="${item.id}">${item.bought ? '✓' : ''}</button>
+        <span class="shop-text ${item.bought ? 'bought' : ''}">${escapeHtml(item.text)}</span>
+        <button class="shop-item-delete" data-action="delete-item" data-task-id="${taskId}" data-item-id="${item.id}">✕</button>
+      </div>`;
+  }
+
+  function updateTaskShopping(taskId, updater) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    const newList = updater(task.shopping || []);
+    task.shopping = newList;
+    setDoc(doc(db, 'tasks', taskId), { shopping: newList }, { merge: true }).catch(console.error);
+    if (currentDetailId === taskId) renderDetailShopList();
+    if (shoppingOverlayOpen) renderShoppingOverlay();
+  }
+
+  function handleShopClick(e) {
+    const toggleBtn = e.target.closest('[data-action="toggle-item"]');
+    if (toggleBtn) {
+      const { taskId, itemId } = toggleBtn.dataset;
+      updateTaskShopping(taskId, list => list.map(it => it.id === itemId ? { ...it, bought: !it.bought } : it));
+      return;
+    }
+    const delBtn = e.target.closest('[data-action="delete-item"]');
+    if (delBtn) {
+      const { taskId, itemId } = delBtn.dataset;
+      updateTaskShopping(taskId, list => list.filter(it => it.id !== itemId));
+    }
   }
 
   const fieldTimers = {};
@@ -792,6 +940,9 @@
   const detailTools = document.getElementById('detailTools');
   const detailLocation = document.getElementById('detailLocation');
   const notesTextarea = document.getElementById('notesTextarea');
+  const detailShopList = document.getElementById('detailShopList');
+  const detailShopInput = document.getElementById('detailShopInput');
+  const detailShopAddBtn = document.getElementById('detailShopAddBtn');
   const photosGrid = document.getElementById('photosGrid');
   const addPhotoBtn = document.getElementById('addPhotoBtn');
   const photoInput = document.getElementById('photoInput');
@@ -823,6 +974,7 @@
     if (active !== detailTools) detailTools.value = task.tools || '';
     if (active !== detailLocation) detailLocation.value = task.location || '';
     if (active !== notesTextarea) notesTextarea.value = task.notes || '';
+    renderDetailShopList();
 
     const photos = task.photos || [];
     photosGrid.innerHTML = photos.map(p => `
@@ -836,6 +988,58 @@
   }
 
   document.getElementById('detailBackBtn').addEventListener('click', closeDetail);
+
+  function renderDetailShopList() {
+    const task = tasks.find(t => t.id === currentDetailId);
+    if (!task) return;
+    const items = task.shopping || [];
+    detailShopList.innerHTML = items.length
+      ? items.map(item => shopItemHtml(task.id, item)).join('')
+      : `<div class="shop-empty">No items yet</div>`;
+  }
+  detailShopList.addEventListener('click', handleShopClick);
+
+  function addDetailShopItem() {
+    const id = currentDetailId;
+    const text = detailShopInput.value.trim();
+    if (!id || !text) return;
+    updateTaskShopping(id, list => [...list, { id: genId(), text, bought: false }]);
+    detailShopInput.value = '';
+  }
+  detailShopAddBtn.addEventListener('click', addDetailShopItem);
+  detailShopInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addDetailShopItem(); }
+  });
+
+  // Shopping list: everything to buy, across every task, in one place
+  const shoppingOverlay = document.getElementById('shoppingOverlay');
+  const shoppingBody = document.getElementById('shoppingBody');
+
+  function renderShoppingOverlay() {
+    const groups = tasks.filter(t => (t.shopping || []).length > 0);
+    if (groups.length === 0) {
+      shoppingBody.innerHTML = `<div class="shop-empty">No items to buy yet.<br>Add some from a task's shopping list.</div>`;
+      return;
+    }
+    const totalLeft = tasks.reduce((sum, t) => sum + (t.shopping || []).filter(i => !i.bought).length, 0);
+    shoppingBody.innerHTML =
+      `<div class="shop-summary">${totalLeft} item${totalLeft === 1 ? '' : 's'} left to buy</div>` +
+      groups.map(t => `
+        <div class="shop-task-title">${t.emoji} ${escapeHtml(t.text)}</div>
+        <div class="shop-list">${(t.shopping || []).map(item => shopItemHtml(t.id, item)).join('')}</div>
+      `).join('');
+  }
+  shoppingBody.addEventListener('click', handleShopClick);
+
+  document.getElementById('shoppingOpenBtn').addEventListener('click', () => {
+    shoppingOverlayOpen = true;
+    renderShoppingOverlay();
+    shoppingOverlay.classList.add('open');
+  });
+  document.getElementById('shoppingBackBtn').addEventListener('click', () => {
+    shoppingOverlayOpen = false;
+    shoppingOverlay.classList.remove('open');
+  });
 
   notesTextarea.addEventListener('input', () => {
     const id = currentDetailId;
