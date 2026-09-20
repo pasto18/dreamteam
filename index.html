@@ -674,6 +674,21 @@
     max-height: 100%;
     border-radius: 8px;
   }
+
+  /* Plan for the Day: whole app flips to a bone background while selecting */
+  body.plan-mode {
+    background: #e8dfc8;
+    color: #000000;
+    transition: background 0.15s, color 0.15s;
+  }
+  body.plan-mode .brand { color: #6b6b5f; }
+  body.plan-mode .title { color: #000000; }
+  body.plan-mode .nav-btn { color: #4a4a42; }
+  body.plan-mode .progress-text { color: #3a3a34; }
+  body.plan-mode .task { border-bottom-color: rgba(0, 0, 0, 0.12); }
+  body.plan-mode .task-text { color: #000000; }
+  body.plan-mode .task-text.done { color: #7a7a6e; }
+  body.plan-mode footer { color: #6b6b5f; }
 </style>
 </head>
 <body>
@@ -1171,6 +1186,7 @@
   planToggleBtn.addEventListener('click', () => {
     planModeActive = !planModeActive;
     planToggleBtn.classList.toggle('active', planModeActive);
+    document.body.classList.toggle('plan-mode', planModeActive);
     renderList();
   });
 
