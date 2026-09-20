@@ -326,11 +326,30 @@
     margin: 0;
     color: #8e8e93;
   }
-  .detail-text {
-    font-size: 1.15rem;
-    line-height: 1.4;
+  .detail-title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
     margin-bottom: 20px;
   }
+  .detail-title-emoji {
+    font-size: 1.4rem;
+    padding-top: 12px;
+  }
+  .detail-title-input {
+    flex: 1;
+    min-height: 60px;
+    resize: vertical;
+    background: #1c1c1e;
+    border: 1px solid #2c2c2e;
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 16px;
+    font-family: inherit;
+    line-height: 1.4;
+    padding: 12px;
+  }
+  .detail-title-input:focus { outline: none; border-color: #ff9f0a; }
   .detail-inner .meta-input,
   .detail-inner .chip-wrap {
     margin-bottom: 20px;
@@ -572,7 +591,11 @@
         <button class="detail-back" id="detailBackBtn">←</button>
         <h2>Task details</h2>
       </div>
-      <div class="detail-text" id="detailText"></div>
+      <div class="section-label">Task</div>
+      <div class="detail-title-row">
+        <span class="detail-title-emoji" id="detailEmoji"></span>
+        <textarea class="detail-title-input" id="detailTitleInput" placeholder="Task description"></textarea>
+      </div>
 
       <div class="section-label">Assigned to</div>
       <div class="chip-wrap" id="detailAssigneeChips"></div>
@@ -935,7 +958,8 @@
 
   // Detail panel: private notes and photos for the task
   const detailOverlay = document.getElementById('detailOverlay');
-  const detailText = document.getElementById('detailText');
+  const detailEmoji = document.getElementById('detailEmoji');
+  const detailTitleInput = document.getElementById('detailTitleInput');
   const detailAssigneeChips = document.getElementById('detailAssigneeChips');
   const detailTools = document.getElementById('detailTools');
   const detailLocation = document.getElementById('detailLocation');
@@ -969,7 +993,8 @@
 
     const active = document.activeElement;
 
-    detailText.textContent = `${task.emoji} ${task.text}`;
+    detailEmoji.textContent = task.emoji;
+    if (active !== detailTitleInput) detailTitleInput.value = task.text;
     detailAssigneeChips.innerHTML = assigneeChipsHtml(task.assignees);
     if (active !== detailTools) detailTools.value = task.tools || '';
     if (active !== detailLocation) detailLocation.value = task.location || '';
@@ -988,6 +1013,15 @@
   }
 
   document.getElementById('detailBackBtn').addEventListener('click', closeDetail);
+
+  detailTitleInput.addEventListener('input', () => {
+    const id = currentDetailId;
+    if (!id) return;
+    const task = tasks.find(t => t.id === id);
+    if (task) task.text = detailTitleInput.value;
+    renderList();
+    scheduleFieldSave(id, 'text', detailTitleInput.value, 500);
+  });
 
   function renderDetailShopList() {
     const task = tasks.find(t => t.id === currentDetailId);
