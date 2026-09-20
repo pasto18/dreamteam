@@ -1043,11 +1043,30 @@
       </div>`;
   }
 
+  function locationRank(loc) {
+    if (!loc) return 2; // no site set - last
+    const idx = LOCATIONS.indexOf(loc);
+    return idx === -1 ? 1 : 0; // 0 = preset site, 1 = custom site, 2 = none
+  }
+
+  function taskSortCompare(a, b) {
+    const ra = locationRank(a.location);
+    const rb = locationRank(b.location);
+    if (ra !== rb) return ra - rb;
+    if (ra === 0) {
+      const idxDiff = LOCATIONS.indexOf(a.location) - LOCATIONS.indexOf(b.location);
+      if (idxDiff !== 0) return idxDiff;
+    } else if (ra === 1) {
+      const cmp = a.location.localeCompare(b.location);
+      if (cmp !== 0) return cmp;
+    }
+    return (b.highPriority ? 1 : 0) - (a.highPriority ? 1 : 0);
+  }
+
   function renderList() {
     const todayStr = getBerlinDateString();
-    const byPriority = (a, b) => (b.highPriority ? 1 : 0) - (a.highPriority ? 1 : 0);
-    const notDone = tasks.filter(t => t.status !== 'done').sort(byPriority);
-    const done = tasks.filter(t => t.status === 'done').sort(byPriority);
+    const notDone = tasks.filter(t => t.status !== 'done').sort(taskSortCompare);
+    const done = tasks.filter(t => t.status === 'done').sort(taskSortCompare);
 
     if (planModeActive) {
       listEl.innerHTML = [...notDone, ...done].map(t => taskRowHtml(t, todayStr)).join('');
