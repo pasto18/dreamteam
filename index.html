@@ -140,15 +140,6 @@
   }
   .form-input:focus { outline: none; border-color: #ff9f0a; }
   .form-input::placeholder { color: #555555; }
-  select.form-input {
-    color: #ffffff;
-    padding-right: 34px;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 16px;
-  }
-  select.form-input option { background: #000000; color: #ffffff; }
   .form-actions {
     display: flex;
     gap: 10px;
@@ -244,17 +235,32 @@
   }
   .meta-input:focus { outline: none; border-bottom-color: #ff9f0a; }
   .meta-input::placeholder { color: #555555; }
-  .meta-input.assignee { color: #ff9f0a; }
   .meta-input.tools { color: #64d2ff; }
   .meta-input.location { color: #ff6482; }
-  select.meta-input {
-    padding-right: 22px;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff9f0a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right center;
-    background-size: 14px;
+
+  .chip-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
   }
-  select.meta-input option { background: #000000; color: #ffffff; }
+  .chip {
+    border: none;
+    background: #1c1c1e;
+    color: #8e8e93;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 9px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  .chip.active {
+    background: #ff9f0a;
+    color: #000000;
+  }
+  .chip.everyone.active {
+    background: #64d2ff;
+    color: #000000;
+  }
 
   .delete-btn {
     flex-shrink: 0;
@@ -325,7 +331,8 @@
     line-height: 1.4;
     margin-bottom: 20px;
   }
-  .detail-inner .meta-input {
+  .detail-inner .meta-input,
+  .detail-inner .chip-wrap {
     margin-bottom: 20px;
   }
 
@@ -456,7 +463,7 @@
       <input class="form-input" id="newText" placeholder="Task description">
       <input class="form-input" id="newTools" placeholder="🧰 Tools needed">
       <input class="form-input" id="newLocation" placeholder="📍 Site / tent">
-      <select class="form-input" id="newAssignee"></select>
+      <div class="chip-wrap" id="newAssigneeChips"></div>
       <div class="form-actions">
         <button class="form-cancel" id="cancelAddBtn" type="button">Cancel</button>
         <button class="form-submit" id="submitAddBtn" type="button">Add</button>
@@ -478,7 +485,7 @@
       <div class="detail-text" id="detailText"></div>
 
       <div class="section-label">Assigned to</div>
-      <select class="meta-input assignee" id="detailAssignee"></select>
+      <div class="chip-wrap" id="detailAssigneeChips"></div>
 
       <div class="section-label">Tools needed</div>
       <input class="meta-input tools" type="text" id="detailTools" placeholder="e.g. hammer, nails, ladder...">
@@ -552,15 +559,27 @@
   const NAMES = ['German', 'Fran', 'Laura', 'Fabri', 'Felix', 'Flavia', 'Manda', 'Juani', 'Joan', 'Anto', 'Walid', 'Lisi', 'Helene']
     .sort((a, b) => a.localeCompare(b, 'es'));
 
-  function assigneeOptionsHtml(selected) {
-    const opts = [`<option value="">👤 Unassigned</option>`];
-    if (selected && !NAMES.includes(selected)) {
-      opts.push(`<option value="${escapeAttr(selected)}" selected>${escapeHtml(selected)}</option>`);
-    }
-    NAMES.forEach(n => {
-      opts.push(`<option value="${escapeAttr(n)}"${selected === n ? ' selected' : ''}>${escapeHtml(n)}</option>`);
+  function assigneeChipsHtml(assignees) {
+    const list = assignees || [];
+    const everyoneActive = NAMES.length > 0 && NAMES.every(n => list.includes(n));
+    const chips = [`<button type="button" class="chip everyone ${everyoneActive ? 'active' : ''}" data-name="__everyone__">👥 Everyone</button>`];
+    list.filter(n => !NAMES.includes(n)).forEach(n => {
+      chips.push(`<button type="button" class="chip active" data-name="${escapeAttr(n)}">${escapeHtml(n)}</button>`);
     });
-    return opts.join('');
+    NAMES.forEach(n => {
+      chips.push(`<button type="button" class="chip ${list.includes(n) ? 'active' : ''}" data-name="${escapeAttr(n)}">${escapeHtml(n)}</button>`);
+    });
+    return chips.join('');
+  }
+
+  function toggleAssignee(list, name) {
+    const current = list || [];
+    if (name === '__everyone__') {
+      const allSelected = NAMES.every(n => current.includes(n));
+      const extras = current.filter(n => !NAMES.includes(n));
+      return allSelected ? extras : [...extras, ...NAMES];
+    }
+    return current.includes(name) ? current.filter(n => n !== name) : [...current, name];
   }
 
   let tasks = [];
@@ -571,6 +590,10 @@
   const progressText = document.getElementById('progressText');
   const progressFill = document.getElementById('progressFill');
 
+  function splitLegacyAssignee(str) {
+    return String(str || '').split(',').map(s => s.trim()).filter(Boolean);
+  }
+
   async function ensureSeeded() {
     await Promise.all(SEED_TASKS.map(async (t) => {
       const ref = doc(db, 'tasks', String(t.id));
@@ -579,7 +602,7 @@
         await setDoc(ref, {
           emoji: t.emoji,
           text: t.text,
-          assignee: t.assignee,
+          assignees: splitLegacyAssignee(t.assignee),
           tools: '',
           location: '',
           status: 'pending',
@@ -595,6 +618,9 @@
       if (data.tools === undefined) patch.tools = '';
       if (data.location === undefined) patch.location = '';
       if (data.order === undefined) patch.order = t.id;
+      if (data.assignees === undefined) {
+        patch.assignees = data.assignee !== undefined ? splitLegacyAssignee(data.assignee) : splitLegacyAssignee(t.assignee);
+      }
       if (Object.keys(patch).length) await setDoc(ref, patch, { merge: true });
     }));
   }
@@ -607,7 +633,7 @@
         id: d.id,
         emoji: data.emoji || DEFAULT_EMOJI,
         text: data.text || '',
-        assignee: data.assignee || '',
+        assignees: Array.isArray(data.assignees) ? data.assignees : splitLegacyAssignee(data.assignee),
         tools: data.tools || '',
         location: data.location || '',
         status: data.status || 'pending',
@@ -714,14 +740,23 @@
   const newText = document.getElementById('newText');
   const newTools = document.getElementById('newTools');
   const newLocation = document.getElementById('newLocation');
-  const newAssignee = document.getElementById('newAssignee');
-  newAssignee.innerHTML = assigneeOptionsHtml('');
+  const newAssigneeChips = document.getElementById('newAssigneeChips');
+  let newAssigneeSelection = [];
+  newAssigneeChips.innerHTML = assigneeChipsHtml(newAssigneeSelection);
+
+  newAssigneeChips.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    newAssigneeSelection = toggleAssignee(newAssigneeSelection, chip.dataset.name);
+    newAssigneeChips.innerHTML = assigneeChipsHtml(newAssigneeSelection);
+  });
 
   function resetAddForm() {
     newText.value = '';
     newTools.value = '';
     newLocation.value = '';
-    newAssignee.value = '';
+    newAssigneeSelection = [];
+    newAssigneeChips.innerHTML = assigneeChipsHtml(newAssigneeSelection);
   }
 
   addToggleBtn.addEventListener('click', () => {
@@ -742,7 +777,7 @@
       text,
       tools: newTools.value.trim(),
       location: newLocation.value.trim(),
-      assignee: newAssignee.value.trim(),
+      assignees: newAssigneeSelection,
       status: 'pending',
       order: Date.now(),
     });
@@ -753,7 +788,7 @@
   // Detail panel: private notes and photos for the task
   const detailOverlay = document.getElementById('detailOverlay');
   const detailText = document.getElementById('detailText');
-  const detailAssignee = document.getElementById('detailAssignee');
+  const detailAssigneeChips = document.getElementById('detailAssigneeChips');
   const detailTools = document.getElementById('detailTools');
   const detailLocation = document.getElementById('detailLocation');
   const notesTextarea = document.getElementById('notesTextarea');
@@ -784,7 +819,7 @@
     const active = document.activeElement;
 
     detailText.textContent = `${task.emoji} ${task.text}`;
-    if (active !== detailAssignee) detailAssignee.innerHTML = assigneeOptionsHtml(task.assignee);
+    detailAssigneeChips.innerHTML = assigneeChipsHtml(task.assignees);
     if (active !== detailTools) detailTools.value = task.tools || '';
     if (active !== detailLocation) detailLocation.value = task.location || '';
     if (active !== notesTextarea) notesTextarea.value = task.notes || '';
@@ -810,12 +845,16 @@
     scheduleFieldSave(id, 'notes', notesTextarea.value, 500);
   });
 
-  detailAssignee.addEventListener('change', () => {
+  detailAssigneeChips.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
     const id = currentDetailId;
     if (!id) return;
     const task = tasks.find(t => t.id === id);
-    if (task) task.assignee = detailAssignee.value;
-    scheduleFieldSave(id, 'assignee', detailAssignee.value, 0);
+    if (!task) return;
+    task.assignees = toggleAssignee(task.assignees, chip.dataset.name);
+    detailAssigneeChips.innerHTML = assigneeChipsHtml(task.assignees);
+    scheduleFieldSave(id, 'assignees', task.assignees, 0);
   });
 
   detailTools.addEventListener('input', () => {
