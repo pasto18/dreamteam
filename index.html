@@ -560,12 +560,15 @@
       <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     </div>
 
-    <div class="filters">
+    <div class="filters" id="statusFilters">
       <button class="filter-btn active" data-filter="all">All</button>
       <button class="filter-btn" data-filter="pending">Pending</button>
       <button class="filter-btn" data-filter="progress">In progress</button>
       <button class="filter-btn" data-filter="done">Done</button>
     </div>
+
+    <div class="section-label">Filter by person</div>
+    <div class="filters" id="personFilters"></div>
 
     <button class="add-btn" id="addToggleBtn">+ Add task</button>
     <div class="add-form" id="addForm">
@@ -715,12 +718,31 @@
 
   let tasks = [];
   let currentFilter = 'all';
+  let currentPersonFilter = 'all';
   let currentDetailId = null;
   let shoppingOverlayOpen = false;
 
   const listEl = document.getElementById('taskList');
   const progressText = document.getElementById('progressText');
   const progressFill = document.getElementById('progressFill');
+  const personFiltersEl = document.getElementById('personFilters');
+
+  function renderPersonFilters() {
+    personFiltersEl.innerHTML = ['All', ...NAMES].map(n => {
+      const value = n === 'All' ? 'all' : n;
+      const active = currentPersonFilter === value ? 'active' : '';
+      return `<button class="filter-btn ${active}" data-person="${escapeAttr(value)}">${escapeHtml(n)}</button>`;
+    }).join('');
+  }
+  renderPersonFilters();
+
+  personFiltersEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    currentPersonFilter = btn.dataset.person;
+    renderPersonFilters();
+    renderList();
+  });
 
   function splitLegacyAssignee(str) {
     return String(str || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -795,7 +817,9 @@
       const isDone = t.status === 'done';
       const checkIcon = isDone ? '✓' : '';
       const prefix = isDone ? '✅ ' : '';
-      const hiddenClass = (currentFilter !== 'all' && t.status !== currentFilter) ? 'hidden' : '';
+      const statusHidden = currentFilter !== 'all' && t.status !== currentFilter;
+      const personHidden = currentPersonFilter !== 'all' && !(t.assignees || []).includes(currentPersonFilter);
+      const hiddenClass = (statusHidden || personHidden) ? 'hidden' : '';
       return `
         <div class="task ${hiddenClass}" data-id="${t.id}">
           <button class="status-btn ${t.status}" data-action="cycle" data-id="${t.id}">${checkIcon}</button>
@@ -896,9 +920,9 @@
     }, delay);
   }
 
-  document.querySelectorAll('.filter-btn').forEach(btn => {
+  document.querySelectorAll('#statusFilters .filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#statusFilters .filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentFilter = btn.dataset.filter;
       renderList();
