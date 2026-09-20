@@ -215,11 +215,23 @@
     font-size: 1rem;
     line-height: 1.4;
     color: #f2f2f7;
+    cursor: pointer;
   }
   .task-text.done {
     color: #6d6d70;
     text-decoration: line-through;
   }
+
+  .detail-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: #64d2ff;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .detail-hint .chevron { color: #48484a; margin-left: auto; }
 
   .meta {
     display: flex;
@@ -276,6 +288,152 @@
     font-size: 0.68rem;
     color: #444444;
   }
+
+  /* Panel de detalle: notas y fotos (no aparecen en la lista principal) */
+  .detail-overlay {
+    position: fixed;
+    inset: 0;
+    background: #000000;
+    display: none;
+    flex-direction: column;
+    z-index: 50;
+  }
+  .detail-overlay.open { display: flex; }
+  .detail-inner {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .detail-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .detail-back {
+    background: none;
+    border: none;
+    color: #ff9f0a;
+    font-size: 1.6rem;
+    padding: 8px;
+    margin: -8px;
+    cursor: pointer;
+  }
+  .detail-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: #8e8e93;
+  }
+  .detail-text {
+    font-size: 1.15rem;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+
+  .section-label {
+    font-size: 0.8rem;
+    color: #8e8e93;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .notes-textarea {
+    width: 100%;
+    min-height: 110px;
+    background: #1c1c1e;
+    border: 1px solid #2c2c2e;
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 16px;
+    font-family: inherit;
+    padding: 12px;
+    resize: vertical;
+    margin-bottom: 24px;
+  }
+  .notes-textarea:focus { outline: none; border-color: #ff9f0a; }
+  .notes-textarea::placeholder { color: #555555; }
+
+  .photos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .photo-thumb {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #1c1c1e;
+  }
+  .photo-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+  }
+  .photo-thumb .photo-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.65);
+    color: #ffffff;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .photo-thumb.uploading img { opacity: 0.4; }
+  .photo-thumb .spinner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+  }
+
+  .add-photo-btn {
+    width: 100%;
+    border: 1px dashed #3a3a3c;
+    background: none;
+    color: #8e8e93;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 14px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .add-photo-btn:active { background: #1c1c1e; }
+
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 60;
+    padding: 20px;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+  }
 </style>
 </head>
 <body>
@@ -317,11 +475,39 @@
     <footer>Toca el círculo para cambiar el estado · 🗑 para borrar</footer>
   </div>
 
+  <!-- Panel de detalle: notas y fotos privadas de la tarea -->
+  <div class="detail-overlay" id="detailOverlay">
+    <div class="detail-inner">
+      <div class="detail-header">
+        <button class="detail-back" id="detailBackBtn">←</button>
+        <h2>Detalle de la tarea</h2>
+      </div>
+      <div class="detail-text" id="detailText"></div>
+
+      <div class="section-label">Notas</div>
+      <textarea class="notes-textarea" id="notesTextarea" placeholder="Notas privadas de la tarea (no aparecen en la lista principal)..."></textarea>
+
+      <div class="section-label">Fotos</div>
+      <div class="photos-grid" id="photosGrid"></div>
+      <button class="add-photo-btn" id="addPhotoBtn">📷 Añadir foto</button>
+      <input type="file" accept="image/*" multiple id="photoInput" style="display:none;">
+    </div>
+  </div>
+
+  <!-- Visor de foto a pantalla completa -->
+  <div class="lightbox" id="lightbox">
+    <img id="lightboxImg" src="" alt="">
+  </div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
   import {
-    getFirestore, collection, doc, getDoc, setDoc, addDoc, deleteDoc, onSnapshot
+    getFirestore, collection, doc, getDoc, setDoc, addDoc, deleteDoc, onSnapshot,
+    updateDoc, arrayUnion, arrayRemove
   } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+  import {
+    getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject
+  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCiXcWoZLR37Ildi1Uy1N-cgXkOPuamV2A",
@@ -334,6 +520,7 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const storage = getStorage(app);
   const tasksCol = collection(db, 'tasks');
 
   // Definición inicial (solo se usa una vez, para sembrar la base de datos la primera vez)
@@ -376,6 +563,7 @@
 
   let tasks = [];
   let currentFilter = 'all';
+  let currentDetailId = null;
 
   const listEl = document.getElementById('taskList');
   const progressText = document.getElementById('progressText');
@@ -422,6 +610,8 @@
         location: data.location || '',
         status: data.status || 'pending',
         order: typeof data.order === 'number' ? data.order : 0,
+        notes: data.notes || '',
+        photos: Array.isArray(data.photos) ? data.photos : [],
       });
     });
     list.sort((a, b) => a.order - b.order);
@@ -455,7 +645,13 @@
         <div class="task ${hiddenClass}" data-id="${t.id}">
           <button class="status-btn ${t.status}" data-action="cycle" data-id="${t.id}">${checkIcon}</button>
           <div class="task-body">
-            <div class="task-text ${isDone ? 'done' : ''}">${prefix}${t.emoji} ${escapeHtml(t.text)}</div>
+            <div class="task-text ${isDone ? 'done' : ''}" data-action="open-detail" data-id="${t.id}">${prefix}${t.emoji} ${escapeHtml(t.text)}</div>
+            <div class="detail-hint" data-action="open-detail" data-id="${t.id}">
+              ${t.photos && t.photos.length ? `📷 ${t.photos.length}` : ''}
+              ${t.notes ? '📝' : ''}
+              ${(!t.photos || !t.photos.length) && !t.notes ? 'Fotos y notas' : ''}
+              <span class="chevron">›</span>
+            </div>
             <div class="meta">
               <input class="meta-input tools" type="text" placeholder="🧰 Herramientas necesarias..." value="${escapeAttr(t.tools)}" data-field="tools" data-id="${t.id}">
               <input class="meta-input location" type="text" placeholder="📍 Sitio / carpa..." value="${escapeAttr(t.location)}" data-field="location" data-id="${t.id}">
@@ -487,6 +683,7 @@
   function render() {
     renderProgress();
     renderList();
+    if (currentDetailId) renderDetail();
   }
 
   const fieldTimers = {};
@@ -507,8 +704,14 @@
       const id = deleteBtn.dataset.id;
       const task = tasks.find(t => t.id === id);
       if (task && confirm(`¿Borrar la tarea "${task.text.slice(0, 60)}"?`)) {
+        (task.photos || []).forEach(p => deleteObject(storageRef(storage, p.path)).catch(() => {}));
         deleteDoc(doc(db, 'tasks', id)).catch(console.error);
       }
+      return;
+    }
+    const openBtn = e.target.closest('[data-action="open-detail"]');
+    if (openBtn) {
+      openDetail(openBtn.dataset.id);
       return;
     }
   });
@@ -579,6 +782,147 @@
     });
     resetAddForm();
     addForm.classList.remove('open');
+  });
+
+  // Panel de detalle: notas y fotos privadas de la tarea
+  const detailOverlay = document.getElementById('detailOverlay');
+  const detailText = document.getElementById('detailText');
+  const notesTextarea = document.getElementById('notesTextarea');
+  const photosGrid = document.getElementById('photosGrid');
+  const addPhotoBtn = document.getElementById('addPhotoBtn');
+  const photoInput = document.getElementById('photoInput');
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+
+  let pendingUploads = 0; // fotos subiéndose en este momento, para mostrar el spinner
+
+  function openDetail(id) {
+    currentDetailId = id;
+    pendingUploads = 0;
+    renderDetail();
+    detailOverlay.classList.add('open');
+  }
+
+  function closeDetail() {
+    currentDetailId = null;
+    detailOverlay.classList.remove('open');
+  }
+
+  function renderDetail() {
+    const task = tasks.find(t => t.id === currentDetailId);
+    if (!task) { closeDetail(); return; }
+
+    const active = document.activeElement;
+    const keepNotesFocus = active === notesTextarea;
+    const selStart = keepNotesFocus ? active.selectionStart : null;
+
+    detailText.textContent = `${task.emoji} ${task.text}`;
+    if (!keepNotesFocus) notesTextarea.value = task.notes || '';
+
+    const photos = task.photos || [];
+    photosGrid.innerHTML = photos.map(p => `
+      <div class="photo-thumb">
+        <img src="${escapeAttr(p.url)}" data-action="view-photo" data-url="${escapeAttr(p.url)}">
+        <button class="photo-remove" data-action="remove-photo" data-path="${escapeAttr(p.path)}" data-url="${escapeAttr(p.url)}">✕</button>
+      </div>`).join('') + (pendingUploads > 0
+        ? Array.from({ length: pendingUploads }).map(() => `
+      <div class="photo-thumb uploading"><div class="spinner">⏳</div></div>`).join('')
+        : '');
+
+    if (keepNotesFocus) {
+      notesTextarea.focus();
+      notesTextarea.setSelectionRange(selStart, selStart);
+    }
+  }
+
+  document.getElementById('detailBackBtn').addEventListener('click', closeDetail);
+
+  let notesTimer = null;
+  notesTextarea.addEventListener('input', () => {
+    const id = currentDetailId;
+    if (!id) return;
+    const task = tasks.find(t => t.id === id);
+    if (task) task.notes = notesTextarea.value;
+    clearTimeout(notesTimer);
+    notesTimer = setTimeout(() => {
+      updateDoc(doc(db, 'tasks', id), { notes: notesTextarea.value }).catch(console.error);
+    }, 500);
+  });
+
+  function compressImage(file, maxDim = 1600, quality = 0.75) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+          else { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(objectUrl);
+          resolve(blob || file);
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('No se pudo leer la imagen')); };
+      img.src = objectUrl;
+    });
+  }
+
+  addPhotoBtn.addEventListener('click', () => photoInput.click());
+
+  photoInput.addEventListener('change', async () => {
+    const id = currentDetailId;
+    const files = Array.from(photoInput.files || []);
+    photoInput.value = '';
+    if (!id || files.length === 0) return;
+
+    pendingUploads = files.length;
+    renderDetail();
+
+    for (const file of files) {
+      try {
+        const blob = await compressImage(file);
+        const path = `tasks/${id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+        const sRef = storageRef(storage, path);
+        await uploadBytes(sRef, blob, { contentType: 'image/jpeg' });
+        const url = await getDownloadURL(sRef);
+        await updateDoc(doc(db, 'tasks', id), { photos: arrayUnion({ url, path }) });
+      } catch (err) {
+        console.error('Error subiendo foto:', err);
+        alert('No se pudo subir una foto. Comprueba tu conexión e inténtalo de nuevo.');
+      } finally {
+        pendingUploads = Math.max(0, pendingUploads - 1);
+        renderDetail();
+      }
+    }
+  });
+
+  photosGrid.addEventListener('click', (e) => {
+    const viewBtn = e.target.closest('[data-action="view-photo"]');
+    if (viewBtn) {
+      lightboxImg.src = viewBtn.dataset.url;
+      lightbox.classList.add('open');
+      return;
+    }
+    const removeBtn = e.target.closest('[data-action="remove-photo"]');
+    if (removeBtn) {
+      if (!confirm('¿Borrar esta foto?')) return;
+      const id = currentDetailId;
+      const { path, url } = removeBtn.dataset;
+      updateDoc(doc(db, 'tasks', id), { photos: arrayRemove({ url, path }) })
+        .then(() => deleteObject(storageRef(storage, path)).catch(() => {}))
+        .catch(console.error);
+    }
+  });
+
+  lightbox.addEventListener('click', () => {
+    lightbox.classList.remove('open');
+    lightboxImg.src = '';
   });
 
   render();
