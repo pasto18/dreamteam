@@ -417,6 +417,34 @@
     border-color: #ff9f0a;
     color: #000000;
   }
+
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+  .stepper-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #1c1c1e;
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stepper-btn:active { background: #333333; }
+  .stepper-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+  }
   .detail-inner .meta-input,
   .detail-inner .chip-wrap {
     margin-bottom: 20px;
@@ -640,6 +668,14 @@
     </div>
     <div class="add-form" id="addForm">
       <input class="form-input" id="newText" placeholder="Task description">
+
+      <div class="section-label">People needed</div>
+      <div class="stepper">
+        <button type="button" class="stepper-btn" id="newPeopleMinus">−</button>
+        <span class="stepper-value" id="newPeopleValue">1</span>
+        <button type="button" class="stepper-btn" id="newPeoplePlus">+</button>
+      </div>
+
       <div class="section-label">🧰 Tools needed</div>
       <div class="tag-wrap" id="newToolsTags"></div>
       <div class="chip-wrap" id="newToolSuggestions"></div>
@@ -686,6 +722,13 @@
       </div>
 
       <button type="button" class="priority-toggle" id="detailPriorityBtn">🔥 Mark as high priority</button>
+
+      <div class="section-label">People needed</div>
+      <div class="stepper">
+        <button type="button" class="stepper-btn" id="detailPeopleMinus">−</button>
+        <span class="stepper-value" id="detailPeopleValue">1</span>
+        <button type="button" class="stepper-btn" id="detailPeoplePlus">+</button>
+      </div>
 
       <div class="section-label">Assigned to</div>
       <div class="chip-wrap" id="detailAssigneeChips"></div>
@@ -871,6 +914,7 @@
           location: '',
           status: 'pending',
           order: t.id,
+          peopleNeeded: 1,
         });
         return;
       }
@@ -881,6 +925,7 @@
       if (data.emoji === undefined) patch.emoji = t.emoji;
       if (data.location === undefined) patch.location = '';
       if (data.order === undefined) patch.order = t.id;
+      if (data.peopleNeeded === undefined) patch.peopleNeeded = 1;
       if (data.assignees === undefined) {
         patch.assignees = data.assignee !== undefined ? splitCommaList(data.assignee) : splitCommaList(t.assignee);
       }
@@ -908,6 +953,7 @@
         photos: Array.isArray(data.photos) ? data.photos : [],
         shopping: Array.isArray(data.shopping) ? data.shopping : [],
         highPriority: !!data.highPriority,
+        peopleNeeded: typeof data.peopleNeeded === 'number' ? data.peopleNeeded : 1,
       });
     });
     list.sort((a, b) => a.order - b.order);
@@ -1053,6 +1099,17 @@
   const addToggleBtn = document.getElementById('addToggleBtn');
   const addForm = document.getElementById('addForm');
   const newText = document.getElementById('newText');
+  let newPeopleNeeded = 1;
+  const newPeopleValue = document.getElementById('newPeopleValue');
+  document.getElementById('newPeopleMinus').addEventListener('click', () => {
+    newPeopleNeeded = Math.max(1, newPeopleNeeded - 1);
+    newPeopleValue.textContent = newPeopleNeeded;
+  });
+  document.getElementById('newPeoplePlus').addEventListener('click', () => {
+    newPeopleNeeded = Math.min(20, newPeopleNeeded + 1);
+    newPeopleValue.textContent = newPeopleNeeded;
+  });
+
   const newToolsTags = document.getElementById('newToolsTags');
   const newToolSuggestions = document.getElementById('newToolSuggestions');
   const newToolOtherRow = document.getElementById('newToolOtherRow');
@@ -1117,6 +1174,8 @@
 
   function resetAddForm() {
     newText.value = '';
+    newPeopleNeeded = 1;
+    newPeopleValue.textContent = newPeopleNeeded;
     newToolsList = [];
     renderNewTools();
     newToolOtherRow.style.display = 'none';
@@ -1149,6 +1208,7 @@
       assignees: newAssigneeSelection,
       status: 'pending',
       order: Date.now(),
+      peopleNeeded: newPeopleNeeded,
     });
     resetAddForm();
     addForm.classList.remove('open');
@@ -1159,6 +1219,7 @@
   const detailEmoji = document.getElementById('detailEmoji');
   const detailTitleInput = document.getElementById('detailTitleInput');
   const detailPriorityBtn = document.getElementById('detailPriorityBtn');
+  const detailPeopleValue = document.getElementById('detailPeopleValue');
   const detailAssigneeChips = document.getElementById('detailAssigneeChips');
   const detailToolsList = document.getElementById('detailToolsList');
   const detailToolSuggestions = document.getElementById('detailToolSuggestions');
@@ -1202,6 +1263,7 @@
     autoGrowTextarea(detailTitleInput);
     detailPriorityBtn.classList.toggle('active', !!task.highPriority);
     detailPriorityBtn.textContent = task.highPriority ? '🔥 High priority (tap to remove)' : '🔥 Mark as high priority';
+    detailPeopleValue.textContent = task.peopleNeeded || 1;
     detailAssigneeChips.innerHTML = assigneeChipsHtml(task.assignees);
     renderDetailTools();
     const loc = task.location || '';
@@ -1235,6 +1297,18 @@
     renderList();
     scheduleFieldSave(id, 'highPriority', task.highPriority, 0);
   });
+
+  function changePeopleNeeded(delta) {
+    const id = currentDetailId;
+    if (!id) return;
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    task.peopleNeeded = Math.min(20, Math.max(1, (task.peopleNeeded || 1) + delta));
+    detailPeopleValue.textContent = task.peopleNeeded;
+    scheduleFieldSave(id, 'peopleNeeded', task.peopleNeeded, 0);
+  }
+  document.getElementById('detailPeopleMinus').addEventListener('click', () => changePeopleNeeded(-1));
+  document.getElementById('detailPeoplePlus').addEventListener('click', () => changePeopleNeeded(1));
 
   function autoGrowTextarea(el) {
     el.style.height = 'auto';
