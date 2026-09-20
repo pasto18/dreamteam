@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>DreamTeam - Calculadora de Pitágoras</title>
+<title>DreamTeam - Pythagorean Calculator</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
@@ -74,7 +74,7 @@
   .dot.active { background: #ff9f0a; }
   .dot.done { background: #4cd964; }
 
-  /* Pantalla: sin recuadro, números flotando sobre negro */
+  /* Screen: no box, numbers floating on black */
   .screen {
     flex: 1;
     min-height: 0;
@@ -127,7 +127,7 @@
     min-height: 1.1em;
   }
 
-  /* Teclado tipo iPhone: botones circulares, 3 columnas -> más anchos */
+  /* iPhone-style keypad: circular buttons, 3 columns -> wider */
   .keypad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -155,7 +155,7 @@
   .keypad button.fn { background: #a5a5a5; color: #000000; }
   .keypad button.fn:active { background: #cfcfcf; }
 
-  /* Botón de acción a todo lo ancho, abajo del todo */
+  /* Full-width action button at the very bottom */
   .action-btn {
     width: 100%;
     border: none;
@@ -177,7 +177,7 @@
     color: #444444;
   }
 
-  /* Historial */
+  /* History */
   .history-overlay {
     position: absolute;
     inset: 0;
@@ -244,9 +244,9 @@
 <body>
   <div class="tpv">
     <div class="topbar">
-      <a href="index.html" class="nav-btn" title="Tareas">📋</a>
-      <div class="brand">DreamTeam · Pitágoras</div>
-      <button class="history-btn" id="historyOpenBtn" title="Historial">📖</button>
+      <a href="index.html" class="nav-btn" title="Tasks">📋</a>
+      <div class="brand">DreamTeam · Pythagoras</div>
+      <button class="history-btn" id="historyOpenBtn" title="History">📖</button>
     </div>
 
     <div class="steps">
@@ -255,23 +255,23 @@
       <div class="dot" id="dot3"></div>
     </div>
 
-    <!-- Pantalla principal (pasos 1, 2 y 3) -->
+    <!-- Main screen (steps 1, 2 and 3) -->
     <div class="screen" id="mainScreen">
       <div class="prev-rows" id="prevRows"></div>
 
       <div id="entryBlock">
-        <div class="label" id="entryLabel">Introduce el lado A</div>
+        <div class="label" id="entryLabel">Enter side A</div>
         <div class="value" id="entryValue">0<span class="cursor">|</span></div>
       </div>
 
       <div class="result-box" id="resultBlock" style="display:none;">
-        <div class="r-label">Hipotenusa</div>
+        <div class="r-label">Hypotenuse</div>
         <div class="r-value" id="sumC">0</div>
       </div>
     </div>
     <div class="error" id="errorMsg">&nbsp;</div>
 
-    <!-- Teclado numérico tipo iPhone -->
+    <!-- iPhone-style numeric keypad -->
     <div class="keypad" id="entryPad">
       <button data-key="7">7</button>
       <button data-key="8">8</button>
@@ -287,18 +287,18 @@
       <button class="fn" data-key="back">⌫</button>
     </div>
 
-    <!-- Botón de acción a todo lo ancho -->
-    <button class="action-btn" id="actionBtn">Siguiente ➜</button>
+    <!-- Full-width action button -->
+    <button class="action-btn" id="actionBtn">Next ➜</button>
 
     <footer>a&sup2; + b&sup2; = c&sup2;</footer>
 
-    <!-- Panel de historial -->
+    <!-- History panel -->
     <div class="history-overlay" id="historyOverlay">
       <div class="history-header">
-        <h2>Historial</h2>
+        <h2>History</h2>
         <button class="close-btn" id="historyCloseBtn">✕</button>
       </div>
-      <button class="history-clear" id="historyClearBtn">Vaciar historial</button>
+      <button class="history-clear" id="historyClearBtn">Clear history</button>
       <div class="history-list" id="historyList"></div>
     </div>
   </div>
@@ -337,7 +337,7 @@
     const list = loadHistory();
     const container = document.getElementById('historyList');
     if (list.length === 0) {
-      container.innerHTML = '<div class="history-empty">Sin cálculos todavía</div>';
+      container.innerHTML = '<div class="history-empty">No calculations yet</div>';
       return;
     }
     container.innerHTML = list.map(item => {
@@ -357,13 +357,13 @@
       else if (i + 1 === state.step) d.classList.add('active');
     });
 
-    // Filas superiores con los valores ya introducidos
+    // Rows at the top with the values already entered
     let rows = '';
     if (state.step >= 2) {
-      rows += `<div class="summary-row"><span>Lado A</span><span class="v">${state.a}</span></div>`;
+      rows += `<div class="summary-row"><span>Side A</span><span class="v">${state.a}</span></div>`;
     }
     if (state.step >= 3) {
-      rows += `<div class="summary-row"><span>Lado B</span><span class="v">${state.b}</span></div>`;
+      rows += `<div class="summary-row"><span>Side B</span><span class="v">${state.b}</span></div>`;
     }
     prevRows.innerHTML = rows;
 
@@ -371,11 +371,11 @@
       entryBlock.style.display = '';
       resultBlock.style.display = 'none';
       entryPad.style.display = '';
-      entryLabel.textContent = state.step === 1 ? 'Introduce el lado A' : 'Introduce el lado B';
+      entryLabel.textContent = state.step === 1 ? 'Enter side A' : 'Enter side B';
       const buf = currentBuffer();
       entryValue.innerHTML = (buf === '' ? '0' : buf) + '<span class="cursor">|</span>';
       errorMsg.textContent = ' ';
-      actionBtn.textContent = 'Siguiente ➜';
+      actionBtn.textContent = 'Next ➜';
     } else {
       entryBlock.style.display = 'none';
       resultBlock.style.display = '';
@@ -384,7 +384,7 @@
       const b = parseFloat(state.b);
       const c = Math.sqrt(a * a + b * b);
       document.getElementById('sumC').textContent = c.toFixed(4);
-      actionBtn.textContent = '🔁 Nuevo cálculo';
+      actionBtn.textContent = '🔁 New calculation';
     }
   }
 
@@ -422,7 +422,7 @@
     const buf = currentBuffer();
     const n = parseFloat(buf);
     if (buf === '' || isNaN(n) || n <= 0) {
-      errorMsg.textContent = 'Introduce un número válido mayor que 0';
+      errorMsg.textContent = 'Enter a valid number greater than 0';
       return;
     }
     if (state.step === 2) {
@@ -454,7 +454,7 @@
     }
   });
 
-  // Historial: abrir / cerrar / vaciar
+  // History: open / close / clear
   const historyOverlay = document.getElementById('historyOverlay');
   document.getElementById('historyOpenBtn').addEventListener('click', () => {
     renderHistory();
