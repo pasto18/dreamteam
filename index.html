@@ -201,8 +201,26 @@
     <footer>Toca el círculo para cambiar el estado · Escribe quién la lleva</footer>
   </div>
 
-<script>
-  const TASKS = [
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import {
+    getFirestore, collection, doc, getDoc, setDoc, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCiXcWoZLR37Ildi1Uy1N-cgXkOPuamV2A",
+    authDomain: "dreamteam-9ba54.firebaseapp.com",
+    projectId: "dreamteam-9ba54",
+    storageBucket: "dreamteam-9ba54.firebasestorage.app",
+    messagingSenderId: "796331884443",
+    appId: "1:796331884443:web:a18eb67205ff3799f82b3e"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const tasksCol = collection(db, 'tasks');
+
+  const TASK_DEFS = [
     { id: 1,  emoji: '🔨', text: 'Put new wood on trailer subardo', assignee: '' },
     { id: 2,  emoji: '🔨', text: 'DT CONTAINER - set up scaffolding container dream team (ask Patrick to weld some parts?)', assignee: '' },
     { id: 3,  emoji: '🔨', text: "make a roof outside the door of dream team container, where there is already wood and a shitty fabric on it, (something hard so it doesn't rip off with the wind)", assignee: '' },
@@ -223,32 +241,43 @@
     { id: 18, emoji: '🚜', text: 'cargar trailer azul con metal de tribune de ballena - WALID-ANTO', assignee: 'Walid, Anto' },
   ];
 
-  const STORAGE_KEY = 'dreamteam_tasks_v1';
   const STATUS_ORDER = ['pending', 'progress', 'done'];
 
-  function loadState() {
-    let saved = {};
-    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-    catch (e) { saved = {}; }
-    return TASKS.map(t => ({
-      ...t,
-      status: (saved[t.id] && saved[t.id].status) || 'pending',
-      assignee: (saved[t.id] && saved[t.id].assignee !== undefined) ? saved[t.id].assignee : t.assignee,
-    }));
-  }
-
-  function saveState() {
-    const toSave = {};
-    tasks.forEach(t => { toSave[t.id] = { status: t.status, assignee: t.assignee }; });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-  }
-
-  let tasks = loadState();
+  // Estado local (se pinta de inmediato; Firestore lo mantiene sincronizado entre dispositivos)
+  let tasks = TASK_DEFS.map(t => ({ ...t, status: 'pending' }));
   let currentFilter = 'all';
 
   const listEl = document.getElementById('taskList');
   const progressText = document.getElementById('progressText');
   const progressFill = document.getElementById('progressFill');
+
+  async function ensureSeeded() {
+    await Promise.all(TASK_DEFS.map(async (t) => {
+      const ref = doc(db, 'tasks', String(t.id));
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        await setDoc(ref, { status: 'pending', assignee: t.assignee });
+      }
+    }));
+  }
+
+  function mergeSnapshot(snapshot) {
+    const byId = {};
+    snapshot.forEach(d => { byId[d.id] = d.data(); });
+    tasks = TASK_DEFS.map(t => {
+      const data = byId[String(t.id)] || {};
+      return {
+        ...t,
+        status: data.status || 'pending',
+        assignee: data.assignee !== undefined ? data.assignee : t.assignee,
+      };
+    });
+    render();
+  }
+
+  ensureSeeded()
+    .then(() => onSnapshot(tasksCol, mergeSnapshot, (err) => console.error('Firestore error:', err)))
+    .catch((err) => console.error('Error inicializando Firestore:', err));
 
   function renderProgress() {
     const done = tasks.filter(t => t.status === 'done').length;
@@ -257,6 +286,11 @@
   }
 
   function renderList() {
+    // Conserva el foco y la posición del cursor si se está editando un campo "asignar a"
+    const active = document.activeElement;
+    const focusedId = (active && active.dataset && active.dataset.action === 'assignee') ? active.dataset.id : null;
+    const selStart = focusedId ? active.selectionStart : null;
+
     listEl.innerHTML = tasks.map(t => {
       const isDone = t.status === 'done';
       const checkIcon = isDone ? '✓' : '';
@@ -271,6 +305,14 @@
           </div>
         </div>`;
     }).join('');
+
+    if (focusedId) {
+      const input = listEl.querySelector(`[data-action="assignee"][data-id="${focusedId}"]`);
+      if (input) {
+        input.focus();
+        input.setSelectionRange(selStart, selStart);
+      }
+    }
   }
 
   function escapeHtml(str) {
@@ -285,6 +327,8 @@
     renderList();
   }
 
+  const assigneeTimers = {};
+
   listEl.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-action="cycle"]');
     if (!btn) return;
@@ -292,8 +336,8 @@
     const task = tasks.find(t => t.id === id);
     const idx = STATUS_ORDER.indexOf(task.status);
     task.status = STATUS_ORDER[(idx + 1) % STATUS_ORDER.length];
-    saveState();
     render();
+    setDoc(doc(db, 'tasks', String(id)), { status: task.status }, { merge: true }).catch(console.error);
   });
 
   listEl.addEventListener('input', (e) => {
@@ -302,7 +346,10 @@
     const id = Number(input.dataset.id);
     const task = tasks.find(t => t.id === id);
     task.assignee = input.value;
-    saveState();
+    clearTimeout(assigneeTimers[id]);
+    assigneeTimers[id] = setTimeout(() => {
+      setDoc(doc(db, 'tasks', String(id)), { assignee: input.value }, { merge: true }).catch(console.error);
+    }, 500);
   });
 
   document.querySelectorAll('.filter-btn').forEach(btn => {
