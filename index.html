@@ -79,6 +79,20 @@
     transition: width 0.25s;
   }
 
+  .filters-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .filters-row #statusFilters {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+  .plan-toggle {
+    flex-shrink: 0;
+  }
   .filters {
     display: flex;
     gap: 8px;
@@ -99,6 +113,10 @@
   }
   .filter-btn.active {
     background: #ff9f0a;
+    color: #000000;
+  }
+  .plan-toggle.active {
+    background: #ffffff;
     color: #000000;
   }
 
@@ -217,6 +235,25 @@
     border-color: #4cd964;
     background: #4cd964;
     color: #04310f;
+  }
+  .status-btn.today-selected {
+    border-color: #ffffff;
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .today-header {
+    color: #ffffff;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    margin: 4px 0 8px 7px;
+  }
+  .today-separator {
+    height: 1px;
+    background: #333333;
+    margin: 8px 0 4px;
   }
 
   .task-body {
@@ -655,11 +692,14 @@
       <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     </div>
 
-    <div class="filters" id="statusFilters">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="pending">Pending</button>
-      <button class="filter-btn" data-filter="progress">In progress</button>
-      <button class="filter-btn" data-filter="done">Done</button>
+    <div class="filters-row">
+      <div class="filters" id="statusFilters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="pending">Pending</button>
+        <button class="filter-btn" data-filter="progress">In progress</button>
+        <button class="filter-btn" data-filter="done">Done</button>
+      </div>
+      <button class="filter-btn plan-toggle" id="planToggleBtn" title="Plan for the Day">📅 Plan Day</button>
     </div>
 
     <div class="filter-add-row">
@@ -871,11 +911,17 @@
     return current.includes(name) ? current.filter(n => n !== name) : [...current, name];
   }
 
+  function getBerlinDateString() {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  }
+
   let tasks = [];
   let currentFilter = 'all';
   let currentPersonFilter = 'all';
   let currentDetailId = null;
   let shoppingOverlayOpen = false;
+  let planModeActive = false;
+  let lastBerlinDate = getBerlinDateString();
 
   const listEl = document.getElementById('taskList');
   const progressText = document.getElementById('progressText');
@@ -969,6 +1015,7 @@
         shopping: Array.isArray(data.shopping) ? data.shopping : [],
         highPriority: !!data.highPriority,
         peopleNeeded: typeof data.peopleNeeded === 'number' ? data.peopleNeeded : 1,
+        todayDate: data.todayDate || '',
       });
     });
     list.sort((a, b) => a.order - b.order);
@@ -986,30 +1033,56 @@
     progressFill.style.width = tasks.length ? `${(done / tasks.length) * 100}%` : '0%';
   }
 
+  function isTaskHidden(t) {
+    const statusHidden = currentFilter !== 'all' && t.status !== currentFilter;
+    const personHidden = currentPersonFilter !== 'all' && !(t.assignees || []).includes(currentPersonFilter);
+    const siteHidden = currentSiteFilter !== 'all' && t.location !== currentSiteFilter;
+    return statusHidden || personHidden || siteHidden;
+  }
+
+  function taskRowHtml(t, todayStr) {
+    const isDone = t.status === 'done';
+    const isUnassigned = (t.assignees || []).length === 0;
+    const isToday = t.todayDate === todayStr;
+    const checkIcon = isDone ? '✓' : '';
+    const rowClasses = [
+      isTaskHidden(t) ? 'hidden' : '',
+      t.highPriority ? 'priority-high' : '',
+      isUnassigned ? 'unassigned' : '',
+    ].filter(Boolean).join(' ');
+    const icons = (t.highPriority ? '🔥 ' : '') + (isUnassigned ? '⚠️ ' : '');
+    const statusBtnHtml = planModeActive
+      ? `<button class="status-btn ${isToday ? 'today-selected' : ''}" data-action="toggle-today" data-id="${t.id}">${isToday ? '✓' : ''}</button>`
+      : `<button class="status-btn ${t.status}" data-action="cycle" data-id="${t.id}">${checkIcon}</button>`;
+    const bodyAction = planModeActive ? 'toggle-today' : 'open-detail';
+    return `
+      <div class="task ${rowClasses}" data-id="${t.id}">
+        ${statusBtnHtml}
+        <div class="task-body" data-action="${bodyAction}" data-id="${t.id}">
+          <div class="task-text ${isDone ? 'done' : ''}">${icons}${escapeHtml(t.text)}</div>
+        </div>
+      </div>`;
+  }
+
   function renderList() {
+    const todayStr = getBerlinDateString();
     const sorted = [...tasks].sort((a, b) => (b.highPriority ? 1 : 0) - (a.highPriority ? 1 : 0));
-    listEl.innerHTML = sorted.map(t => {
-      const isDone = t.status === 'done';
-      const isUnassigned = (t.assignees || []).length === 0;
-      const checkIcon = isDone ? '✓' : '';
-      const statusHidden = currentFilter !== 'all' && t.status !== currentFilter;
-      const personHidden = currentPersonFilter !== 'all' && !(t.assignees || []).includes(currentPersonFilter);
-      const siteHidden = currentSiteFilter !== 'all' && t.location !== currentSiteFilter;
-      const hiddenClass = (statusHidden || personHidden || siteHidden) ? 'hidden' : '';
-      const rowClasses = [
-        hiddenClass,
-        t.highPriority ? 'priority-high' : '',
-        isUnassigned ? 'unassigned' : '',
-      ].filter(Boolean).join(' ');
-      const icons = (t.highPriority ? '🔥 ' : '') + (isUnassigned ? '⚠️ ' : '');
-      return `
-        <div class="task ${rowClasses}" data-id="${t.id}">
-          <button class="status-btn ${t.status}" data-action="cycle" data-id="${t.id}">${checkIcon}</button>
-          <div class="task-body" data-action="open-detail" data-id="${t.id}">
-            <div class="task-text ${isDone ? 'done' : ''}">${icons}${escapeHtml(t.text)}</div>
-          </div>
-        </div>`;
-    }).join('');
+
+    if (planModeActive) {
+      listEl.innerHTML = sorted.map(t => taskRowHtml(t, todayStr)).join('');
+      return;
+    }
+
+    const todayTasks = sorted.filter(t => t.todayDate === todayStr);
+    const restTasks = sorted.filter(t => t.todayDate !== todayStr);
+    let html = '';
+    if (todayTasks.length) {
+      html += `<div class="today-header">Today</div>`;
+      html += todayTasks.map(t => taskRowHtml(t, todayStr)).join('');
+      html += `<div class="today-separator"></div>`;
+    }
+    html += restTasks.map(t => taskRowHtml(t, todayStr)).join('');
+    listEl.innerHTML = html;
   }
 
   function escapeHtml(str) {
@@ -1080,6 +1153,41 @@
     if (openBtn) {
       openDetail(openBtn.dataset.id);
       return;
+    }
+    const todayBtn = e.target.closest('[data-action="toggle-today"]');
+    if (todayBtn) {
+      const id = todayBtn.dataset.id;
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+      const todayStr = getBerlinDateString();
+      task.todayDate = task.todayDate === todayStr ? '' : todayStr;
+      renderList();
+      scheduleFieldSave(id, 'todayDate', task.todayDate, 0);
+      return;
+    }
+  });
+
+  const planToggleBtn = document.getElementById('planToggleBtn');
+  planToggleBtn.addEventListener('click', () => {
+    planModeActive = !planModeActive;
+    planToggleBtn.classList.toggle('active', planModeActive);
+    renderList();
+  });
+
+  setInterval(() => {
+    const d = getBerlinDateString();
+    if (d !== lastBerlinDate) {
+      lastBerlinDate = d;
+      renderList();
+    }
+  }, 60000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const d = getBerlinDateString();
+      if (d !== lastBerlinDate) {
+        lastBerlinDate = d;
+      }
+      renderList();
     }
   });
 
