@@ -1081,15 +1081,17 @@
 
   function renderList() {
     const todayStr = getBerlinDateString();
-    const sorted = [...tasks].sort((a, b) => (b.highPriority ? 1 : 0) - (a.highPriority ? 1 : 0));
+    const byPriority = (a, b) => (b.highPriority ? 1 : 0) - (a.highPriority ? 1 : 0);
+    const notDone = tasks.filter(t => t.status !== 'done').sort(byPriority);
+    const done = tasks.filter(t => t.status === 'done').sort(byPriority);
 
     if (planModeActive) {
-      listEl.innerHTML = sorted.map(t => taskRowHtml(t, todayStr)).join('');
+      listEl.innerHTML = [...notDone, ...done].map(t => taskRowHtml(t, todayStr)).join('');
       return;
     }
 
-    const todayTasks = sorted.filter(t => t.todayDate === todayStr);
-    const restTasks = sorted.filter(t => t.todayDate !== todayStr);
+    const todayTasks = notDone.filter(t => t.todayDate === todayStr);
+    const restTasks = notDone.filter(t => t.todayDate !== todayStr);
     let html = '';
     if (todayTasks.length) {
       html += `<div class="today-header">Today</div>`;
@@ -1097,6 +1099,7 @@
       html += `<div class="today-separator"></div>`;
     }
     html += restTasks.map(t => taskRowHtml(t, todayStr)).join('');
+    html += done.map(t => taskRowHtml(t, todayStr)).join('');
     listEl.innerHTML = html;
   }
 
