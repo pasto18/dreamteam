@@ -215,23 +215,13 @@
     font-size: 1rem;
     line-height: 1.4;
     color: #f2f2f7;
-    cursor: pointer;
   }
   .task-text.done {
     color: #6d6d70;
     text-decoration: line-through;
   }
 
-  .detail-hint {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 8px;
-    color: #64d2ff;
-    font-size: 0.85rem;
-    cursor: pointer;
-  }
-  .detail-hint .chevron { color: #48484a; margin-left: auto; }
+  .task-body { cursor: pointer; }
 
   .meta {
     display: flex;
@@ -333,6 +323,9 @@
   .detail-text {
     font-size: 1.15rem;
     line-height: 1.4;
+    margin-bottom: 20px;
+  }
+  .detail-inner .meta-input {
     margin-bottom: 20px;
   }
 
@@ -484,6 +477,15 @@
       </div>
       <div class="detail-text" id="detailText"></div>
 
+      <div class="section-label">Assigned to</div>
+      <select class="meta-input assignee" id="detailAssignee"></select>
+
+      <div class="section-label">Tools needed</div>
+      <input class="meta-input tools" type="text" id="detailTools" placeholder="e.g. hammer, nails, ladder...">
+
+      <div class="section-label">Site / tent</div>
+      <input class="meta-input location" type="text" id="detailLocation" placeholder="e.g. Dream Team container...">
+
       <div class="section-label">Notes</div>
       <textarea class="notes-textarea" id="notesTextarea" placeholder="Private notes for this task (not shown in the main list)..."></textarea>
 
@@ -621,7 +623,7 @@
 
   ensureSeeded()
     .then(() => onSnapshot(tasksCol, mergeSnapshot, (err) => console.error('Firestore error:', err)))
-    .catch((err) => console.error('Error inicializando Firestore:', err));
+    .catch((err) => console.error('Error initializing Firestore:', err));
 
   function renderProgress() {
     const done = tasks.filter(t => t.status === 'done').length;
@@ -630,12 +632,6 @@
   }
 
   function renderList() {
-    // Preserve focus and cursor position if a text field is being edited
-    const active = document.activeElement;
-    const focusedField = (active && active.dataset && active.dataset.field) ? active.dataset.field : null;
-    const focusedId = focusedField ? active.dataset.id : null;
-    const selStart = focusedId ? active.selectionStart : null;
-
     listEl.innerHTML = tasks.map(t => {
       const isDone = t.status === 'done';
       const checkIcon = isDone ? '✓' : '';
@@ -644,33 +640,12 @@
       return `
         <div class="task ${hiddenClass}" data-id="${t.id}">
           <button class="status-btn ${t.status}" data-action="cycle" data-id="${t.id}">${checkIcon}</button>
-          <div class="task-body">
-            <div class="task-text ${isDone ? 'done' : ''}" data-action="open-detail" data-id="${t.id}">${prefix}${t.emoji} ${escapeHtml(t.text)}</div>
-            <div class="detail-hint" data-action="open-detail" data-id="${t.id}">
-              ${t.photos && t.photos.length ? `📷 ${t.photos.length}` : ''}
-              ${t.notes ? '📝' : ''}
-              ${(!t.photos || !t.photos.length) && !t.notes ? 'Photos & notes' : ''}
-              <span class="chevron">›</span>
-            </div>
-            <div class="meta">
-              <input class="meta-input tools" type="text" placeholder="🧰 Tools needed..." value="${escapeAttr(t.tools)}" data-field="tools" data-id="${t.id}">
-              <input class="meta-input location" type="text" placeholder="📍 Site / tent..." value="${escapeAttr(t.location)}" data-field="location" data-id="${t.id}">
-              <select class="meta-input assignee" data-field="assignee" data-id="${t.id}">${assigneeOptionsHtml(t.assignee)}</select>
-            </div>
+          <div class="task-body" data-action="open-detail" data-id="${t.id}">
+            <div class="task-text ${isDone ? 'done' : ''}">${prefix}${t.emoji} ${escapeHtml(t.text)}</div>
           </div>
           <button class="delete-btn" data-action="delete" data-id="${t.id}" title="Delete task">🗑</button>
         </div>`;
     }).join('');
-
-    if (focusedId) {
-      const input = listEl.querySelector(`[data-field="${focusedField}"][data-id="${focusedId}"]`);
-      if (input) {
-        input.focus();
-        if (input.tagName === 'INPUT' && selStart !== null && selStart !== undefined) {
-          input.setSelectionRange(selStart, selStart);
-        }
-      }
-    }
   }
 
   function escapeHtml(str) {
@@ -716,22 +691,13 @@
     }
   });
 
-  function handleFieldChange(e) {
-    const input = e.target.closest('[data-field]');
-    if (!input) return;
-    const id = input.dataset.id;
-    const field = input.dataset.field;
-    const task = tasks.find(t => t.id === id);
-    if (task) task[field] = input.value;
+  function scheduleFieldSave(id, field, value, delay) {
     const key = id + ':' + field;
     clearTimeout(fieldTimers[key]);
-    const delay = input.tagName === 'SELECT' ? 0 : 500;
     fieldTimers[key] = setTimeout(() => {
-      setDoc(doc(db, 'tasks', id), { [field]: input.value }, { merge: true }).catch(console.error);
+      setDoc(doc(db, 'tasks', id), { [field]: value }, { merge: true }).catch(console.error);
     }, delay);
   }
-  listEl.addEventListener('input', handleFieldChange);
-  listEl.addEventListener('change', handleFieldChange);
 
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -787,6 +753,9 @@
   // Detail panel: private notes and photos for the task
   const detailOverlay = document.getElementById('detailOverlay');
   const detailText = document.getElementById('detailText');
+  const detailAssignee = document.getElementById('detailAssignee');
+  const detailTools = document.getElementById('detailTools');
+  const detailLocation = document.getElementById('detailLocation');
   const notesTextarea = document.getElementById('notesTextarea');
   const photosGrid = document.getElementById('photosGrid');
   const addPhotoBtn = document.getElementById('addPhotoBtn');
@@ -813,11 +782,12 @@
     if (!task) { closeDetail(); return; }
 
     const active = document.activeElement;
-    const keepNotesFocus = active === notesTextarea;
-    const selStart = keepNotesFocus ? active.selectionStart : null;
 
     detailText.textContent = `${task.emoji} ${task.text}`;
-    if (!keepNotesFocus) notesTextarea.value = task.notes || '';
+    if (active !== detailAssignee) detailAssignee.innerHTML = assigneeOptionsHtml(task.assignee);
+    if (active !== detailTools) detailTools.value = task.tools || '';
+    if (active !== detailLocation) detailLocation.value = task.location || '';
+    if (active !== notesTextarea) notesTextarea.value = task.notes || '';
 
     const photos = task.photos || [];
     photosGrid.innerHTML = photos.map(p => `
@@ -828,25 +798,40 @@
         ? Array.from({ length: pendingUploads }).map(() => `
       <div class="photo-thumb uploading"><div class="spinner">⏳</div></div>`).join('')
         : '');
-
-    if (keepNotesFocus) {
-      notesTextarea.focus();
-      notesTextarea.setSelectionRange(selStart, selStart);
-    }
   }
 
   document.getElementById('detailBackBtn').addEventListener('click', closeDetail);
 
-  let notesTimer = null;
   notesTextarea.addEventListener('input', () => {
     const id = currentDetailId;
     if (!id) return;
     const task = tasks.find(t => t.id === id);
     if (task) task.notes = notesTextarea.value;
-    clearTimeout(notesTimer);
-    notesTimer = setTimeout(() => {
-      updateDoc(doc(db, 'tasks', id), { notes: notesTextarea.value }).catch(console.error);
-    }, 500);
+    scheduleFieldSave(id, 'notes', notesTextarea.value, 500);
+  });
+
+  detailAssignee.addEventListener('change', () => {
+    const id = currentDetailId;
+    if (!id) return;
+    const task = tasks.find(t => t.id === id);
+    if (task) task.assignee = detailAssignee.value;
+    scheduleFieldSave(id, 'assignee', detailAssignee.value, 0);
+  });
+
+  detailTools.addEventListener('input', () => {
+    const id = currentDetailId;
+    if (!id) return;
+    const task = tasks.find(t => t.id === id);
+    if (task) task.tools = detailTools.value;
+    scheduleFieldSave(id, 'tools', detailTools.value, 500);
+  });
+
+  detailLocation.addEventListener('input', () => {
+    const id = currentDetailId;
+    if (!id) return;
+    const task = tasks.find(t => t.id === id);
+    if (task) task.location = detailLocation.value;
+    scheduleFieldSave(id, 'location', detailLocation.value, 500);
   });
 
   function compressImage(file, maxDim = 1600, quality = 0.75) {
@@ -868,7 +853,7 @@
           resolve(blob || file);
         }, 'image/jpeg', quality);
       };
-      img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('No se pudo leer la imagen')); };
+      img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Could not read the image')); };
       img.src = objectUrl;
     });
   }
