@@ -664,6 +664,7 @@
 
     <div class="filter-add-row">
       <select class="form-input select-input" id="personFilterSelect"></select>
+      <select class="form-input select-input" id="siteFilterSelect"></select>
       <button class="add-btn-compact" id="addToggleBtn">+ Add</button>
     </div>
     <div class="add-form" id="addForm">
@@ -884,7 +885,7 @@
   function renderPersonFilterOptions() {
     personFilterSelect.innerHTML = ['All people', ...NAMES].map((n, i) => {
       const value = i === 0 ? 'all' : n;
-      return `<option value="${escapeAttr(value)}">👤 ${escapeHtml(n)}</option>`;
+      return `<option value="${escapeAttr(value)}">${escapeHtml(n)}</option>`;
     }).join('');
     personFilterSelect.value = currentPersonFilter;
   }
@@ -892,6 +893,22 @@
 
   personFilterSelect.addEventListener('change', () => {
     currentPersonFilter = personFilterSelect.value;
+    renderList();
+  });
+
+  let currentSiteFilter = 'all';
+  const siteFilterSelect = document.getElementById('siteFilterSelect');
+  function renderSiteFilterOptions() {
+    siteFilterSelect.innerHTML = ['All sites', ...LOCATIONS].map((n, i) => {
+      const value = i === 0 ? 'all' : n;
+      return `<option value="${escapeAttr(value)}">${escapeHtml(n)}</option>`;
+    }).join('');
+    siteFilterSelect.value = currentSiteFilter;
+  }
+  renderSiteFilterOptions();
+
+  siteFilterSelect.addEventListener('change', () => {
+    currentSiteFilter = siteFilterSelect.value;
     renderList();
   });
 
@@ -977,7 +994,8 @@
       const checkIcon = isDone ? '✓' : '';
       const statusHidden = currentFilter !== 'all' && t.status !== currentFilter;
       const personHidden = currentPersonFilter !== 'all' && !(t.assignees || []).includes(currentPersonFilter);
-      const hiddenClass = (statusHidden || personHidden) ? 'hidden' : '';
+      const siteHidden = currentSiteFilter !== 'all' && t.location !== currentSiteFilter;
+      const hiddenClass = (statusHidden || personHidden || siteHidden) ? 'hidden' : '';
       const rowClasses = [
         hiddenClass,
         t.highPriority ? 'priority-high' : '',
