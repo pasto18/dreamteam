@@ -310,22 +310,6 @@
     color: #000000;
   }
 
-  .delete-btn {
-    flex-shrink: 0;
-    background: none;
-    border: none;
-    color: #48484a;
-    font-size: 1.1rem;
-    cursor: pointer;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: -4px -4px 0 0;
-  }
-  .delete-btn:active { color: #ff453a; }
-
   footer {
     margin-top: 18px;
     text-align: center;
@@ -380,12 +364,8 @@
     gap: 10px;
     margin-bottom: 20px;
   }
-  .detail-title-emoji {
-    font-size: 1.4rem;
-    padding-top: 12px;
-  }
   .detail-title-input {
-    flex: 1;
+    width: 100%;
     min-height: 60px;
     resize: none;
     overflow: hidden;
@@ -400,22 +380,28 @@
   }
   .detail-title-input:focus { outline: none; border-color: #ff9f0a; }
 
+  .priority-people-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 20px;
+  }
   .priority-toggle {
-    width: 100%;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
     border: 1px solid #3a3a3c;
     background: none;
-    color: #8e8e93;
-    font-weight: 600;
-    font-size: 0.95rem;
-    padding: 12px;
-    border-radius: 12px;
+    font-size: 1.3rem;
     cursor: pointer;
-    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .priority-toggle.active {
     background: #ff9f0a;
     border-color: #ff9f0a;
-    color: #000000;
   }
 
   .stepper {
@@ -621,6 +607,20 @@
   }
   .add-photo-btn:active { background: #1c1c1e; }
 
+  .delete-task-btn {
+    width: 100%;
+    border: 1px solid #ff453a;
+    background: none;
+    color: #ff453a;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .delete-task-btn:active { background: rgba(255, 69, 58, 0.15); }
+
   .lightbox {
     position: fixed;
     inset: 0;
@@ -684,18 +684,13 @@
         <button class="shop-add-btn" type="button" id="newToolOtherAddBtn">Add</button>
       </div>
 
-      <select class="form-input select-input" id="newLocationSelect">
-        <option value="">📍 Select site...</option>
-        <option value="Konsum">Konsum</option>
-        <option value="Subardo">Subardo</option>
-        <option value="Container Dream Team">Container Dream Team</option>
-        <option value="Container White">Container White</option>
-        <option value="Palapa">Palapa</option>
-        <option value="Palapita">Palapita</option>
-        <option value="Ballena">Ballena</option>
-        <option value="Other">Other...</option>
-      </select>
-      <input class="form-input" id="newLocationOther" placeholder="📍 Enter site name..." style="display:none;">
+      <div class="section-label">📍 Site / tent</div>
+      <div class="chip-wrap" id="newLocationChips"></div>
+      <div class="shop-add-row" id="newLocationOtherRow" style="display:none;">
+        <input class="form-input" type="text" id="newLocationOtherInput" placeholder="Enter site name...">
+      </div>
+
+      <div class="section-label">Assigned to</div>
       <div class="chip-wrap" id="newAssigneeChips"></div>
       <div class="form-actions">
         <button class="form-cancel" id="cancelAddBtn" type="button">Cancel</button>
@@ -705,7 +700,7 @@
 
     <div class="list" id="taskList"></div>
 
-    <footer>Tap the circle to change status · 🗑 to delete</footer>
+    <footer>Tap the circle to change status · tap a task to open it</footer>
   </div>
 
   <!-- Detail panel: private notes and photos for the task -->
@@ -717,17 +712,17 @@
       </div>
       <div class="section-label">Task</div>
       <div class="detail-title-row">
-        <span class="detail-title-emoji" id="detailEmoji"></span>
         <textarea class="detail-title-input" id="detailTitleInput" placeholder="Task description"></textarea>
       </div>
 
-      <button type="button" class="priority-toggle" id="detailPriorityBtn">🔥 Mark as high priority</button>
-
-      <div class="section-label">People needed</div>
-      <div class="stepper">
-        <button type="button" class="stepper-btn" id="detailPeopleMinus">−</button>
-        <span class="stepper-value" id="detailPeopleValue">1</span>
-        <button type="button" class="stepper-btn" id="detailPeoplePlus">+</button>
+      <div class="section-label">Priority &amp; people needed</div>
+      <div class="priority-people-row">
+        <button type="button" class="priority-toggle" id="detailPriorityBtn" title="High priority">🔥</button>
+        <div class="stepper" style="margin-bottom: 0;">
+          <button type="button" class="stepper-btn" id="detailPeopleMinus">−</button>
+          <span class="stepper-value" id="detailPeopleValue">1</span>
+          <button type="button" class="stepper-btn" id="detailPeoplePlus">+</button>
+        </div>
       </div>
 
       <div class="section-label">Assigned to</div>
@@ -742,18 +737,10 @@
       </div>
 
       <div class="section-label">Site / tent</div>
-      <select class="meta-input location select-input" id="detailLocationSelect">
-        <option value="">Select site...</option>
-        <option value="Konsum">Konsum</option>
-        <option value="Subardo">Subardo</option>
-        <option value="Container Dream Team">Container Dream Team</option>
-        <option value="Container White">Container White</option>
-        <option value="Palapa">Palapa</option>
-        <option value="Palapita">Palapita</option>
-        <option value="Ballena">Ballena</option>
-        <option value="Other">Other...</option>
-      </select>
-      <input class="meta-input location" type="text" id="detailLocationOther" placeholder="Enter site name..." style="display:none;">
+      <div class="chip-wrap" id="detailLocationChips"></div>
+      <div class="shop-add-row" id="detailLocationOtherRow" style="display:none;">
+        <input class="form-input" type="text" id="detailLocationOtherInput" placeholder="Enter site name...">
+      </div>
 
       <div class="section-label">Shopping list</div>
       <div class="shop-list" id="detailShopList"></div>
@@ -769,6 +756,8 @@
       <div class="photos-grid" id="photosGrid"></div>
       <button class="add-photo-btn" id="addPhotoBtn">📷 Add photo</button>
       <input type="file" accept="image/*" multiple id="photoInput" style="display:none;">
+
+      <button type="button" class="delete-task-btn" id="detailDeleteBtn">🗑 Delete task</button>
     </div>
   </div>
 
@@ -838,6 +827,15 @@
   const DEFAULT_EMOJI = '📌';
   const LOCATIONS = ['Konsum', 'Subardo', 'Container Dream Team', 'Container White', 'Palapa', 'Palapita', 'Ballena'];
   const TOOL_SUGGESTIONS = ['Forklift', 'Roto', 'Cherry picker', 'Hammer', 'Lever'];
+
+  function locationChipsHtml(current) {
+    const isPreset = LOCATIONS.includes(current);
+    const chips = LOCATIONS.map(loc =>
+      `<button type="button" class="chip ${current === loc ? 'active' : ''}" data-location="${escapeAttr(loc)}">${escapeHtml(loc)}</button>`
+    );
+    chips.push(`<button type="button" class="chip ${(!isPreset && current) ? 'active' : ''}" data-location="__other__">Other...</button>`);
+    return chips.join('');
+  }
 
   function toolTagsHtml(list) {
     return (list || []).map((tool, i) => `<span class="tag">${escapeHtml(tool)}<button type="button" class="tag-remove" data-index="${i}">✕</button></span>`).join('');
@@ -990,9 +988,8 @@
         <div class="task ${rowClasses}" data-id="${t.id}">
           <button class="status-btn ${t.status}" data-action="cycle" data-id="${t.id}">${checkIcon}</button>
           <div class="task-body" data-action="open-detail" data-id="${t.id}">
-            <div class="task-text ${isDone ? 'done' : ''}">${icons}${t.emoji} ${escapeHtml(t.text)}</div>
+            <div class="task-text ${isDone ? 'done' : ''}">${icons}${escapeHtml(t.text)}</div>
           </div>
-          <button class="delete-btn" data-action="delete" data-id="${t.id}" title="Delete task">🗑</button>
         </div>`;
     }).join('');
   }
@@ -1059,16 +1056,6 @@
       task.status = STATUS_ORDER[(idx + 1) % STATUS_ORDER.length];
       render();
       setDoc(doc(db, 'tasks', id), { status: task.status }, { merge: true }).catch(console.error);
-      return;
-    }
-    const deleteBtn = e.target.closest('[data-action="delete"]');
-    if (deleteBtn) {
-      const id = deleteBtn.dataset.id;
-      const task = tasks.find(t => t.id === id);
-      if (task && confirm(`Delete task "${task.text.slice(0, 60)}"?`)) {
-        (task.photos || []).forEach(p => deleteObject(storageRef(storage, p.path)).catch(() => {}));
-        deleteDoc(doc(db, 'tasks', id)).catch(console.error);
-      }
       return;
     }
     const openBtn = e.target.closest('[data-action="open-detail"]');
@@ -1155,11 +1142,34 @@
     if (e.key === 'Enter') { e.preventDefault(); addNewToolOther(); }
   });
 
-  const newLocationSelect = document.getElementById('newLocationSelect');
-  const newLocationOther = document.getElementById('newLocationOther');
-  newLocationSelect.addEventListener('change', () => {
-    newLocationOther.style.display = newLocationSelect.value === 'Other' ? '' : 'none';
-    if (newLocationSelect.value === 'Other') newLocationOther.focus();
+  const newLocationChips = document.getElementById('newLocationChips');
+  const newLocationOtherRow = document.getElementById('newLocationOtherRow');
+  const newLocationOtherInput = document.getElementById('newLocationOtherInput');
+  let newLocationValue = '';
+
+  function renderNewLocation() {
+    newLocationChips.innerHTML = locationChipsHtml(newLocationValue);
+  }
+  renderNewLocation();
+
+  newLocationChips.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    if (btn.dataset.location === '__other__') {
+      newLocationValue = '';
+      newLocationOtherInput.value = '';
+      newLocationOtherRow.style.display = '';
+      newLocationOtherInput.focus();
+      renderNewLocation();
+      return;
+    }
+    newLocationValue = btn.dataset.location;
+    newLocationOtherRow.style.display = 'none';
+    renderNewLocation();
+  });
+
+  newLocationOtherInput.addEventListener('input', () => {
+    newLocationValue = newLocationOtherInput.value;
   });
   const newAssigneeChips = document.getElementById('newAssigneeChips');
   let newAssigneeSelection = [];
@@ -1180,9 +1190,10 @@
     renderNewTools();
     newToolOtherRow.style.display = 'none';
     newToolOtherInput.value = '';
-    newLocationSelect.value = '';
-    newLocationOther.value = '';
-    newLocationOther.style.display = 'none';
+    newLocationValue = '';
+    newLocationOtherInput.value = '';
+    newLocationOtherRow.style.display = 'none';
+    renderNewLocation();
     newAssigneeSelection = [];
     newAssigneeChips.innerHTML = assigneeChipsHtml(newAssigneeSelection);
   }
@@ -1201,10 +1212,9 @@
     const text = newText.value.trim();
     if (!text) { newText.focus(); return; }
     await addDoc(tasksCol, {
-      emoji: DEFAULT_EMOJI,
       text,
       toolsList: newToolsList,
-      location: newLocationSelect.value === 'Other' ? newLocationOther.value.trim() : newLocationSelect.value,
+      location: newLocationValue.trim(),
       assignees: newAssigneeSelection,
       status: 'pending',
       order: Date.now(),
@@ -1216,7 +1226,6 @@
 
   // Detail panel: private notes and photos for the task
   const detailOverlay = document.getElementById('detailOverlay');
-  const detailEmoji = document.getElementById('detailEmoji');
   const detailTitleInput = document.getElementById('detailTitleInput');
   const detailPriorityBtn = document.getElementById('detailPriorityBtn');
   const detailPeopleValue = document.getElementById('detailPeopleValue');
@@ -1226,8 +1235,9 @@
   const detailToolOtherRow = document.getElementById('detailToolOtherRow');
   const detailToolOtherInput = document.getElementById('detailToolOtherInput');
   const detailToolOtherAddBtn = document.getElementById('detailToolOtherAddBtn');
-  const detailLocationSelect = document.getElementById('detailLocationSelect');
-  const detailLocationOther = document.getElementById('detailLocationOther');
+  const detailLocationChips = document.getElementById('detailLocationChips');
+  const detailLocationOtherRow = document.getElementById('detailLocationOtherRow');
+  const detailLocationOtherInput = document.getElementById('detailLocationOtherInput');
   const notesTextarea = document.getElementById('notesTextarea');
   const detailShopList = document.getElementById('detailShopList');
   const detailShopInput = document.getElementById('detailShopInput');
@@ -1252,25 +1262,31 @@
     detailOverlay.classList.remove('open');
   }
 
+  document.getElementById('detailDeleteBtn').addEventListener('click', () => {
+    const id = currentDetailId;
+    if (!id) return;
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    if (confirm(`Delete task "${task.text.slice(0, 60)}"?`)) {
+      (task.photos || []).forEach(p => deleteObject(storageRef(storage, p.path)).catch(() => {}));
+      deleteDoc(doc(db, 'tasks', id)).catch(console.error);
+      closeDetail();
+    }
+  });
+
   function renderDetail() {
     const task = tasks.find(t => t.id === currentDetailId);
     if (!task) { closeDetail(); return; }
 
     const active = document.activeElement;
 
-    detailEmoji.textContent = task.emoji;
     if (active !== detailTitleInput) detailTitleInput.value = task.text;
     autoGrowTextarea(detailTitleInput);
     detailPriorityBtn.classList.toggle('active', !!task.highPriority);
-    detailPriorityBtn.textContent = task.highPriority ? '🔥 High priority (tap to remove)' : '🔥 Mark as high priority';
     detailPeopleValue.textContent = task.peopleNeeded || 1;
     detailAssigneeChips.innerHTML = assigneeChipsHtml(task.assignees);
     renderDetailTools();
-    const loc = task.location || '';
-    const isPresetLoc = LOCATIONS.includes(loc);
-    if (active !== detailLocationSelect) detailLocationSelect.value = isPresetLoc ? loc : (loc ? 'Other' : '');
-    detailLocationOther.style.display = detailLocationSelect.value === 'Other' ? '' : 'none';
-    if (active !== detailLocationOther) detailLocationOther.value = isPresetLoc ? '' : loc;
+    renderDetailLocation();
     if (active !== notesTextarea) notesTextarea.value = task.notes || '';
     renderDetailShopList();
 
@@ -1361,7 +1377,7 @@
     shoppingBody.innerHTML =
       `<div class="shop-summary">${totalLeft} item${totalLeft === 1 ? '' : 's'} left to buy</div>` +
       groups.map(t => `
-        <div class="shop-task-title">${t.emoji} ${escapeHtml(t.text)}</div>
+        <div class="shop-task-title">${escapeHtml(t.text)}</div>
         <div class="shop-list">${(t.shopping || []).map(item => shopItemHtml(t.id, item)).join('')}</div>
       `).join('');
   }
@@ -1452,28 +1468,47 @@
     if (e.key === 'Enter') { e.preventDefault(); addDetailToolOther(); }
   });
 
-  detailLocationSelect.addEventListener('change', () => {
+  function renderDetailLocation() {
+    const task = tasks.find(t => t.id === currentDetailId);
+    if (!task) return;
+    const active = document.activeElement;
+    if (active === detailLocationOtherInput) return;
+    const loc = task.location || '';
+    const isPresetLoc = LOCATIONS.includes(loc);
+    detailLocationChips.innerHTML = locationChipsHtml(loc);
+    detailLocationOtherInput.value = isPresetLoc ? '' : loc;
+    detailLocationOtherRow.style.display = (!isPresetLoc && loc) ? '' : 'none';
+  }
+
+  detailLocationChips.addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
     const id = currentDetailId;
     if (!id) return;
     const task = tasks.find(t => t.id === id);
     if (!task) return;
-    const isOther = detailLocationSelect.value === 'Other';
-    detailLocationOther.style.display = isOther ? '' : 'none';
-    if (isOther) {
-      detailLocationOther.focus();
-      task.location = detailLocationOther.value;
-    } else {
-      task.location = detailLocationSelect.value;
+    if (btn.dataset.location === '__other__') {
+      detailLocationOtherRow.style.display = '';
+      detailLocationOtherInput.focus();
+      if (LOCATIONS.includes(task.location)) {
+        task.location = '';
+        detailLocationOtherInput.value = '';
+        scheduleFieldSave(id, 'location', '', 0);
+      }
+      return;
     }
+    detailLocationOtherRow.style.display = 'none';
+    task.location = btn.dataset.location;
+    detailLocationChips.innerHTML = locationChipsHtml(task.location);
     scheduleFieldSave(id, 'location', task.location, 0);
   });
 
-  detailLocationOther.addEventListener('input', () => {
+  detailLocationOtherInput.addEventListener('input', () => {
     const id = currentDetailId;
     if (!id) return;
     const task = tasks.find(t => t.id === id);
-    if (task) task.location = detailLocationOther.value;
-    scheduleFieldSave(id, 'location', detailLocationOther.value, 500);
+    if (task) task.location = detailLocationOtherInput.value;
+    scheduleFieldSave(id, 'location', detailLocationOtherInput.value, 500);
   });
 
   function compressImage(file, maxDim = 1600, quality = 0.75) {
