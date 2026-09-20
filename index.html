@@ -243,6 +243,40 @@
     margin: 14px 0 4px 7px;
   }
 
+  .subtask-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .subtask-check {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #48484a;
+    background: transparent;
+    color: #04310f;
+    font-size: 0.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .subtask-check.done {
+    border-color: #4cd964;
+    background: #4cd964;
+  }
+  .subtask-text {
+    font-size: 0.85rem;
+    color: #8e8e93;
+  }
+  .subtask-text.done {
+    text-decoration: line-through;
+    color: #5a5a5a;
+  }
+
   .task-body {
     flex: 1;
     min-width: 0;
@@ -675,6 +709,7 @@
   body.plan-mode .task { border-bottom-color: rgba(0, 0, 0, 0.12); }
   body.plan-mode .site-header { color: #4a4a42; }
   body.plan-mode .task-text { color: #000000; }
+  body.plan-mode .subtask-text { color: #4a4a42; }
   body.plan-mode .task-text.done { color: #7a7a6e; }
   body.plan-mode footer { color: #6b6b5f; }
 </style>
@@ -751,6 +786,13 @@
       <div class="section-label">Task</div>
       <div class="detail-title-row">
         <textarea class="detail-title-input" id="detailTitleInput" placeholder="Task description"></textarea>
+      </div>
+
+      <div class="section-label">Subtasks</div>
+      <div class="shop-list" id="detailSubtasksList"></div>
+      <div class="shop-add-row">
+        <input class="form-input" type="text" id="detailSubtaskInput" placeholder="Add a subtask (e.g. something blocking this)...">
+        <button class="shop-add-btn" type="button" id="detailSubtaskAddBtn">Add</button>
       </div>
 
       <div class="section-label">Priority &amp; people needed</div>
@@ -1008,6 +1050,7 @@
         notes: data.notes || '',
         photos: Array.isArray(data.photos) ? data.photos : [],
         shopping: Array.isArray(data.shopping) ? data.shopping : [],
+        subtasks: Array.isArray(data.subtasks) ? data.subtasks : [],
         highPriority: !!data.highPriority,
         peopleNeeded: typeof data.peopleNeeded === 'number' ? data.peopleNeeded : 1,
         todayDate: data.todayDate || '',
@@ -1027,6 +1070,20 @@
     const personHidden = currentPersonFilter !== 'all' && !(t.assignees || []).includes(currentPersonFilter);
     const siteHidden = currentSiteFilter !== 'all' && t.location !== currentSiteFilter;
     return statusHidden || personHidden || siteHidden;
+  }
+
+  function subtaskRowsHtml(t) {
+    const manual = (t.subtasks || []).map(s => `
+      <div class="subtask-row">
+        <button type="button" class="subtask-check ${s.done ? 'done' : ''}" data-action="toggle-subtask" data-task-id="${t.id}" data-item-id="${s.id}">${s.done ? '✓' : ''}</button>
+        <span class="subtask-text ${s.done ? 'done' : ''}">${escapeHtml(s.text)}</span>
+      </div>`).join('');
+    const blockers = (t.shopping || []).filter(i => !i.bought).map(i => `
+      <div class="subtask-row">
+        <button type="button" class="subtask-check" data-action="toggle-item" data-task-id="${t.id}" data-item-id="${i.id}"></button>
+        <span class="subtask-text">🛒 Buy ${escapeHtml(i.text)}</span>
+      </div>`).join('');
+    return manual + blockers;
   }
 
   function taskRowHtml(t, todayStr) {
@@ -1049,6 +1106,7 @@
         ${statusBtnHtml}
         <div class="task-body" data-action="${bodyAction}" data-id="${t.id}">
           <div class="task-text ${isDone ? 'done' : ''}">${icons}${escapeHtml(t.text)}</div>
+          ${subtaskRowsHtml(t)}
         </div>
       </div>`;
   }
@@ -1142,8 +1200,19 @@
     const newList = updater(task.shopping || []);
     task.shopping = newList;
     setDoc(doc(db, 'tasks', taskId), { shopping: newList }, { merge: true }).catch(console.error);
+    renderList();
     if (currentDetailId === taskId) renderDetailShopList();
     if (shoppingOverlayOpen) renderShoppingOverlay();
+  }
+
+  function updateTaskSubtasks(taskId, updater) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    const newList = updater(task.subtasks || []);
+    task.subtasks = newList;
+    setDoc(doc(db, 'tasks', taskId), { subtasks: newList }, { merge: true }).catch(console.error);
+    renderList();
+    if (currentDetailId === taskId) renderDetailSubtasks();
   }
 
   function handleShopClick(e) {
@@ -1163,6 +1232,18 @@
   const fieldTimers = {};
 
   listEl.addEventListener('click', (e) => {
+    const subtaskBtn = e.target.closest('[data-action="toggle-subtask"]');
+    if (subtaskBtn) {
+      const { taskId, itemId } = subtaskBtn.dataset;
+      updateTaskSubtasks(taskId, list => list.map(s => s.id === itemId ? { ...s, done: !s.done } : s));
+      return;
+    }
+    const blockerBtn = e.target.closest('[data-action="toggle-item"]');
+    if (blockerBtn) {
+      const { taskId, itemId } = blockerBtn.dataset;
+      updateTaskShopping(taskId, list => list.map(it => it.id === itemId ? { ...it, bought: !it.bought } : it));
+      return;
+    }
     const cycleBtn = e.target.closest('[data-action="cycle"]');
     if (cycleBtn) {
       const id = cycleBtn.dataset.id;
@@ -1378,6 +1459,9 @@
   // Detail panel: private notes and photos for the task
   const detailOverlay = document.getElementById('detailOverlay');
   const detailTitleInput = document.getElementById('detailTitleInput');
+  const detailSubtasksList = document.getElementById('detailSubtasksList');
+  const detailSubtaskInput = document.getElementById('detailSubtaskInput');
+  const detailSubtaskAddBtn = document.getElementById('detailSubtaskAddBtn');
   const detailPriorityBtn = document.getElementById('detailPriorityBtn');
   const detailPeopleValue = document.getElementById('detailPeopleValue');
   const detailAssigneeChips = document.getElementById('detailAssigneeChips');
@@ -1433,6 +1517,7 @@
 
     if (active !== detailTitleInput) detailTitleInput.value = task.text;
     autoGrowTextarea(detailTitleInput);
+    renderDetailSubtasks();
     detailPriorityBtn.classList.toggle('active', !!task.highPriority);
     detailPeopleValue.textContent = task.peopleNeeded || 1;
     detailAssigneeChips.innerHTML = assigneeChipsHtml(task.assignees);
@@ -1490,6 +1575,48 @@
     if (task) task.text = detailTitleInput.value;
     renderList();
     scheduleFieldSave(id, 'text', detailTitleInput.value, 500);
+  });
+
+  function renderDetailSubtasks() {
+    const task = tasks.find(t => t.id === currentDetailId);
+    if (!task) return;
+    const items = task.subtasks || [];
+    detailSubtasksList.innerHTML = items.length
+      ? items.map(s => `
+        <div class="shop-item">
+          <button class="shop-check ${s.done ? 'bought' : ''}" data-action="toggle-subtask-detail" data-item-id="${s.id}">${s.done ? '✓' : ''}</button>
+          <span class="shop-text ${s.done ? 'bought' : ''}">${escapeHtml(s.text)}</span>
+          <button class="shop-item-delete" data-action="delete-subtask" data-item-id="${s.id}">✕</button>
+        </div>`).join('')
+      : `<div class="shop-empty">No subtasks yet</div>`;
+  }
+
+  detailSubtasksList.addEventListener('click', (e) => {
+    const id = currentDetailId;
+    if (!id) return;
+    const toggleBtn = e.target.closest('[data-action="toggle-subtask-detail"]');
+    if (toggleBtn) {
+      const itemId = toggleBtn.dataset.itemId;
+      updateTaskSubtasks(id, list => list.map(s => s.id === itemId ? { ...s, done: !s.done } : s));
+      return;
+    }
+    const delBtn = e.target.closest('[data-action="delete-subtask"]');
+    if (delBtn) {
+      const itemId = delBtn.dataset.itemId;
+      updateTaskSubtasks(id, list => list.filter(s => s.id !== itemId));
+    }
+  });
+
+  function addDetailSubtask() {
+    const id = currentDetailId;
+    const text = detailSubtaskInput.value.trim();
+    if (!id || !text) return;
+    updateTaskSubtasks(id, list => [...list, { id: genId(), text, done: false }]);
+    detailSubtaskInput.value = '';
+  }
+  detailSubtaskAddBtn.addEventListener('click', addDetailSubtask);
+  detailSubtaskInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addDetailSubtask(); }
   });
 
   function renderDetailShopList() {
