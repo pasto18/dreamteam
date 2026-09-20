@@ -1096,7 +1096,7 @@
       t.highPriority ? 'priority-high' : '',
       isUnassigned ? 'unassigned' : '',
     ].filter(Boolean).join(' ');
-    const icons = (t.highPriority ? '🔥 ' : '') + (isUnassigned ? '⚠️ ' : '');
+    const icons = t.highPriority ? '🔥 ' : '';
     const statusBtnHtml = planModeActive
       ? `<button class="status-btn ${isToday ? 'today-selected' : ''}" data-action="toggle-today" data-id="${t.id}">${isToday ? '✓' : ''}</button>`
       : `<button class="status-btn ${t.status}" data-action="cycle" data-id="${t.id}">${checkIcon}</button>`;
