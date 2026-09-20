@@ -102,19 +102,38 @@
     color: #000000;
   }
 
-  .add-btn {
-    width: 100%;
+  .filter-add-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .filter-add-row .form-input {
+    flex: 1;
+    height: 48px;
+    margin-bottom: 0;
+  }
+  .select-input {
+    padding-right: 34px;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+  }
+  .select-input option { background: #000000; color: #ffffff; }
+  .add-btn-compact {
+    flex-shrink: 0;
+    height: 48px;
     border: 1px dashed #3a3a3c;
     background: none;
     color: #8e8e93;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 500;
-    padding: 15px;
+    padding: 0 18px;
     border-radius: 12px;
     cursor: pointer;
-    margin-bottom: 14px;
+    white-space: nowrap;
   }
-  .add-btn:active { background: #1c1c1e; }
+  .add-btn-compact:active { background: #1c1c1e; }
 
   .add-form {
     background: #1c1c1e;
@@ -567,10 +586,10 @@
       <button class="filter-btn" data-filter="done">Done</button>
     </div>
 
-    <div class="section-label">Filter by person</div>
-    <div class="filters" id="personFilters"></div>
-
-    <button class="add-btn" id="addToggleBtn">+ Add task</button>
+    <div class="filter-add-row">
+      <select class="form-input select-input" id="personFilterSelect"></select>
+      <button class="add-btn-compact" id="addToggleBtn">+ Add</button>
+    </div>
     <div class="add-form" id="addForm">
       <input class="form-input" id="newText" placeholder="Task description">
       <input class="form-input" id="newTools" placeholder="🧰 Tools needed">
@@ -725,22 +744,19 @@
   const listEl = document.getElementById('taskList');
   const progressText = document.getElementById('progressText');
   const progressFill = document.getElementById('progressFill');
-  const personFiltersEl = document.getElementById('personFilters');
+  const personFilterSelect = document.getElementById('personFilterSelect');
 
-  function renderPersonFilters() {
-    personFiltersEl.innerHTML = ['All', ...NAMES].map(n => {
-      const value = n === 'All' ? 'all' : n;
-      const active = currentPersonFilter === value ? 'active' : '';
-      return `<button class="filter-btn ${active}" data-person="${escapeAttr(value)}">${escapeHtml(n)}</button>`;
+  function renderPersonFilterOptions() {
+    personFilterSelect.innerHTML = ['All people', ...NAMES].map((n, i) => {
+      const value = i === 0 ? 'all' : n;
+      return `<option value="${escapeAttr(value)}">👤 ${escapeHtml(n)}</option>`;
     }).join('');
+    personFilterSelect.value = currentPersonFilter;
   }
-  renderPersonFilters();
+  renderPersonFilterOptions();
 
-  personFiltersEl.addEventListener('click', (e) => {
-    const btn = e.target.closest('.filter-btn');
-    if (!btn) return;
-    currentPersonFilter = btn.dataset.person;
-    renderPersonFilters();
+  personFilterSelect.addEventListener('change', () => {
+    currentPersonFilter = personFilterSelect.value;
     renderList();
   });
 
@@ -816,7 +832,6 @@
     listEl.innerHTML = tasks.map(t => {
       const isDone = t.status === 'done';
       const checkIcon = isDone ? '✓' : '';
-      const prefix = isDone ? '✅ ' : '';
       const statusHidden = currentFilter !== 'all' && t.status !== currentFilter;
       const personHidden = currentPersonFilter !== 'all' && !(t.assignees || []).includes(currentPersonFilter);
       const hiddenClass = (statusHidden || personHidden) ? 'hidden' : '';
@@ -824,7 +839,7 @@
         <div class="task ${hiddenClass}" data-id="${t.id}">
           <button class="status-btn ${t.status}" data-action="cycle" data-id="${t.id}">${checkIcon}</button>
           <div class="task-body" data-action="open-detail" data-id="${t.id}">
-            <div class="task-text ${isDone ? 'done' : ''}">${prefix}${t.emoji} ${escapeHtml(t.text)}</div>
+            <div class="task-text ${isDone ? 'done' : ''}">${t.emoji} ${escapeHtml(t.text)}</div>
           </div>
           <button class="delete-btn" data-action="delete" data-id="${t.id}" title="Delete task">🗑</button>
         </div>`;
