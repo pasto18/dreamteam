@@ -220,14 +220,25 @@
     color: #000000;
   }
 
+  .today-section {
+    background: #e8dfc8;
+    border-radius: 14px;
+    padding: 10px 8px 2px;
+    margin: 0 -4px 4px;
+  }
   .today-header {
-    color: #ffffff;
+    color: #000000;
     font-size: 1.1rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-weight: 700;
     margin: 4px 0 8px 7px;
   }
+  .today-section .site-header { color: #4a4a42; }
+  .today-section .task { border-bottom-color: rgba(0, 0, 0, 0.12); }
+  .today-section .task-text { color: #000000; }
+  .today-section .task-text.done { color: #7a7a6e; }
+  .today-section .subtask-text { color: #4a4a42; }
   .today-separator {
     height: 1px;
     background: #333333;
@@ -708,8 +719,6 @@
   body.plan-mode .progress-text { color: #3a3a34; }
   body.plan-mode .task { border-bottom-color: rgba(0, 0, 0, 0.12); }
   body.plan-mode .site-header { color: #4a4a42; }
-  body.plan-mode .today-header { color: #000000; }
-  body.plan-mode .today-separator { background: rgba(0, 0, 0, 0.15); }
   body.plan-mode .task-text { color: #000000; }
   body.plan-mode .subtask-text { color: #4a4a42; }
   body.plan-mode .task-text.done { color: #7a7a6e; }
@@ -1154,8 +1163,7 @@
     const todayTasks = notDone.filter(t => t.todayDate === todayStr);
     const restTasks = notDone.filter(t => t.todayDate !== todayStr);
 
-    // Bone background stays on while actively planning, or while a Today plan exists
-    document.body.classList.toggle('plan-mode', planModeActive || todayTasks.length > 0);
+    document.body.classList.toggle('plan-mode', planModeActive);
 
     if (planModeActive) {
       listEl.innerHTML = renderGroupWithSiteHeaders([...notDone, ...done], todayStr);
@@ -1164,8 +1172,10 @@
 
     let html = '';
     if (todayTasks.length) {
+      html += `<div class="today-section">`;
       html += `<div class="today-header">Today</div>`;
       html += renderGroupWithSiteHeaders(todayTasks, todayStr);
+      html += `</div>`;
       html += `<div class="today-separator"></div>`;
     }
     html += renderGroupWithSiteHeaders(restTasks, todayStr);
