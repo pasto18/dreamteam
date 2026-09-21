@@ -1009,9 +1009,6 @@
   let shoppingOverlayOpen = false;
   let planModeActive = false;
   let lastBerlinDate = getBerlinDateString();
-  const TODAY_TOOLS_KEY = 'dreamteam_today_tools_checked';
-  let todayToolsChecked = {}; // local-only "packed" state for the Tools needed today checklist, persisted per device
-  try { todayToolsChecked = JSON.parse(localStorage.getItem(TODAY_TOOLS_KEY)) || {}; } catch (e) { todayToolsChecked = {}; }
 
   const listEl = document.getElementById('taskList');
   const personFilterSelect = document.getElementById('personFilterSelect');
@@ -1102,6 +1099,7 @@
         photos: Array.isArray(data.photos) ? data.photos : [],
         shopping: Array.isArray(data.shopping) ? data.shopping : [],
         subtasks: Array.isArray(data.subtasks) ? data.subtasks : [],
+        toolsChecked: (data.toolsChecked && typeof data.toolsChecked === 'object') ? data.toolsChecked : {},
         highPriority: !!data.highPriority,
         peopleNeeded: typeof data.peopleNeeded === 'number' ? data.peopleNeeded : 1,
         todayDate: data.todayDate || '',
@@ -1203,10 +1201,9 @@
     groups.forEach(t => {
       html += `<div class="today-tools-task">${escapeHtml(t.text)}</div>`;
       (t.toolsList || []).forEach((tool, i) => {
-        const key = `${t.id}::${i}`;
-        const checked = !!todayToolsChecked[key];
+        const checked = !!(t.toolsChecked && t.toolsChecked[i]);
         html += `<label class="today-tool-item ${checked ? 'checked' : ''}">
-          <input type="checkbox" data-key="${escapeAttr(key)}" ${checked ? 'checked' : ''}>
+          <input type="checkbox" data-task-id="${t.id}" data-tool-index="${i}" ${checked ? 'checked' : ''}>
           <span>${escapeHtml(tool)}</span>
         </label>`;
       });
@@ -1347,10 +1344,15 @@
   });
 
   listEl.addEventListener('change', (e) => {
-    const cb = e.target.closest('input[type="checkbox"][data-key]');
+    const cb = e.target.closest('input[type="checkbox"][data-task-id]');
     if (!cb) return;
-    todayToolsChecked[cb.dataset.key] = cb.checked;
-    try { localStorage.setItem(TODAY_TOOLS_KEY, JSON.stringify(todayToolsChecked)); } catch (e) {}
+    const taskId = cb.dataset.taskId;
+    const idx = cb.dataset.toolIndex;
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    const newChecked = { ...(task.toolsChecked || {}), [idx]: cb.checked };
+    task.toolsChecked = newChecked;
+    setDoc(doc(db, 'tasks', taskId), { toolsChecked: newChecked }, { merge: true }).catch(console.error);
     renderList();
   });
 
