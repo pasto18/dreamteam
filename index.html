@@ -239,6 +239,43 @@
   .today-section .task-text { color: #000000; }
   .today-section .task-text.done { color: #7a7a6e; }
   .today-section .subtask-text { color: #4a4a42; }
+
+  .today-tools-header {
+    margin: 14px 4px 6px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: #4a4a42;
+  }
+  .today-tools-task {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #000000;
+    margin: 10px 4px 2px;
+  }
+  .today-tool-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 4px;
+    font-size: 0.9rem;
+    color: #3a3a34;
+    cursor: pointer;
+  }
+  .today-tool-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: #000000;
+    cursor: pointer;
+  }
+  .today-tool-item.checked span {
+    text-decoration: line-through;
+    color: #9a9a8e;
+  }
   .today-separator {
     height: 1px;
     background: #333333;
@@ -972,6 +1009,7 @@
   let shoppingOverlayOpen = false;
   let planModeActive = false;
   let lastBerlinDate = getBerlinDateString();
+  let todayToolsChecked = {}; // local-only "packed" state for the Tools needed today checklist
 
   const listEl = document.getElementById('taskList');
   const personFilterSelect = document.getElementById('personFilterSelect');
@@ -1156,6 +1194,24 @@
     return html;
   }
 
+  function todayToolsHtml(todayTasksList) {
+    const groups = todayTasksList.filter(t => (t.toolsList || []).length > 0);
+    if (!groups.length) return '';
+    let html = `<div class="today-tools-header">Tools needed today</div>`;
+    groups.forEach(t => {
+      html += `<div class="today-tools-task">${escapeHtml(t.text)}</div>`;
+      (t.toolsList || []).forEach((tool, i) => {
+        const key = `${t.id}::${i}`;
+        const checked = !!todayToolsChecked[key];
+        html += `<label class="today-tool-item ${checked ? 'checked' : ''}">
+          <input type="checkbox" data-key="${escapeAttr(key)}" ${checked ? 'checked' : ''}>
+          <span>${escapeHtml(tool)}</span>
+        </label>`;
+      });
+    });
+    return html;
+  }
+
   function renderList() {
     const todayStr = getBerlinDateString();
     const notDone = tasks.filter(t => t.status !== 'done').sort(taskSortCompare);
@@ -1175,6 +1231,7 @@
       html += `<div class="today-section">`;
       html += `<div class="today-header">Today</div>`;
       html += renderGroupWithSiteHeaders(todayTasks, todayStr);
+      html += todayToolsHtml(todayTasks);
       html += `</div>`;
       html += `<div class="today-separator"></div>`;
     }
@@ -1285,6 +1342,13 @@
       scheduleFieldSave(id, 'todayDate', task.todayDate, 0);
       return;
     }
+  });
+
+  listEl.addEventListener('change', (e) => {
+    const cb = e.target.closest('input[type="checkbox"][data-key]');
+    if (!cb) return;
+    todayToolsChecked[cb.dataset.key] = cb.checked;
+    renderList();
   });
 
   const planToggleBtn = document.getElementById('planToggleBtn');
