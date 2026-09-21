@@ -1009,7 +1009,9 @@
   let shoppingOverlayOpen = false;
   let planModeActive = false;
   let lastBerlinDate = getBerlinDateString();
-  let todayToolsChecked = {}; // local-only "packed" state for the Tools needed today checklist
+  const TODAY_TOOLS_KEY = 'dreamteam_today_tools_checked';
+  let todayToolsChecked = {}; // local-only "packed" state for the Tools needed today checklist, persisted per device
+  try { todayToolsChecked = JSON.parse(localStorage.getItem(TODAY_TOOLS_KEY)) || {}; } catch (e) { todayToolsChecked = {}; }
 
   const listEl = document.getElementById('taskList');
   const personFilterSelect = document.getElementById('personFilterSelect');
@@ -1348,6 +1350,7 @@
     const cb = e.target.closest('input[type="checkbox"][data-key]');
     if (!cb) return;
     todayToolsChecked[cb.dataset.key] = cb.checked;
+    try { localStorage.setItem(TODAY_TOOLS_KEY, JSON.stringify(todayToolsChecked)); } catch (e) {}
     renderList();
   });
 
