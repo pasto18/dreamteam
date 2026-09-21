@@ -222,7 +222,7 @@
 
   .today-header {
     color: #ffffff;
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-weight: 700;
@@ -708,6 +708,8 @@
   body.plan-mode .progress-text { color: #3a3a34; }
   body.plan-mode .task { border-bottom-color: rgba(0, 0, 0, 0.12); }
   body.plan-mode .site-header { color: #4a4a42; }
+  body.plan-mode .today-header { color: #000000; }
+  body.plan-mode .today-separator { background: rgba(0, 0, 0, 0.15); }
   body.plan-mode .task-text { color: #000000; }
   body.plan-mode .subtask-text { color: #4a4a42; }
   body.plan-mode .task-text.done { color: #7a7a6e; }
@@ -1149,14 +1151,17 @@
     const todayStr = getBerlinDateString();
     const notDone = tasks.filter(t => t.status !== 'done').sort(taskSortCompare);
     const done = tasks.filter(t => t.status === 'done').sort(taskSortCompare);
+    const todayTasks = notDone.filter(t => t.todayDate === todayStr);
+    const restTasks = notDone.filter(t => t.todayDate !== todayStr);
+
+    // Bone background stays on while actively planning, or while a Today plan exists
+    document.body.classList.toggle('plan-mode', planModeActive || todayTasks.length > 0);
 
     if (planModeActive) {
       listEl.innerHTML = renderGroupWithSiteHeaders([...notDone, ...done], todayStr);
       return;
     }
 
-    const todayTasks = notDone.filter(t => t.todayDate === todayStr);
-    const restTasks = notDone.filter(t => t.todayDate !== todayStr);
     let html = '';
     if (todayTasks.length) {
       html += `<div class="today-header">Today</div>`;
@@ -1276,7 +1281,6 @@
   planToggleBtn.addEventListener('click', () => {
     planModeActive = !planModeActive;
     planToggleBtn.classList.toggle('active', planModeActive);
-    document.body.classList.toggle('plan-mode', planModeActive);
     renderList();
   });
 
