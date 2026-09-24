@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#f3f2f2">
+<title>DreamTeam - Tent Plans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f3f2f2; --surface: #eae9e9; --ink: #201e1d; --accent: #ec3013;
+    --divider: color-mix(in srgb, #201e1d 40%, transparent);
+    --n300: #d7d3d3; --n700: #605d5d; --a100: #fff2ef; --a700: #ae1800;
+    --font: "Archivo", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: var(--font); -webkit-text-size-adjust: 100%; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; text-align: left; }
+  :focus { outline: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  svg.i { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  .tpv { position: relative; max-width: 480px; margin: 0 auto; height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
+  .head { display: flex; align-items: center; border-bottom: 2px solid var(--divider); padding: 4px; padding-top: calc(4px + env(safe-area-inset-top)); }
+  .head .h { flex: 1; font-weight: 800; font-size: 17px; }
+  .icon-btn { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: var(--ink); text-decoration: none; }
+  .icon-btn:active { background: var(--surface); }
+
+  .screen { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+</style>
+</head>
+<body>
+  <div class="tpv">
+    <div class="head">
+      <a href="index.html" class="icon-btn" aria-label="Back to tasks"><svg class="i" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></a>
+      <div class="h">Tent Plans</div>
+      <div class="icon-btn" aria-hidden="true"></div>
+    </div>
+
+    <div class="screen"></div>
+  </div>
+</body>
+</html>
