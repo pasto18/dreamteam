@@ -3,275 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#f3f2f2">
 <title>DreamTeam - Pythagorean Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap">
 <style>
-  :root { color-scheme: dark; }
+  :root {
+    color-scheme: light;
+    --bg: #f3f2f2; --surface: #eae9e9; --ink: #201e1d; --accent: #ec3013;
+    --divider: color-mix(in srgb, #201e1d 40%, transparent);
+    --n300: #d7d3d3; --n700: #605d5d; --a100: #fff2ef; --a700: #ae1800;
+    --font: "Archivo", system-ui, -apple-system, sans-serif;
+  }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-  html, body {
-    margin: 0;
-    height: 100%;
-    overflow: hidden;
-    font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
-    background: #000000;
-    color: #ffffff;
-  }
-  body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-  }
-  .tpv {
-    position: relative;
-    width: 100%;
-    max-width: 380px;
-    height: 100vh;
-    height: 100dvh;
-    background: #000000;
-    padding: 16px 14px calc(14px + env(safe-area-inset-bottom));
-    display: flex;
-    flex-direction: column;
-  }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: var(--font); -webkit-text-size-adjust: 100%; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; text-align: left; }
+  :focus { outline: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  svg.i { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 6px;
-  }
-  .brand {
-    font-size: 0.72rem;
-    letter-spacing: 0.15em;
-    color: #555555;
-    text-transform: uppercase;
-  }
-  .history-btn, .nav-btn {
-    background: none;
-    border: none;
-    color: #8e8e93;
-    font-size: 1.35rem;
-    line-height: 1;
-    cursor: pointer;
-    text-decoration: none;
-    padding: 4px 6px;
-    display: inline-flex;
-  }
-  .history-btn:active, .nav-btn:active { color: #ffffff; }
+  .tpv { position: relative; max-width: 480px; margin: 0 auto; height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
+  .head { display: flex; align-items: center; border-bottom: 2px solid var(--divider); padding: 4px; padding-top: calc(4px + env(safe-area-inset-top)); }
+  .head .h { flex: 1; font-weight: 800; font-size: 17px; }
+  .icon-btn { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: var(--ink); text-decoration: none; }
+  .icon-btn:active { background: var(--surface); }
 
-  .steps {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 6px;
-  }
-  .dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #333333;
-    transition: background 0.2s;
-  }
-  .dot.active { background: #ff9f0a; }
-  .dot.done { background: #4cd964; }
+  .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid var(--divider); }
+  .step { padding: 10px 12px 8px; border-bottom: 4px solid transparent; min-width: 0; }
+  .step + .step { border-left: 1px solid var(--divider); }
+  .step.active { border-bottom-color: var(--accent); }
+  .step .l { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--n700); }
+  .step .v { font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .step .v.c { color: var(--a700); }
 
-  /* Screen: no box, numbers floating on black */
-  .screen {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 6px 8px 20px;
-  }
-  .prev-rows { margin-bottom: 4px; }
-  .prev-rows .summary-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-    font-size: 1rem;
-    color: #8e8e93;
-  }
-  .prev-rows .summary-row span.v { color: #ffffff; font-weight: 500; }
+  .screen { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px 16px; }
+  .label { font-size: 15px; font-weight: 600; color: var(--n700); }
+  .value-row { display: flex; align-items: flex-end; gap: 4px; margin-top: 4px; min-width: 0; }
+  .value { font-weight: 800; font-size: clamp(40px, 11vh, 72px); line-height: .95; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; word-break: break-all; }
+  .value.result { color: var(--accent); }
+  .cursor { flex: none; width: 4px; height: clamp(32px, 9vh, 60px); background: var(--accent); margin-bottom: 4px; animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .formula { font-size: 14px; color: var(--n700); margin-top: 10px; }
+  .error { min-height: 20px; margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--a700); }
 
-  .screen .label {
-    font-size: 0.95rem;
-    color: #8e8e93;
-    text-align: right;
-    margin-bottom: 6px;
-  }
-  .screen .value {
-    font-size: 4rem;
-    font-weight: 300;
-    text-align: right;
-    color: #ffffff;
-    min-height: 1.1em;
-    word-break: break-all;
-    line-height: 1;
-  }
-  .screen .value .cursor { color: #ff9f0a; }
+  .keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--divider); border-top: 2px solid var(--divider); flex-shrink: 0; }
+  .keypad button { height: clamp(48px, 8vh, 64px); padding: 0 20px; display: flex; align-items: center; background: var(--bg); font-weight: 600; font-size: 28px; user-select: none; }
+  .keypad button.fn { background: var(--surface); }
+  .keypad button:active { background: var(--n300); }
 
-  .result-box { text-align: right; margin-top: 16px; }
-  .result-box .r-label { font-size: 0.95rem; color: #8e8e93; margin-bottom: 2px; }
-  .result-box .r-value {
-    font-size: 3.4rem;
-    font-weight: 300;
-    color: #ff9f0a;
-    line-height: 1.05;
-  }
+  .action-wrap { padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); border-top: 2px solid var(--ink); flex-shrink: 0; }
+  .action-btn { width: 100%; height: 60px; padding: 0 18px; display: flex; align-items: center; background: var(--accent); color: var(--bg); font-weight: 800; font-size: 18px; }
+  .action-btn:active { background: var(--a700); }
+  .action-btn svg.i { margin-left: auto; }
 
-  .error {
-    color: #ff453a;
-    font-size: 0.85rem;
-    text-align: right;
-    padding: 0 6px;
-    min-height: 1.1em;
-  }
-
-  /* iPhone-style keypad: circular buttons, 3 columns -> wider */
-  .keypad {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    justify-items: center;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-  }
-  .keypad button {
-    border: none;
-    background: #333333;
-    color: #ffffff;
-    font-size: 1.8rem;
-    font-weight: 400;
-    cursor: pointer;
-    user-select: none;
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .keypad button:active { background: #575757; }
-  .keypad button.fn { background: #a5a5a5; color: #000000; }
-  .keypad button.fn:active { background: #cfcfcf; }
-
-  /* Full-width action button at the very bottom */
-  .action-btn {
-    width: 100%;
-    border: none;
-    border-radius: 30px;
-    background: #ff9f0a;
-    color: #ffffff;
-    font-size: 1.25rem;
-    font-weight: 600;
-    padding: 17px 0;
-    margin-top: 14px;
-    cursor: pointer;
-  }
-  .action-btn:active { background: #ffb84d; }
-
-  footer {
-    margin-top: 10px;
-    text-align: center;
-    font-size: 0.68rem;
-    color: #444444;
-  }
-
-  /* History */
-  .history-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.97);
-    display: none;
-    flex-direction: column;
-    padding: 16px 14px;
-    z-index: 10;
-  }
+  .history-overlay { position: absolute; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 10; }
   .history-overlay.open { display: flex; }
-  .history-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .history-header h2 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0;
-  }
-  .history-header .close-btn {
-    background: none;
-    border: none;
-    color: #8e8e93;
-    font-size: 1.3rem;
-    cursor: pointer;
-  }
-  .history-clear {
-    background: none;
-    border: none;
-    color: #ff453a;
-    font-size: 0.85rem;
-    text-align: right;
-    cursor: pointer;
-    padding: 0 0 10px;
-  }
-  .history-list {
-    flex: 1;
-    overflow-y: auto;
-  }
-  .history-item {
-    padding: 12px 4px;
-    border-bottom: 1px solid #1c1c1e;
-  }
-  .history-item .hi-inputs {
-    font-size: 0.85rem;
-    color: #8e8e93;
-  }
-  .history-item .hi-result {
-    font-size: 1.4rem;
-    font-weight: 500;
-    color: #ff9f0a;
-    margin-top: 2px;
-  }
-  .history-empty {
-    color: #555555;
-    text-align: center;
-    margin-top: 40px;
-    font-size: 0.95rem;
-  }
+  .history-clear { height: 48px; padding: 0 12px; font-size: 14px; font-weight: 800; color: var(--a700); }
+  .history-clear:active { background: var(--a100); }
+  .history-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: env(safe-area-inset-bottom); }
+  .history-item { padding: 14px 16px; border-bottom: 1px solid var(--divider); }
+  .hi-result { font-weight: 800; font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .hi-inputs { font-size: 13px; color: var(--n700); margin-top: 4px; }
+  .history-empty { padding: 24px 16px; font-size: 15px; color: var(--n700); }
 </style>
 </head>
 <body>
   <div class="tpv">
-    <div class="topbar">
-      <a href="index.html" class="nav-btn" title="Tasks">📋</a>
-      <div class="brand">DreamTeam · Pythagoras</div>
-      <button class="history-btn" id="historyOpenBtn" title="History">📖</button>
+    <div class="head">
+      <a href="index.html" class="icon-btn" aria-label="Back to tasks"><svg class="i" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></a>
+      <div class="h">Pythagoras</div>
+      <button class="icon-btn" id="historyOpenBtn" aria-label="History"><svg class="i" viewBox="0 0 24 24" style="stroke-width:2;width:22px;height:22px"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></button>
     </div>
 
     <div class="steps">
-      <div class="dot" id="dot1"></div>
-      <div class="dot" id="dot2"></div>
-      <div class="dot" id="dot3"></div>
+      <div class="step" id="step1"><div class="l">Side a</div><div class="v" id="stepVal1">—</div></div>
+      <div class="step" id="step2"><div class="l">Side b</div><div class="v" id="stepVal2">—</div></div>
+      <div class="step" id="step3"><div class="l">Hyp. c</div><div class="v c" id="stepVal3">—</div></div>
     </div>
 
-    <!-- Main screen (steps 1, 2 and 3) -->
-    <div class="screen" id="mainScreen">
-      <div class="prev-rows" id="prevRows"></div>
-
+    <div class="screen">
       <div id="entryBlock">
-        <div class="label" id="entryLabel">Enter side A</div>
-        <div class="value" id="entryValue">0<span class="cursor">|</span></div>
+        <div class="label" id="entryLabel">Enter side a</div>
+        <div class="value-row"><span class="value" id="entryValue">0</span><span class="cursor"></span></div>
       </div>
-
-      <div class="result-box" id="resultBlock" style="display:none;">
-        <div class="r-label">Hypotenuse</div>
-        <div class="r-value" id="sumC">0</div>
+      <div id="resultBlock" style="display:none;">
+        <div class="label">Hypotenuse c</div>
+        <div class="value result" id="sumC">0</div>
+        <div class="formula">a² + b² = c²</div>
       </div>
+      <div class="error" id="errorMsg"></div>
     </div>
-    <div class="error" id="errorMsg">&nbsp;</div>
 
-    <!-- iPhone-style numeric keypad -->
     <div class="keypad" id="entryPad">
       <button data-key="7">7</button>
       <button data-key="8">8</button>
@@ -284,21 +106,19 @@
       <button data-key="3">3</button>
       <button class="fn" data-key=".">,</button>
       <button data-key="0">0</button>
-      <button class="fn" data-key="back">⌫</button>
+      <button class="fn" data-key="back" aria-label="Delete">⌫</button>
     </div>
 
-    <!-- Full-width action button -->
-    <button class="action-btn" id="actionBtn">Next ➜</button>
+    <div class="action-wrap">
+      <button class="action-btn" id="actionBtn"><span id="actionLabel">Next · side b</span><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+    </div>
 
-    <footer>a&sup2; + b&sup2; = c&sup2;</footer>
-
-    <!-- History panel -->
     <div class="history-overlay" id="historyOverlay">
-      <div class="history-header">
-        <h2>History</h2>
-        <button class="close-btn" id="historyCloseBtn">✕</button>
+      <div class="head">
+        <button class="icon-btn" id="historyCloseBtn" aria-label="Back"><svg class="i" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
+        <div class="h">History</div>
+        <button class="history-clear" id="historyClearBtn">Clear</button>
       </div>
-      <button class="history-clear" id="historyClearBtn">Clear history</button>
       <div class="history-list" id="historyList"></div>
     </div>
   </div>
@@ -307,7 +127,6 @@
   const state = { step: 1, a: '', b: '' };
   const HISTORY_KEY = 'dreamteam_pitagoras_history';
 
-  const prevRows = document.getElementById('prevRows');
   const entryBlock = document.getElementById('entryBlock');
   const resultBlock = document.getElementById('resultBlock');
   const entryPad = document.getElementById('entryPad');
@@ -315,14 +134,12 @@
   const entryValue = document.getElementById('entryValue');
   const errorMsg = document.getElementById('errorMsg');
   const actionBtn = document.getElementById('actionBtn');
-  const dots = [document.getElementById('dot1'), document.getElementById('dot2'), document.getElementById('dot3')];
+  const actionLabel = document.getElementById('actionLabel');
+  const stepEls = [1, 2, 3].map(n => document.getElementById('step' + n));
+  const stepVals = [1, 2, 3].map(n => document.getElementById('stepVal' + n));
 
-  function currentBuffer() {
-    return state.step === 1 ? state.a : state.b;
-  }
-  function setBuffer(v) {
-    if (state.step === 1) state.a = v; else state.b = v;
-  }
+  function currentBuffer() { return state.step === 1 ? state.a : state.b; }
+  function setBuffer(v) { if (state.step === 1) state.a = v; else state.b = v; }
 
   function loadHistory() {
     try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
@@ -336,114 +153,93 @@
   function renderHistory() {
     const list = loadHistory();
     const container = document.getElementById('historyList');
+    document.getElementById('historyClearBtn').style.visibility = list.length ? 'visible' : 'hidden';
     if (list.length === 0) {
-      container.innerHTML = '<div class="history-empty">No calculations yet</div>';
+      container.innerHTML = '<div class="history-empty">No calculations yet.</div>';
       return;
     }
     container.innerHTML = list.map(item => {
       const date = new Date(item.ts);
-      const fecha = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      const when = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       return `<div class="history-item">
-        <div class="hi-inputs">A = ${item.a}  ·  B = ${item.b}  ·  ${fecha}</div>
         <div class="hi-result">c = ${Number(item.c).toFixed(4)}</div>
+        <div class="hi-inputs">a = ${item.a} · b = ${item.b} · ${when}</div>
       </div>`;
     }).join('');
   }
 
   function render() {
-    dots.forEach((d, i) => {
-      d.classList.remove('active', 'done');
-      if (i + 1 < state.step) d.classList.add('done');
-      else if (i + 1 === state.step) d.classList.add('active');
-    });
-
-    // Rows at the top with the values already entered
-    let rows = '';
-    if (state.step >= 2) {
-      rows += `<div class="summary-row"><span>Side A</span><span class="v">${state.a}</span></div>`;
-    }
-    if (state.step >= 3) {
-      rows += `<div class="summary-row"><span>Side B</span><span class="v">${state.b}</span></div>`;
-    }
-    prevRows.innerHTML = rows;
+    stepEls.forEach((el, i) => el.classList.toggle('active', i + 1 === state.step));
+    stepVals[0].textContent = state.a || '—';
+    stepVals[1].textContent = state.b || '—';
 
     if (state.step <= 2) {
       entryBlock.style.display = '';
       resultBlock.style.display = 'none';
       entryPad.style.display = '';
-      entryLabel.textContent = state.step === 1 ? 'Enter side A' : 'Enter side B';
+      entryLabel.textContent = state.step === 1 ? 'Enter side a' : 'Enter side b';
       const buf = currentBuffer();
-      entryValue.innerHTML = (buf === '' ? '0' : buf) + '<span class="cursor">|</span>';
-      errorMsg.textContent = ' ';
-      actionBtn.textContent = 'Next ➜';
+      entryValue.textContent = buf === '' ? '0' : buf;
+      stepVals[2].textContent = '—';
+      actionLabel.textContent = state.step === 1 ? 'Next · side b' : 'Calculate c';
     } else {
       entryBlock.style.display = 'none';
       resultBlock.style.display = '';
       entryPad.style.display = 'none';
-      const a = parseFloat(state.a);
-      const b = parseFloat(state.b);
-      const c = Math.sqrt(a * a + b * b);
-      document.getElementById('sumC').textContent = c.toFixed(4);
-      actionBtn.textContent = '🔁 New calculation';
+      const a = parseFloat(state.a), b = parseFloat(state.b);
+      const c = Math.sqrt(a * a + b * b).toFixed(4);
+      document.getElementById('sumC').textContent = c;
+      stepVals[2].textContent = c;
+      actionLabel.textContent = 'New calculation';
     }
   }
 
   function handleKey(key) {
     if (state.step > 2) return;
     let buf = currentBuffer();
-
-    if (key === 'back') {
-      buf = buf.slice(0, -1);
-      setBuffer(buf);
-      render();
-      return;
-    }
+    errorMsg.textContent = '';
+    if (key === 'back') { setBuffer(buf.slice(0, -1)); render(); return; }
     if (key === '.') {
       if (buf.includes('.')) return;
-      buf = (buf === '' ? '0' : buf) + '.';
-      setBuffer(buf);
+      setBuffer((buf === '' ? '0' : buf) + '.');
       render();
       return;
     }
     if (buf.length >= 10) return;
-    buf = buf === '0' ? key : buf + key;
-    setBuffer(buf);
+    setBuffer(buf === '0' ? key : buf + key);
     render();
   }
 
   function handleAction() {
     if (state.step > 2) {
-      state.step = 1;
-      state.a = '';
-      state.b = '';
+      state.step = 1; state.a = ''; state.b = '';
+      errorMsg.textContent = '';
       render();
       return;
     }
     const buf = currentBuffer();
     const n = parseFloat(buf);
     if (buf === '' || isNaN(n) || n <= 0) {
-      errorMsg.textContent = 'Enter a valid number greater than 0';
+      errorMsg.textContent = 'Enter a number greater than 0';
       return;
     }
     if (state.step === 2) {
-      const a = parseFloat(state.a);
-      const b = parseFloat(state.b);
-      const c = Math.sqrt(a * a + b * b);
-      saveHistoryEntry(a, b, c);
+      const a = parseFloat(state.a), b = parseFloat(state.b);
+      saveHistoryEntry(a, b, Math.sqrt(a * a + b * b));
     }
+    errorMsg.textContent = '';
     state.step += 1;
     render();
   }
 
   entryPad.addEventListener('click', (e) => {
     const btn = e.target.closest('button');
-    if (!btn) return;
-    handleKey(btn.dataset.key);
+    if (btn) handleKey(btn.dataset.key);
   });
   actionBtn.addEventListener('click', handleAction);
 
   document.addEventListener('keydown', (e) => {
-    if (document.getElementById('historyOverlay').classList.contains('open')) return;
+    if (historyOverlay.classList.contains('open')) return;
     if (state.step <= 2) {
       if (/^[0-9]$/.test(e.key)) handleKey(e.key);
       else if (e.key === '.' || e.key === ',') handleKey('.');
@@ -454,19 +250,10 @@
     }
   });
 
-  // History: open / close / clear
   const historyOverlay = document.getElementById('historyOverlay');
-  document.getElementById('historyOpenBtn').addEventListener('click', () => {
-    renderHistory();
-    historyOverlay.classList.add('open');
-  });
-  document.getElementById('historyCloseBtn').addEventListener('click', () => {
-    historyOverlay.classList.remove('open');
-  });
-  document.getElementById('historyClearBtn').addEventListener('click', () => {
-    localStorage.removeItem(HISTORY_KEY);
-    renderHistory();
-  });
+  document.getElementById('historyOpenBtn').addEventListener('click', () => { renderHistory(); historyOverlay.classList.add('open'); });
+  document.getElementById('historyCloseBtn').addEventListener('click', () => historyOverlay.classList.remove('open'));
+  document.getElementById('historyClearBtn').addEventListener('click', () => { localStorage.removeItem(HISTORY_KEY); renderHistory(); });
 
   render();
 </script>
