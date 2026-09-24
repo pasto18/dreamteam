@@ -50,13 +50,17 @@
   .stat b { font-size: 13px; font-weight: 800; line-height: 1.1; }
   .stat span { font-size: 12px; line-height: 1.1; opacity: .75; }
   .stat.on { background: var(--ink); color: var(--bg); }
-  .sel-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--divider); border-bottom: 2px solid var(--divider); }
+  .sel-grid { display: grid; grid-template-columns: 1fr 1fr auto; border-top: 1px solid var(--divider); border-bottom: 2px solid var(--divider); }
   .sel-cell { position: relative; }
   .sel-cell + .sel-cell { border-left: 1px solid var(--divider); }
   .sel-cell select { width: 100%; height: 48px; border: 0; background: transparent; padding: 0 36px 0 16px; font-size: 14px; font-weight: 600; }
   .sel-cell select.active { color: var(--a700); }
   .sel-cell select option { color: var(--ink); background: var(--bg); }
   .sel-cell svg.i { position: absolute; right: 12px; top: 15px; width: 18px; height: 18px; pointer-events: none; stroke-width: 2.5; }
+  .tools-toggle-btn { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: 0; border-left: 1px solid var(--divider); background: transparent; }
+  .tools-toggle-btn svg.i { width: 18px; height: 18px; stroke-width: 2.5; }
+  .tools-toggle-btn.on { background: var(--ink); color: var(--bg); }
+  .tools-toggle-btn.on svg.i { fill: currentColor; }
   .plan-banner { display: none; background: var(--accent); color: var(--bg); padding: 18px 16px 16px; }
   .plan-banner-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .plan-banner h2 { margin: 0; font-weight: 800; font-size: 28px; line-height: 1.05; letter-spacing: -0.015em; }
@@ -265,6 +269,7 @@
         <div class="sel-grid">
           <div class="sel-cell"><select id="personFilterSelect" aria-label="Filter by person"></select><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
           <div class="sel-cell"><select id="siteFilterSelect" aria-label="Filter by site"></select><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+          <button type="button" class="tools-toggle-btn" id="toolsVisibleBtn" aria-label="Show or hide tools in the list"><svg class="i" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></button>
         </div>
       </div>
       <div class="plan-banner">
@@ -539,6 +544,7 @@
   let tasks = [];
   let activeStatuses = { pending: true, progress: true, done: false };
   let highPriorityOnly = false;
+  let toolsVisible = true;
   let currentPersonFilter = 'all';
   let currentSiteFilter = 'all';
   let currentDetailId = null;
@@ -661,7 +667,7 @@
     if (!assignees.length) meta.push(`<span class="tag-un">Unassigned</span>`);
     else meta.push(`<span class="who">${escapeHtml(who)}</span>`);
     if ((t.peopleNeeded || 1) > 1) meta.push(`<span class="ic">${ICON.users}${t.peopleNeeded} people</span>`);
-    if ((t.toolsList || []).length) meta.push(`<span class="ic">${ICON.wrench}${escapeHtml(t.toolsList.join(', '))}</span>`);
+    if (toolsVisible && (t.toolsList || []).length) meta.push(`<span class="ic">${ICON.wrench}${escapeHtml(t.toolsList.join(', '))}</span>`);
     return `
       <div class="task ${planModeActive && isToday ? 'hl' : ''}">
         <button type="button" class="box-btn" data-action="${boxAction}" data-id="${t.id}" aria-label="${planModeActive ? 'Toggle today' : 'Change status'}">
@@ -932,6 +938,14 @@
   document.getElementById('highPriorityFilterBtn').addEventListener('click', (e) => {
     highPriorityOnly = !highPriorityOnly;
     e.currentTarget.classList.toggle('on', highPriorityOnly);
+    renderList();
+  });
+
+  const toolsVisibleBtn = document.getElementById('toolsVisibleBtn');
+  toolsVisibleBtn.classList.toggle('on', toolsVisible);
+  toolsVisibleBtn.addEventListener('click', () => {
+    toolsVisible = !toolsVisible;
+    toolsVisibleBtn.classList.toggle('on', toolsVisible);
     renderList();
   });
 
