@@ -34,23 +34,33 @@
 
   /* header */
   .head { position: sticky; top: 0; z-index: 20; background: var(--bg); }
-  .top { display: flex; align-items: center; padding: 14px 4px 10px 16px; }
+  .top { display: flex; align-items: center; padding: 14px 4px 10px 16px; transition: padding .35s ease; }
   .top-text { flex: 1; min-width: 0; }
-  .title { font-weight: 800; font-size: 34px; line-height: 1; letter-spacing: -0.02em; }
-  .sub { font-size: 13px; color: var(--n700); margin-top: 6px; }
-  .icon-btn { position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; text-decoration: none; color: var(--ink); }
+  .title { font-weight: 800; font-size: 34px; line-height: 1; letter-spacing: -0.02em; transition: font-size .35s ease; }
+  .sub { font-size: 13px; color: var(--n700); margin-top: 6px; max-height: 18px; overflow: hidden; transition: opacity .35s ease, margin-top .35s ease, max-height .35s ease; }
+  .icon-btn { position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; text-decoration: none; color: var(--ink); transition: width .35s ease, height .35s ease; }
   .icon-btn:active { background: var(--surface); }
-  .icon-btn svg.i { width: 24px; height: 24px; }
+  .icon-btn svg.i { width: 24px; height: 24px; transition: width .35s ease, height .35s ease; }
   .badge { position: absolute; top: 6px; right: 4px; min-width: 18px; height: 18px; padding: 0 4px; background: var(--accent); color: var(--bg); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
   .badge[hidden] { display: none; }
 
-  .stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 2px solid var(--divider); }
-  .stat { height: 52px; padding: 0 12px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+  body.scrolled .top { padding: 6px 4px 6px 16px; }
+  body.scrolled .title { font-size: 19px; }
+  body.scrolled .sub { opacity: 0; margin-top: 0; max-height: 0; }
+  body.scrolled .icon-btn { width: 34px; height: 34px; }
+  body.scrolled .icon-btn svg.i { width: 18px; height: 18px; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 2px solid var(--divider); border-bottom: 2px solid transparent; transition: border-bottom-color .35s ease; }
+  body.scrolled .stat-grid { border-bottom-color: var(--divider); }
+  .stat { height: 52px; padding: 0 12px; display: flex; flex-direction: column; justify-content: center; gap: 2px; transition: height .35s ease; }
   .stat + .stat { border-left: 1px solid var(--divider); }
   .stat b { font-size: 13px; font-weight: 800; line-height: 1.1; }
-  .stat span { font-size: 12px; line-height: 1.1; opacity: .75; }
+  .stat span { font-size: 12px; line-height: 1.1; opacity: .75; max-height: 14px; overflow: hidden; transition: opacity .35s ease, max-height .35s ease; }
   .stat.on { background: var(--ink); color: var(--bg); }
-  .sel-grid { display: grid; grid-template-columns: 1fr 1fr auto; border-top: 1px solid var(--divider); border-bottom: 2px solid var(--divider); }
+  body.scrolled .stat { height: 36px; }
+  body.scrolled .stat span { opacity: 0; max-height: 0; }
+  .sel-grid { display: grid; grid-template-columns: 1fr 1fr auto; border-top: 1px solid var(--divider); border-bottom: 2px solid var(--divider); max-height: 49px; overflow: hidden; opacity: 1; transition: max-height .35s ease, opacity .3s ease, border-width .35s ease; }
+  body.scrolled .sel-grid { max-height: 0; opacity: 0; border-top-width: 0; border-bottom-width: 0; }
   .sel-cell { position: relative; }
   .sel-cell + .sel-cell { border-left: 1px solid var(--divider); }
   .sel-cell select { width: 100%; height: 48px; border: 0; background: transparent; padding: 0 36px 0 16px; font-size: 14px; font-weight: 600; }
@@ -925,6 +935,23 @@
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') { lastBerlinDate = getBerlinDateString(); renderList(); }
   });
+
+  let headerScrolled = false;
+  let scrollTicking = false;
+  function updateHeaderScroll() {
+    scrollTicking = false;
+    const scrolled = window.scrollY > 24;
+    if (scrolled !== headerScrolled) {
+      headerScrolled = scrolled;
+      document.body.classList.toggle('scrolled', scrolled);
+    }
+  }
+  window.addEventListener('scroll', () => {
+    if (!scrollTicking) {
+      scrollTicking = true;
+      requestAnimationFrame(updateHeaderScroll);
+    }
+  }, { passive: true });
 
   document.querySelectorAll('#statusFilters .stat[data-status]').forEach(btn => {
     btn.addEventListener('click', () => {
