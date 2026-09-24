@@ -1199,6 +1199,25 @@
     if (active !== notesTextarea) notesTextarea.value = task.notes || '';
     renderDetailShopList();
     renderPhotos();
+    reorderNotesAndPhotos(task);
+  }
+
+  function reorderNotesAndPhotos(task) {
+    const notesBlk = notesTextarea.closest('.blk');
+    const photosBlk = photosGrid.closest('.blk');
+    const assignedBlk = detailAssigneeChips.closest('.blk');
+    const shopBlk = detailShopList.closest('.blk');
+    const hasContent = !!(task.notes && task.notes.trim()) || !!(task.photos && task.photos.length);
+    if (hasContent) {
+      assignedBlk.before(notesBlk, photosBlk);
+      photosBlk.classList.remove('last');
+      shopBlk.classList.add('last');
+    } else {
+      const delWrap = detailOverlay.querySelector('.del-wrap');
+      delWrap.before(notesBlk, photosBlk);
+      shopBlk.classList.remove('last');
+      photosBlk.classList.add('last');
+    }
   }
 
   function renderPhotos() {
