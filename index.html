@@ -44,7 +44,7 @@
   .badge { position: absolute; top: 6px; right: 4px; min-width: 18px; height: 18px; padding: 0 4px; background: var(--accent); color: var(--bg); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
   .badge[hidden] { display: none; }
 
-  .stat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 2px solid var(--divider); }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 2px solid var(--divider); }
   .stat { height: 52px; padding: 0 12px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
   .stat + .stat { border-left: 1px solid var(--divider); }
   .stat b { font-size: 13px; font-weight: 800; line-height: 1.1; }
@@ -58,8 +58,11 @@
   .sel-cell select option { color: var(--ink); background: var(--bg); }
   .sel-cell svg.i { position: absolute; right: 12px; top: 15px; width: 18px; height: 18px; pointer-events: none; stroke-width: 2.5; }
   .plan-banner { display: none; background: var(--accent); color: var(--bg); padding: 18px 16px 16px; }
+  .plan-banner-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .plan-banner h2 { margin: 0; font-weight: 800; font-size: 28px; line-height: 1.05; letter-spacing: -0.015em; }
   .plan-banner p { margin: 6px 0 0; font-size: 15px; font-weight: 600; }
+  .btn-delete-plan { flex-shrink: 0; margin-top: 4px; height: 32px; padding: 0 12px; border: 1px solid var(--bg); border-radius: 8px; font-weight: 800; font-size: 15px; color: var(--bg); background: none; white-space: nowrap; }
+  .btn-delete-plan:active { background: rgba(255, 255, 255, 0.15); }
   body.plan-mode .filters-block { display: none; }
   body.plan-mode .plan-banner { display: block; }
 
@@ -86,6 +89,7 @@
   .box.done { background: var(--ink); }
   .t-body { padding: 16px 16px 14px 0; cursor: pointer; min-width: 0; }
   .t-text { font-size: 16px; line-height: 1.38; text-wrap: pretty; overflow-wrap: anywhere; }
+  .t-text::first-letter, .tt-task::first-letter, .task-link::first-letter { text-transform: uppercase; }
   .t-text.done { color: var(--n600); text-decoration: line-through; }
   .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; font-size: 13px; color: var(--n700); }
   .meta .who { font-weight: 600; color: var(--ink); }
@@ -256,6 +260,7 @@
           <button class="stat on" data-status="pending"><b>Pending</b><span data-count="pending">0</span></button>
           <button class="stat on" data-status="progress"><b>In progress</b><span data-count="progress">0</span></button>
           <button class="stat" data-status="done"><b>Done</b><span data-count="done">0</span></button>
+          <button class="stat" id="highPriorityFilterBtn"><b>High Priority</b><span data-count="highPriority">0</span></button>
         </div>
         <div class="sel-grid">
           <div class="sel-cell"><select id="personFilterSelect" aria-label="Filter by person"></select><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
@@ -263,7 +268,10 @@
         </div>
       </div>
       <div class="plan-banner">
-        <h2>Plan the day</h2>
+        <div class="plan-banner-head">
+          <h2>Plan the day</h2>
+          <button type="button" class="btn-delete-plan" id="deletePlanBtn">Delete plan</button>
+        </div>
         <p>Tap tasks to put them on today's list · <span id="planCount">0</span> selected</p>
       </div>
     </div>
@@ -530,6 +538,7 @@
 
   let tasks = [];
   let activeStatuses = { pending: true, progress: true, done: false };
+  let highPriorityOnly = false;
   let currentPersonFilter = 'all';
   let currentSiteFilter = 'all';
   let currentDetailId = null;
@@ -619,7 +628,8 @@
     const statusHidden = !activeStatuses[t.status];
     const personHidden = currentPersonFilter !== 'all' && !(t.assignees || []).includes(currentPersonFilter);
     const siteHidden = currentSiteFilter !== 'all' && t.location !== currentSiteFilter;
-    return statusHidden || personHidden || siteHidden;
+    const priorityHidden = highPriorityOnly && !t.highPriority;
+    return statusHidden || personHidden || siteHidden || priorityHidden;
   }
 
   function subtaskRowsHtml(t) {
@@ -638,7 +648,7 @@
 
   function taskRowHtml(t, todayStr) {
     const isDone = t.status === 'done';
-    const isToday = t.todayDate === todayStr;
+    const isToday = !!t.todayDate;
     const assignees = t.assignees || [];
     let boxClass = t.status, boxIcon = isDone ? ICON.check : '';
     if (planModeActive) { boxClass = isToday ? 'today' : ''; boxIcon = isToday ? ICON.check : ''; }
@@ -715,8 +725,11 @@
   }
 
   function renderHeaderStats() {
-    const counts = { pending: 0, progress: 0, done: 0 };
-    tasks.forEach(t => { if (counts[t.status] !== undefined) counts[t.status]++; });
+    const counts = { pending: 0, progress: 0, done: 0, highPriority: 0 };
+    tasks.forEach(t => {
+      if (counts[t.status] !== undefined) counts[t.status]++;
+      if (t.highPriority) counts.highPriority++;
+    });
     Object.keys(counts).forEach(k => {
       const el = document.querySelector(`[data-count="${k}"]`);
       if (el) el.textContent = counts[k];
@@ -726,8 +739,7 @@
     const badge = document.getElementById('shopBadge');
     badge.hidden = left === 0;
     badge.textContent = left;
-    const todayStr = getBerlinDateString();
-    const todayCount = tasks.filter(t => t.status !== 'done' && t.todayDate === todayStr).length;
+    const todayCount = tasks.filter(t => t.status !== 'done' && t.todayDate).length;
     document.getElementById('planCount').textContent = todayCount;
     document.getElementById('planCount2').textContent = todayCount;
   }
@@ -737,8 +749,8 @@
     const visible = tasks.filter(t => !isTaskHidden(t));
     const notDone = visible.filter(t => t.status !== 'done').sort(taskSortCompare);
     const done = visible.filter(t => t.status === 'done').sort(taskSortCompare);
-    const todayTasks = notDone.filter(t => t.todayDate === todayStr);
-    const restTasks = notDone.filter(t => t.todayDate !== todayStr);
+    const todayTasks = notDone.filter(t => t.todayDate);
+    const restTasks = notDone.filter(t => !t.todayDate);
 
     document.body.classList.toggle('plan-mode', planModeActive);
     renderHeaderStats();
@@ -875,7 +887,7 @@
       const task = tasks.find(t => t.id === id);
       if (!task) return;
       const todayStr = getBerlinDateString();
-      task.todayDate = task.todayDate === todayStr ? '' : todayStr;
+      task.todayDate = task.todayDate ? '' : todayStr;
       renderList();
       scheduleFieldSave(id, 'todayDate', task.todayDate, 0);
     }
@@ -887,6 +899,17 @@
     window.scrollTo(0, 0);
   }
   document.getElementById('planToggleBtn').addEventListener('click', () => setPlanMode(true));
+
+  document.getElementById('deletePlanBtn').addEventListener('click', () => {
+    if (!confirm('Delete today\'s plan?')) return;
+    tasks.forEach(t => {
+      if (t.todayDate) {
+        t.todayDate = '';
+        setDoc(doc(db, 'tasks', t.id), { todayDate: '' }, { merge: true }).catch(console.error);
+      }
+    });
+    renderList();
+  });
   document.getElementById('planDoneBtn').addEventListener('click', () => setPlanMode(false));
 
   setInterval(() => {
@@ -897,13 +920,19 @@
     if (document.visibilityState === 'visible') { lastBerlinDate = getBerlinDateString(); renderList(); }
   });
 
-  document.querySelectorAll('#statusFilters .stat').forEach(btn => {
+  document.querySelectorAll('#statusFilters .stat[data-status]').forEach(btn => {
     btn.addEventListener('click', () => {
       const status = btn.dataset.status;
       activeStatuses[status] = !activeStatuses[status];
       btn.classList.toggle('on', activeStatuses[status]);
       renderList();
     });
+  });
+
+  document.getElementById('highPriorityFilterBtn').addEventListener('click', (e) => {
+    highPriorityOnly = !highPriorityOnly;
+    e.currentTarget.classList.toggle('on', highPriorityOnly);
+    renderList();
   });
 
   // ---- New task ----
