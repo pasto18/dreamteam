@@ -342,7 +342,7 @@
         <span class="step-val" id="newPeopleValue">1</span>
         <button type="button" class="step-btn" id="newPeoplePlus" aria-label="More"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
       </div>
-      <div class="blk last">
+      <div class="blk">
         <div class="lbl">Tools needed</div>
         <div class="chips" id="newToolsTags"></div>
         <div class="chips" id="newToolSuggestions"></div>
@@ -350,6 +350,15 @@
           <input class="input" type="text" id="newToolOtherInput" placeholder="Tool name">
           <button type="button" id="newToolOtherAddBtn">Add</button>
         </div>
+      </div>
+      <div class="blk">
+        <div class="lbl">Notes</div>
+        <textarea class="input" id="newNotesInput" rows="4" placeholder="Private notes — not shown in the list"></textarea>
+      </div>
+      <div class="blk last">
+        <div class="lbl">Photos</div>
+        <div class="photos" id="newPhotosGrid"></div>
+        <input type="file" accept="image/*" multiple id="newPhotoInput" style="display:none;">
       </div>
       <div class="spacer"></div>
       <div class="bar">
@@ -996,11 +1005,15 @@
   const newLocationOtherRow = document.getElementById('newLocationOtherRow');
   const newLocationOtherInput = document.getElementById('newLocationOtherInput');
   const newAssigneeChips = document.getElementById('newAssigneeChips');
+  const newNotesInput = document.getElementById('newNotesInput');
+  const newPhotosGrid = document.getElementById('newPhotosGrid');
+  const newPhotoInput = document.getElementById('newPhotoInput');
   let newPeopleNeeded = 1;
   let newToolsList = [];
   let newLocationValue = '';
   let newLocationOtherOpen = false;
   let newAssigneeSelection = [];
+  let newPhotoFiles = [];
 
   function setNewTextError(on) {
     newTextLabel.textContent = on ? 'Write a description first' : 'Description';
@@ -1074,6 +1087,35 @@
     renderNewAssignees();
   });
 
+  function renderNewPhotos() {
+    newPhotosGrid.innerHTML = newPhotoFiles.map((p, i) => `
+      <div class="ph">
+        <img src="${p.previewUrl}" alt="">
+        <button type="button" class="ph-x" data-action="remove-new-photo" data-index="${i}" aria-label="Remove photo">${ICON.x}</button>
+      </div>`).join('')
+      + `<button type="button" class="ph-add" data-action="add-new-photo">${ICON.camera}<span>Add photo</span></button>`;
+  }
+  function clearNewPhotos() {
+    newPhotoFiles.forEach(p => URL.revokeObjectURL(p.previewUrl));
+    newPhotoFiles = [];
+  }
+  newPhotosGrid.addEventListener('click', (e) => {
+    if (e.target.closest('[data-action="add-new-photo"]')) { newPhotoInput.click(); return; }
+    const rm = e.target.closest('[data-action="remove-new-photo"]');
+    if (rm) {
+      const idx = Number(rm.dataset.index);
+      URL.revokeObjectURL(newPhotoFiles[idx].previewUrl);
+      newPhotoFiles.splice(idx, 1);
+      renderNewPhotos();
+    }
+  });
+  newPhotoInput.addEventListener('change', () => {
+    const files = Array.from(newPhotoInput.files || []);
+    newPhotoInput.value = '';
+    files.forEach(file => newPhotoFiles.push({ file, previewUrl: URL.createObjectURL(file) }));
+    renderNewPhotos();
+  });
+
   function resetAddForm() {
     newText.value = '';
     setNewTextError(false);
@@ -1087,9 +1129,12 @@
     newLocationOtherInput.value = '';
     newLocationOtherRow.style.display = 'none';
     newAssigneeSelection = [];
+    newNotesInput.value = '';
+    clearNewPhotos();
     renderNewTools();
     renderNewLocation();
     renderNewAssignees();
+    renderNewPhotos();
   }
   function openAddForm() {
     addOverlay.classList.add('open');
@@ -1126,9 +1171,30 @@
       status: 'pending',
       order: Date.now(),
       peopleNeeded: newPeopleNeeded,
+      notes: newNotesInput.value.trim(),
     };
+    const photosToUpload = newPhotoFiles.map(p => p.file);
     closeAddForm();
-    await addDoc(tasksCol, payload).catch(err => { console.error(err); alert("Couldn't save the task. Check your connection."); });
+    let newRef;
+    try {
+      newRef = await addDoc(tasksCol, payload);
+    } catch (err) {
+      console.error(err);
+      alert("Couldn't save the task. Check your connection.");
+      return;
+    }
+    for (const file of photosToUpload) {
+      try {
+        const blob = await compressImage(file);
+        const path = `tasks/${newRef.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+        const sRef = storageRef(storage, path);
+        await uploadBytes(sRef, blob, { contentType: 'image/jpeg' });
+        const url = await getDownloadURL(sRef);
+        await updateDoc(newRef, { photos: arrayUnion({ url, path }) });
+      } catch (err) {
+        console.error('Error uploading photo:', err);
+      }
+    }
   });
 
   // ---- Task detail ----
