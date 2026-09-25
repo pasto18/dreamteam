@@ -692,6 +692,7 @@
     if (!planModeActive && t.status === 'progress') meta.push(`<span class="t-prog">In progress</span>`);
     if (!assignees.length) meta.push(`<span class="tag-un">Unassigned</span>`);
     else meta.push(`<span class="who">${escapeHtml(who)}</span>`);
+    if ((t.photos || []).length) meta.push(`<span class="ic">${ICON.camera}</span>`);
     if ((t.peopleNeeded || 1) > 1) meta.push(`<span class="ic">${ICON.users}${t.peopleNeeded} people</span>`);
     if (toolsVisible && (t.toolsList || []).length) meta.push(`<span class="ic">${ICON.wrench}${escapeHtml(t.toolsList.join(', '))}</span>`);
     return `
