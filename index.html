@@ -161,7 +161,7 @@
   .overlay { position: fixed; inset: 0; z-index: 50; background: var(--bg); overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; }
   .overlay.open { display: block; }
   .ov-inner { max-width: 480px; margin: 0 auto; min-height: 100%; }
-  .ov-head { position: sticky; top: 0; z-index: 5; background: var(--bg); display: flex; align-items: center; border-bottom: 2px solid var(--divider); padding: 4px; }
+  .ov-head { position: sticky; top: 0; z-index: 5; background: var(--bg); display: flex; align-items: center; border-bottom: 2px solid var(--divider); padding: 4px; padding-top: calc(4px + env(safe-area-inset-top)); }
   .ov-head .h { flex: 1; font-weight: 800; font-size: 17px; }
   .ov-head .h.big { font-size: 22px; letter-spacing: -0.01em; padding-left: 12px; }
   .ov-head .meta-r { font-size: 12px; color: var(--n700); padding-right: 12px; }
