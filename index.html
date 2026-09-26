@@ -60,10 +60,12 @@
   .stat.on { background: var(--ink); color: var(--bg); }
   body.scrolled .stat { height: 36px; }
   body.scrolled .stat span { opacity: 0; max-height: 0; }
-  .sel-grid { display: grid; grid-template-columns: 1fr 1fr auto; border-top: 1px solid var(--divider); border-bottom: 2px solid var(--divider); max-height: 49px; overflow: hidden; opacity: 1; transition: max-height .35s ease, opacity .3s ease, border-width .35s ease; }
+  .sel-grid { display: grid; grid-template-columns: auto 1fr 1fr auto; border-top: 1px solid var(--divider); border-bottom: 2px solid var(--divider); max-height: 49px; overflow: hidden; opacity: 1; transition: max-height .35s ease, opacity .3s ease, border-width .35s ease; }
   body.scrolled .sel-grid { max-height: 0; opacity: 0; border-top-width: 0; border-bottom-width: 0; }
+  .today-view-btn { height: 48px; padding: 0 16px; border: 0; background: transparent; font-size: 14px; font-weight: 600; }
+  .today-view-btn.on { background: var(--accent); color: var(--bg); }
   .sel-cell { position: relative; }
-  .sel-cell + .sel-cell { border-left: 1px solid var(--divider); }
+  .today-view-btn + .sel-cell, .sel-cell + .sel-cell { border-left: 1px solid var(--divider); }
   .sel-cell select { width: 100%; height: 48px; border: 0; background: transparent; padding: 0 36px 0 16px; font-size: 14px; font-weight: 600; }
   .sel-cell select.active { color: var(--a700); }
   .sel-cell select option { color: var(--ink); background: var(--bg); }
@@ -94,7 +96,13 @@
   .site-add svg.i { width: 20px; height: 20px; stroke-width: 2.5; }
 
   .task { display: grid; grid-template-columns: 52px minmax(0, 1fr); border-bottom: 1px solid var(--divider); }
-  .task.hl { background: var(--a200); }
+  .task.is-today { position: relative; background: var(--accent); color: var(--bg); }
+  .task.is-today .box { border-color: var(--bg); }
+  .task.is-today .box.progress, .task.is-today .box.today { background: var(--bg); color: var(--accent); }
+  .task.is-today .meta, .task.is-today .meta .who, .task.is-today .t-prog, .task.is-today .t-text.done { color: var(--bg); }
+  .task.is-today .tag-prio, .task.is-today .tag-today { background: transparent; color: var(--bg); box-shadow: inset 0 0 0 1.5px var(--bg); }
+  .task.is-today .t-body { padding-bottom: 34px; }
+  .task.is-today .tag-today { position: absolute; right: 10px; bottom: 10px; }
   .box-btn { display: flex; justify-content: center; padding-top: 14px; min-height: 60px; }
   .box-btn:active { background: var(--surface); }
   .box { width: 26px; height: 26px; border: 2px solid var(--ink); display: flex; align-items: center; justify-content: center; color: var(--bg); }
@@ -109,7 +117,7 @@
   .meta .who { font-weight: 600; color: var(--ink); }
   .meta .ic { display: inline-flex; align-items: center; gap: 4px; }
   .meta .ic svg.i { width: 14px; height: 14px; }
-  .tag-prio { display: inline-flex; align-items: center; gap: 4px; background: var(--accent); color: var(--bg); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; }
+  .tag-prio, .tag-today { display: inline-flex; align-items: center; gap: 4px; background: var(--accent); color: var(--bg); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; }
   .tag-prio svg.i { width: 12px; height: 12px; stroke-width: 2.5; }
   .t-prog { font-weight: 800; color: var(--a700); }
   .tag-un { font-size: 11px; font-weight: 600; padding: 2px 9px; border: 1px solid var(--accent); color: var(--a700); }
@@ -250,7 +258,9 @@
 
   .lightbox { position: fixed; inset: 0; z-index: 60; background: var(--n900); display: none; align-items: center; justify-content: center; padding: 16px; }
   .lightbox.open { display: flex; }
-  .lightbox img { max-width: 100%; max-height: 100%; }
+  .lightbox img { max-width: 100%; max-height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; transform-origin: center; will-change: transform; }
+  .lightbox-x { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 12px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,.45); z-index: 1; }
+  .lightbox-x svg.i { width: 24px; height: 24px; stroke-width: 2.5; }
 </style>
 </head>
 <body>
@@ -287,6 +297,7 @@
           <button class="stat" id="highPriorityFilterBtn"><b>High Priority</b><span data-count="highPriority">0</span></button>
         </div>
         <div class="sel-grid">
+          <button type="button" class="today-view-btn" id="todayViewBtn">Today</button>
           <div class="sel-cell"><select id="personFilterSelect" aria-label="Filter by person"></select><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
           <div class="sel-cell"><select id="siteFilterSelect" aria-label="Filter by site"></select><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
           <button type="button" class="tools-toggle-btn" id="toolsVisibleBtn" aria-label="Show or hide tools in the list"><svg class="i" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></button>
@@ -310,51 +321,6 @@
       <button class="btn btn-pri" id="addToggleBtn">New task<svg class="i" viewBox="0 0 24 24" style="stroke-width:2.5"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
     </div>
     <button class="btn btn-ink plan-only" id="planDoneBtn">Done planning · <span id="planCount2">0</span> for today<svg class="i" viewBox="0 0 24 24" style="stroke-width:2.5"><path d="M20 6 9 17l-5-5"/></svg></button>
-  </div>
-
-  <!-- New task -->
-  <div class="overlay" id="addOverlay">
-    <div class="ov-inner">
-      <div class="ov-head">
-        <div class="h big">New task</div>
-        <button class="icon-btn" id="addCloseBtn" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
-      </div>
-      <div class="blk">
-        <div class="lbl" id="newTextLabel">Description</div>
-        <textarea class="input" id="newText" rows="3" placeholder="What needs doing?" style="font-size:17px;resize:none"></textarea>
-      </div>
-      <div class="blk">
-        <div class="lbl">Site / tent</div>
-        <div class="chips" id="newLocationChips"></div>
-        <div class="other-row" id="newLocationOtherRow" style="display:none;"><input class="input" type="text" id="newLocationOtherInput" placeholder="Site name"></div>
-      </div>
-      <div class="blk">
-        <div class="lbl">Assigned to</div>
-        <div class="chips" id="newAssigneeChips"></div>
-      </div>
-      <div class="ppl-row">
-        <div class="lbl">People needed</div>
-        <button type="button" class="step-btn" id="newPeopleMinus" aria-label="Fewer"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
-        <span class="step-val" id="newPeopleValue">1</span>
-        <button type="button" class="step-btn" id="newPeoplePlus" aria-label="More"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
-      </div>
-      <div class="blk last">
-        <div class="lbl">Tools needed</div>
-        <div class="chips" id="newToolsTags"></div>
-        <div class="chips" id="newToolSuggestions"></div>
-        <div class="add-row" id="newToolOtherRow" style="display:none;">
-          <input class="input" type="text" id="newToolOtherInput" placeholder="Tool name">
-          <button type="button" id="newToolOtherAddBtn">Add</button>
-        </div>
-      </div>
-      <div class="spacer"></div>
-      <div class="bar">
-        <div class="bar-grid">
-          <button class="btn btn-sec" id="cancelAddBtn" type="button">Cancel</button>
-          <button class="btn btn-pri" id="submitAddBtn" type="button">Add task<svg class="i" viewBox="0 0 24 24" style="stroke-width:2.5"><path d="M20 6 9 17l-5-5"/></svg></button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Task detail -->
@@ -445,7 +411,7 @@
     </div>
   </div>
 
-  <div class="lightbox" id="lightbox"><img id="lightboxImg" src="data:," alt=""></div>
+  <div class="lightbox" id="lightbox"><button type="button" class="lightbox-x" id="lightboxClose" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button><img id="lightboxImg" src="data:," alt=""></div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
@@ -563,6 +529,7 @@
   let currentDetailId = null;
   let shoppingOverlayOpen = false;
   let planModeActive = false;
+  let todayView = false;
   let lastBerlinDate = getBerlinDateString();
 
   const listEl = document.getElementById('taskList');
@@ -576,6 +543,11 @@
     siteFilterSelect.value = currentSiteFilter;
   }
   renderFilterOptions();
+  document.getElementById('todayViewBtn').addEventListener('click', (e) => {
+    todayView = !todayView;
+    e.currentTarget.classList.toggle('on', todayView);
+    renderList();
+  });
   personFilterSelect.addEventListener('change', () => {
     currentPersonFilter = personFilterSelect.value;
     personFilterSelect.classList.toggle('active', currentPersonFilter !== 'all');
@@ -648,6 +620,7 @@
     const personHidden = currentPersonFilter !== 'all' && !(t.assignees || []).includes(currentPersonFilter);
     const siteHidden = currentSiteFilter !== 'all' && t.location !== currentSiteFilter;
     const priorityHidden = highPriorityOnly && !t.highPriority;
+    if (!t.text.trim()) return true;
     return statusHidden || personHidden || siteHidden || priorityHidden;
   }
 
@@ -670,20 +643,19 @@
     const isToday = !!t.todayDate;
     const assignees = t.assignees || [];
     let boxClass = t.status, boxIcon = isDone ? ICON.check : '';
-    if (planModeActive) { boxClass = isToday ? 'today' : ''; boxIcon = isToday ? ICON.check : ''; }
-    const boxAction = planModeActive ? 'toggle-today' : 'cycle';
+    const boxAction = 'cycle';
     const bodyAction = planModeActive ? 'toggle-today' : 'open-detail';
     const who = assignees.length && NAMES.every(n => assignees.includes(n)) ? 'Everyone' : assignees.join(', ');
     const meta = [];
-    if (t.highPriority) meta.push(`<span class="tag-prio">${ICON.flame}Priority</span>`);
-    if (!planModeActive && t.status === 'progress') meta.push(`<span class="t-prog">In progress</span>`);
-    if (!assignees.length) meta.push(`<span class="tag-un">Unassigned</span>`);
-    else meta.push(`<span class="who">${escapeHtml(who)}</span>`);
+    if (t.highPriority) meta.push(`<span class="tag-prio" aria-label="High priority">${ICON.flame}</span>`);
+    if ((t.photos || []).length) meta.push(`<span class="ic">${ICON.camera}${t.photos.length}</span>`);
+    if (t.status === 'progress') meta.push(`<span class="t-prog">In progress</span>`);
+    if (assignees.length) meta.push(`<span class="who">${escapeHtml(who)}</span>`);
     if ((t.peopleNeeded || 1) > 1) meta.push(`<span class="ic">${ICON.users}${t.peopleNeeded} people</span>`);
     if (toolsVisible && (t.toolsList || []).length) meta.push(`<span class="ic">${ICON.wrench}${escapeHtml(t.toolsList.join(', '))}</span>`);
     return `
-      <div class="task ${planModeActive && isToday ? 'hl' : ''}">
-        <button type="button" class="box-btn" data-action="${boxAction}" data-id="${t.id}" aria-label="${planModeActive ? 'Toggle today' : 'Change status'}">
+      <div class="task ${isToday ? 'is-today' : ''}">
+        <button type="button" class="box-btn" data-action="${boxAction}" data-id="${t.id}" aria-label="Change status">
           <span class="box ${boxClass}">${boxIcon}</span>
         </button>
         <div class="t-body" data-action="${bodyAction}" data-id="${t.id}">
@@ -691,6 +663,7 @@
           <div class="meta">${meta.join('')}</div>
           ${subtaskRowsHtml(t)}
         </div>
+        ${isToday ? '<span class="tag-today">Today</span>' : ''}
       </div>`;
   }
 
@@ -769,25 +742,23 @@
     const notDone = visible.filter(t => t.status !== 'done').sort(taskSortCompare);
     const done = visible.filter(t => t.status === 'done').sort(taskSortCompare);
     const todayTasks = notDone.filter(t => t.todayDate);
-    const restTasks = notDone.filter(t => !t.todayDate);
 
     document.body.classList.toggle('plan-mode', planModeActive);
     renderHeaderStats();
 
     let html = '';
-    if (planModeActive) {
-      html = renderGroupWithSiteHeaders(notDone, todayStr, false) + renderGroupWithSiteHeaders(done, todayStr, true);
-    } else {
+    if (todayView && !planModeActive) {
       if (todayTasks.length) {
         html += `<div class="today"><div class="today-h"><b>Today</b><span>${todayTasks.length} task${todayTasks.length === 1 ? '' : 's'}</span></div>`;
         html += renderGroupWithSiteHeaders(todayTasks, todayStr, false);
         html += todayToolsHtml(todayTasks);
         html += `</div>`;
       }
-      html += renderGroupWithSiteHeaders(restTasks, todayStr, false);
+    } else {
+      html += renderGroupWithSiteHeaders(notDone, todayStr, false);
       html += renderGroupWithSiteHeaders(done, todayStr, true);
     }
-    if (!visible.length) html = `<div class="empty"><b>Nothing here</b><span>Change the filters above or add a new task.</span></div>`;
+    if (!html) html = `<div class="empty"><b>Nothing here</b><span>Change the filters above or add a new task.</span></div>`;
     listEl.innerHTML = html;
   }
 
@@ -864,7 +835,7 @@
 
   listEl.addEventListener('click', (e) => {
     const siteHeaderEl = e.target.closest('[data-action="add-for-site"]');
-    if (siteHeaderEl) { openAddFormForLocation(siteHeaderEl.dataset.location); return; }
+    if (siteHeaderEl) { createTask(siteHeaderEl.dataset.location); return; }
     const subtaskBtn = e.target.closest('[data-action="toggle-subtask"]');
     if (subtaskBtn) {
       const { taskId, itemId } = subtaskBtn.dataset;
@@ -913,9 +884,11 @@
   });
 
   function setPlanMode(on) {
+    const before = listEl.getBoundingClientRect().top;
     planModeActive = on;
     renderList();
-    window.scrollTo(0, 0);
+    // keep the list where it was even though the plan banner changes the header height
+    window.scrollBy(0, listEl.getBoundingClientRect().top - before);
   }
   document.getElementById('planToggleBtn').addEventListener('click', () => setPlanMode(true));
 
@@ -968,6 +941,12 @@
   document.getElementById('highPriorityFilterBtn').addEventListener('click', (e) => {
     highPriorityOnly = !highPriorityOnly;
     e.currentTarget.classList.toggle('on', highPriorityOnly);
+    if (highPriorityOnly) {
+      activeStatuses.pending = true;
+      activeStatuses.progress = true;
+      document.querySelector('#statusFilters .stat[data-status="pending"]').classList.add('on');
+      document.querySelector('#statusFilters .stat[data-status="progress"]').classList.add('on');
+    }
     renderList();
   });
 
@@ -979,153 +958,24 @@
     renderList();
   });
 
-  // ---- New task ----
-  const addOverlay = document.getElementById('addOverlay');
-  const newText = document.getElementById('newText');
-  const newTextLabel = document.getElementById('newTextLabel');
-  const newPeopleValue = document.getElementById('newPeopleValue');
-  const newToolsTags = document.getElementById('newToolsTags');
-  const newToolSuggestions = document.getElementById('newToolSuggestions');
-  const newToolOtherRow = document.getElementById('newToolOtherRow');
-  const newToolOtherInput = document.getElementById('newToolOtherInput');
-  const newLocationChips = document.getElementById('newLocationChips');
-  const newLocationOtherRow = document.getElementById('newLocationOtherRow');
-  const newLocationOtherInput = document.getElementById('newLocationOtherInput');
-  const newAssigneeChips = document.getElementById('newAssigneeChips');
-  let newPeopleNeeded = 1;
-  let newToolsList = [];
-  let newLocationValue = '';
-  let newLocationOtherOpen = false;
-  let newAssigneeSelection = [];
-
-  function setNewTextError(on) {
-    newTextLabel.textContent = on ? 'Write a description first' : 'Description';
-    newTextLabel.classList.toggle('err', on);
-    newText.classList.toggle('err', on);
-  }
-  newText.addEventListener('input', () => setNewTextError(false));
-
-  document.getElementById('newPeopleMinus').addEventListener('click', () => {
-    newPeopleNeeded = Math.max(1, newPeopleNeeded - 1);
-    newPeopleValue.textContent = newPeopleNeeded;
-  });
-  document.getElementById('newPeoplePlus').addEventListener('click', () => {
-    newPeopleNeeded = Math.min(20, newPeopleNeeded + 1);
-    newPeopleValue.textContent = newPeopleNeeded;
-  });
-
-  function renderNewTools() {
-    newToolsTags.innerHTML = toolTagsHtml(newToolsList);
-    newToolSuggestions.innerHTML = toolSuggestionsHtml();
-  }
-  newToolSuggestions.addEventListener('click', (e) => {
-    const btn = e.target.closest('.chip');
-    if (!btn) return;
-    if (btn.dataset.tool === '__other__') { newToolOtherRow.style.display = ''; newToolOtherInput.focus(); return; }
-    newToolsList = [...newToolsList, btn.dataset.tool];
-    renderNewTools();
-  });
-  newToolsTags.addEventListener('click', (e) => {
-    const btn = e.target.closest('.tag-remove');
-    if (!btn) return;
-    newToolsList = newToolsList.filter((_, i) => i !== Number(btn.dataset.index));
-    renderNewTools();
-  });
-  function addNewToolOther() {
-    const text = newToolOtherInput.value.trim();
-    if (!text) return;
-    newToolsList = [...newToolsList, text];
-    newToolOtherInput.value = '';
-    newToolOtherRow.style.display = 'none';
-    renderNewTools();
-  }
-  document.getElementById('newToolOtherAddBtn').addEventListener('click', addNewToolOther);
-  newToolOtherInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addNewToolOther(); } });
-
-  function renderNewLocation() { newLocationChips.innerHTML = locationChipsHtml(newLocationValue, newLocationOtherOpen); }
-  newLocationChips.addEventListener('click', (e) => {
-    const btn = e.target.closest('.chip');
-    if (!btn) return;
-    if (btn.dataset.location === '__other__') {
-      newLocationValue = '';
-      newLocationOtherOpen = true;
-      newLocationOtherInput.value = '';
-      newLocationOtherRow.style.display = '';
-      newLocationOtherInput.focus();
-      renderNewLocation();
-      return;
-    }
-    newLocationValue = btn.dataset.location;
-    newLocationOtherOpen = false;
-    newLocationOtherRow.style.display = 'none';
-    renderNewLocation();
-  });
-  newLocationOtherInput.addEventListener('input', () => { newLocationValue = newLocationOtherInput.value; });
-
-  function renderNewAssignees() { newAssigneeChips.innerHTML = assigneeChipsHtml(newAssigneeSelection); }
-  newAssigneeChips.addEventListener('click', (e) => {
-    const chip = e.target.closest('.chip');
-    if (!chip) return;
-    newAssigneeSelection = toggleAssignee(newAssigneeSelection, chip.dataset.name);
-    renderNewAssignees();
-  });
-
-  function resetAddForm() {
-    newText.value = '';
-    setNewTextError(false);
-    newPeopleNeeded = 1;
-    newPeopleValue.textContent = 1;
-    newToolsList = [];
-    newToolOtherRow.style.display = 'none';
-    newToolOtherInput.value = '';
-    newLocationValue = '';
-    newLocationOtherOpen = false;
-    newLocationOtherInput.value = '';
-    newLocationOtherRow.style.display = 'none';
-    newAssigneeSelection = [];
-    renderNewTools();
-    renderNewLocation();
-    renderNewAssignees();
-  }
-  function openAddForm() {
-    addOverlay.classList.add('open');
-    addOverlay.scrollTop = 0;
-  }
-  function closeAddForm() {
-    resetAddForm();
-    addOverlay.classList.remove('open');
-  }
-  function openAddFormForLocation(loc) {
-    resetAddForm();
-    newLocationValue = loc || '';
-    if (loc && !LOCATIONS.includes(loc)) {
-      newLocationOtherOpen = true;
-      newLocationOtherInput.value = loc;
-      newLocationOtherRow.style.display = '';
-    }
-    renderNewLocation();
-    openAddForm();
-  }
-  resetAddForm();
-
-  document.getElementById('addToggleBtn').addEventListener('click', () => { resetAddForm(); openAddForm(); });
-  document.getElementById('addCloseBtn').addEventListener('click', closeAddForm);
-  document.getElementById('cancelAddBtn').addEventListener('click', closeAddForm);
-  document.getElementById('submitAddBtn').addEventListener('click', async () => {
-    const text = newText.value.trim();
-    if (!text) { setNewTextError(true); newText.focus(); return; }
-    const payload = {
-      text,
-      toolsList: newToolsList,
-      location: newLocationValue.trim(),
-      assignees: newAssigneeSelection,
-      status: 'pending',
-      order: Date.now(),
-      peopleNeeded: newPeopleNeeded,
+  // ---- New task: an empty task opened in the regular detail view ----
+  let draftId = null;
+  function createTask(location) {
+    const ref = doc(tasksCol);
+    const task = {
+      id: ref.id, emoji: DEFAULT_EMOJI, text: '', assignees: [], toolsList: [], location: location || '',
+      status: 'pending', order: Date.now(), notes: '', photos: [], shopping: [], subtasks: [],
+      toolsChecked: {}, highPriority: false, peopleNeeded: 1, todayDate: '',
     };
-    closeAddForm();
-    await addDoc(tasksCol, payload).catch(err => { console.error(err); alert("Couldn't save the task. Check your connection."); });
-  });
+    tasks.push(task);
+    draftId = task.id;
+    setDoc(ref, {
+      text: '', toolsList: [], location: task.location, assignees: [],
+      status: 'pending', order: task.order, peopleNeeded: 1,
+    }).catch(err => { console.error(err); alert("Couldn't save the task. Check your connection."); });
+    openDetail(task.id, true);
+  }
+  document.getElementById('addToggleBtn').addEventListener('click', () => createTask(''));
 
   // ---- Task detail ----
   const detailOverlay = document.getElementById('detailOverlay');
@@ -1157,7 +1007,7 @@
 
   function currentTask() { return tasks.find(t => t.id === currentDetailId); }
 
-  function openDetail(id) {
+  function openDetail(id, isNew) {
     currentDetailId = id;
     pendingUploads = 0;
     detailLocationOtherOpen = false;
@@ -1165,10 +1015,23 @@
     detailSubtaskInput.value = '';
     detailShopInput.value = '';
     renderDetail();
+    // notes/photos are placed once per opening, so typing never moves the fields around
+    reorderNotesAndPhotos(currentTask());
     detailOverlay.classList.add('open');
     detailOverlay.scrollTop = 0;
+    if (isNew) detailTitleInput.focus();
   }
   function closeDetail() {
+    const task = currentTask();
+    if (task && task.id === draftId && !task.text.trim()) {
+      // nothing was written: discard the empty draft
+      Object.keys(fieldTimers).filter(k => k.startsWith(task.id + ':')).forEach(k => clearTimeout(fieldTimers[k]));
+      (task.photos || []).forEach(p => deleteObject(storageRef(storage, p.path)).catch(() => {}));
+      tasks = tasks.filter(t => t.id !== task.id);
+      deleteDoc(doc(db, 'tasks', task.id)).catch(console.error);
+      renderList();
+    }
+    draftId = null;
     currentDetailId = null;
     detailOverlay.classList.remove('open');
   }
@@ -1198,7 +1061,6 @@
     if (active !== notesTextarea) notesTextarea.value = task.notes || '';
     renderDetailShopList();
     renderPhotos();
-    reorderNotesAndPhotos(task);
   }
 
   function reorderNotesAndPhotos(task) {
@@ -1427,7 +1289,7 @@
     scheduleFieldSave(task.id, 'location', detailLocationOtherInput.value, 500);
   });
 
-  function compressImage(file, maxDim = 1600, quality = 0.75) {
+  function compressImage(file, maxDim = 1280, quality = 0.6) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
@@ -1491,7 +1353,56 @@
         .catch(console.error);
     }
   });
-  lightbox.addEventListener('click', () => { lightbox.classList.remove('open'); lightboxImg.src = 'data:,'; });
+  // lightbox: pinch to zoom, drag to pan, double-tap to toggle zoom
+  let lbScale = 1, lbX = 0, lbY = 0;
+  const lbPointers = new Map();
+  let lbPinch = null, lbLastTap = 0, lbMoved = false;
+  function lbApply() {
+    if (lbScale <= 1) { lbScale = 1; lbX = 0; lbY = 0; }
+    lightboxImg.style.transform = `translate(${lbX}px, ${lbY}px) scale(${lbScale})`;
+  }
+  function lbReset() { lbScale = 1; lbX = 0; lbY = 0; lbPointers.clear(); lbPinch = null; lbApply(); }
+  function closeLightbox() { lightbox.classList.remove('open'); lightboxImg.src = 'data:,'; lbReset(); }
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+  lightboxImg.addEventListener('pointerdown', (e) => {
+    lightboxImg.setPointerCapture(e.pointerId);
+    lbPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    lbMoved = false;
+    if (lbPointers.size === 2) {
+      const [a, b] = [...lbPointers.values()];
+      lbPinch = { dist: Math.hypot(a.x - b.x, a.y - b.y), scale: lbScale };
+    }
+  });
+  lightboxImg.addEventListener('pointermove', (e) => {
+    const prev = lbPointers.get(e.pointerId);
+    if (!prev) return;
+    const cur = { x: e.clientX, y: e.clientY };
+    if (lbPointers.size === 2 && lbPinch) {
+      lbPointers.set(e.pointerId, cur);
+      const [a, b] = [...lbPointers.values()];
+      lbScale = Math.min(6, Math.max(1, lbPinch.scale * Math.hypot(a.x - b.x, a.y - b.y) / lbPinch.dist));
+      lbMoved = true;
+    } else if (lbPointers.size === 1 && lbScale > 1) {
+      lbX += cur.x - prev.x; lbY += cur.y - prev.y;
+      lbPointers.set(e.pointerId, cur);
+      lbMoved = true;
+    } else {
+      lbPointers.set(e.pointerId, cur);
+    }
+    lbApply();
+  });
+  function lbPointerEnd(e) {
+    lbPointers.delete(e.pointerId);
+    lbPinch = null;
+    if (lbPointers.size === 0 && !lbMoved) {
+      const now = Date.now();
+      if (now - lbLastTap < 300) { lbScale = lbScale > 1 ? 1 : 2.5; lbX = 0; lbY = 0; lbApply(); lbLastTap = 0; }
+      else lbLastTap = now;
+    }
+  }
+  lightboxImg.addEventListener('pointerup', lbPointerEnd);
+  lightboxImg.addEventListener('pointercancel', lbPointerEnd);
 
   // ---- Shopping list ----
   const shoppingOverlay = document.getElementById('shoppingOverlay');
