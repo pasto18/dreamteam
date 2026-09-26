@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#f3f2f2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DreamTeam">
+<title>DreamTeam - Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f3f2f2; --surface: #eae9e9; --ink: #201e1d; --accent: #ec3013;
+    --divider: color-mix(in srgb, #201e1d 40%, transparent);
+    --n300: #d7d3d3; --n600: #7d7979; --n700: #605d5d; --n800: #444141; --n900: #2d2b2b;
+    --a100: #fff2ef; --a200: #ffe0d9; --a700: #ae1800; --a800: #7c1405;
+    --font: "Archivo", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); -webkit-text-size-adjust: 100%; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; text-align: left; }
+  input, textarea { font: inherit; color: inherit; border-radius: 0; -webkit-appearance: none; appearance: none; }
+  input::placeholder, textarea::placeholder { color: var(--n600); }
+  :focus { outline: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  a { color: var(--a700); }
+  svg.i { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .sm svg.i, svg.i.sm { width: 18px; height: 18px; stroke-width: 2.2; }
+
+  #app { max-width: 480px; margin: 0 auto; min-height: 100dvh; position: relative; }
+  .lbl { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .muted { color: var(--n700); }
+  .press:active { background: var(--surface); }
+
+  .sticky { position: sticky; top: 0; z-index: 20; background: var(--bg); }
+  .head { display: flex; align-items: center; padding: 4px; padding-top: calc(4px + env(safe-area-inset-top)); }
+  .head.line { border-bottom: 2px solid var(--divider); }
+  .ib { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: var(--ink); text-decoration: none; }
+  .ib:active { background: var(--surface); }
+  .head .h { flex: 1; min-width: 0; font-weight: 800; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .txt-btn { height: 48px; padding: 0 14px; display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; }
+  .txt-btn:active { background: var(--surface); }
+  .editbar { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 4px 0 16px; background: var(--accent); color: var(--bg); }
+  .editbar b { font-size: 15px; font-weight: 800; }
+  .editbar .st { flex: 1; font-size: 13px; font-weight: 600; }
+  .editbar button { height: 40px; padding: 0 16px; background: var(--bg); color: var(--ink); font-weight: 800; font-size: 15px; }
+  .editbar button:active { background: var(--a100); }
+
+  /* home */
+  .title34 { font-weight: 800; font-size: 34px; line-height: 1; letter-spacing: -.02em; }
+  .tent-row { width: 100%; min-height: 80px; display: grid; grid-template-columns: minmax(0, 1fr) auto 28px; align-items: center; gap: 12px; padding: 14px 8px 14px 16px; border-bottom: 1px solid var(--divider); }
+  .tent-row:active { background: var(--surface); }
+  .tent-row .nm { font-weight: 800; font-size: 20px; line-height: 1.15; letter-spacing: -.01em; }
+  .tent-row .pl { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 13px; font-weight: 600; color: var(--n700); }
+  .tent-row .pl svg.i { width: 15px; height: 15px; stroke-width: 2; }
+  .tent-row .pl.none { color: var(--n600); }
+  .tent-row .ct { text-align: right; }
+  .tent-row .ct b { display: block; font-weight: 800; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tent-row .ct b.zero { color: var(--n600); }
+  .tent-row .ct span { display: block; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--n700); margin-top: 4px; }
+
+  /* tent page */
+  .plan-btn { position: relative; display: block; width: 100%; aspect-ratio: 1.414 / 1; background: var(--surface); border: 2px solid var(--ink); overflow: hidden; }
+  .plan-btn:active { background: var(--n300); }
+  .plan-btn canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+  .plan-btn .xp { position: absolute; top: 0; right: 0; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--ink); color: var(--bg); }
+  .plan-btn .xp svg.i { width: 20px; height: 20px; stroke-width: 2.2; }
+  .plan-btn .tag { position: absolute; left: 12px; bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--n800); }
+  .plan-btn .tag svg.i { width: 18px; height: 18px; stroke-width: 2; }
+  .dashed { border: 1px dashed var(--n600); }
+  .sec-h { display: flex; align-items: baseline; gap: 8px; padding: 28px 16px 8px; border-bottom: 2px solid var(--divider); }
+  .slide-row { position: relative; display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; min-height: 60px; padding: 0 4px 0 16px; border-bottom: 1px solid var(--divider); cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .slide-row:active { background: var(--surface); }
+  .slide-row .num { font-weight: 800; font-size: 17px; font-variant-numeric: tabular-nums; color: var(--n700); }
+  .slide-row .tt { padding: 10px 0; font-size: 17px; font-weight: 600; line-height: 1.3; text-wrap: pretty; min-width: 0; }
+  .slide-row .tt.empty { color: var(--n600); }
+  .slide-row .tt small { display: block; font-size: 12px; font-weight: 400; color: var(--n700); margin-top: 2px; }
+  .grip { width: 40px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--n700); touch-action: none; cursor: grab; }
+  .grip svg.i { width: 20px; height: 20px; }
+  .drag-src { opacity: .35; }
+  .drop-before::before, .drop-after::after { content: ""; position: absolute; left: 0; right: 0; height: 4px; background: var(--accent); z-index: 5; }
+  .drop-before::before { top: -2px; }
+  .drop-after::after { bottom: -2px; }
+  .dashed-add { width: 100%; height: 56px; padding: 0 16px; display: flex; align-items: center; border: 1px dashed var(--ink); font-weight: 800; font-size: 15px; }
+  .dashed-add:active { background: var(--surface); }
+  .dashed-add svg.i { margin-left: auto; }
+  .bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; z-index: 30; background: var(--bg); border-top: 2px solid var(--ink); padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); }
+  .btn-acc { width: 100%; height: 60px; padding: 0 18px; display: flex; align-items: center; gap: 10px; background: var(--accent); color: var(--bg); font-weight: 800; font-size: 18px; }
+  .btn-acc:active { background: var(--a700); }
+  .btn-acc small { font-size: 14px; font-weight: 600; }
+  .btn-acc svg.i { margin-left: auto; }
+
+  /* slide viewer */
+  .prog { display: flex; gap: 2px; padding: 0 16px 10px; }
+  .prog span { flex: 1; height: 5px; background: var(--n300); }
+  .prog span.done { background: var(--n600); }
+  .prog span.cur { background: var(--accent); }
+  .slide-num { font-weight: 800; font-size: 15px; font-variant-numeric: tabular-nums; color: var(--a700); }
+  .slide-title { font-weight: 800; font-size: 32px; line-height: 1.05; letter-spacing: -.02em; margin-top: 4px; text-wrap: pretty; }
+  textarea.slide-title-in { display: block; width: 100%; padding: 4px 0 8px; border: 0; border-bottom: 1px dashed var(--ink); background: transparent; resize: none; }
+  .navbar { display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; gap: 8px; }
+  .navbar button { height: 56px; display: flex; align-items: center; justify-content: center; }
+  .navbar .prev { border: 1px solid var(--ink); }
+  .navbar .prev:active { background: var(--surface); }
+  .navbar .jump { gap: 8px; background: var(--surface); font-weight: 800; font-size: 15px; }
+  .navbar .jump:active { background: var(--n300); }
+  .navbar .next { background: var(--accent); color: var(--bg); }
+  .navbar .next:active { background: var(--a700); }
+  .navbar button:disabled { opacity: .4; }
+
+  /* blocks */
+  .blk { position: relative; }
+  .blk.ed { margin: 0 16px 14px; border: 2px solid var(--divider); }
+  .blk-tb { display: flex; align-items: center; gap: 4px; height: 40px; padding-left: 4px; background: var(--surface); border-bottom: 1px solid var(--divider); }
+  .blk-tb .grip { width: 36px; height: 40px; }
+  .blk-tb .ty { flex: 1; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--n700); }
+  .blk-tb button.t { width: 44px; height: 40px; display: flex; align-items: center; justify-content: center; }
+  .blk-tb button.t:active { background: var(--a200); }
+  .blk-tb button.t.del { color: var(--a700); }
+  .blk-tb svg.i { width: 18px; height: 18px; stroke-width: 2.2; }
+  .in { width: 100%; padding: 0 12px; background: var(--surface); border: 1px solid var(--divider); }
+  input.in { height: 48px; font-size: 16px; }
+  textarea.in { padding: 12px; font-size: 18px; line-height: 1.45; resize: vertical; }
+  .ed-pad { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .t-heading { font-weight: 800; font-size: 22px; line-height: 1.2; letter-spacing: -.01em; text-wrap: pretty; }
+  .t-body { font-size: 18px; line-height: 1.45; margin-top: 6px; white-space: pre-line; text-wrap: pretty; }
+  .img-box { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; background: var(--surface) center / cover no-repeat; }
+  .img-box .xp { position: absolute; top: 0; right: 0; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--ink); color: var(--bg); }
+  .img-box .xp svg.i { width: 20px; height: 20px; stroke-width: 2.2; }
+  .img-box .ph { position: absolute; left: 12px; bottom: 10px; right: 56px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--n800); pointer-events: none; }
+  .img-box .ph svg.i { width: 18px; height: 18px; stroke-width: 2; }
+  .file-btn { position: absolute; left: 0; bottom: 0; height: 48px; padding: 0 16px; display: flex; align-items: center; gap: 10px; background: var(--ink); color: var(--bg); font-weight: 800; font-size: 15px; cursor: pointer; }
+  .file-btn svg.i { width: 20px; height: 20px; stroke-width: 2; }
+  .file-row { margin-top: 10px; height: 48px; padding: 0 14px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--ink); font-weight: 800; font-size: 15px; cursor: pointer; }
+  .file-row svg.i { margin-left: auto; width: 20px; height: 20px; stroke-width: 2; }
+  .cap { padding: 10px 16px 4px; font-size: 16px; line-height: 1.4; color: var(--n800); text-wrap: pretty; }
+  .hs { position: relative; width: 100%; aspect-ratio: 4 / 3; background: var(--surface) center / cover no-repeat; touch-action: manipulation; }
+  .hs.ed { cursor: crosshair; }
+  .dot { position: absolute; width: 52px; height: 52px; margin: -26px 0 0 -26px; display: flex; align-items: center; justify-content: center; }
+  .dot.ed { touch-action: none; }
+  .dot span { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--accent); color: var(--bg); border: 2px solid var(--bg); box-shadow: 0 2px 8px rgba(0,0,0,.25); font-weight: 800; font-size: 17px; }
+  .dot.on span { background: var(--a700); transform: scale(1.15); }
+  .note-card { margin: 10px 16px 0; display: grid; grid-template-columns: 48px minmax(0, 1fr) 44px; border: 2px solid var(--ink); background: var(--bg); }
+  .note-card .n { display: flex; align-items: flex-start; justify-content: center; padding-top: 12px; background: var(--accent); color: var(--bg); font-weight: 800; font-size: 20px; }
+  .note-card .tx { padding: 12px 4px 14px 14px; font-size: 18px; line-height: 1.4; text-wrap: pretty; white-space: pre-line; }
+  .note-card button { height: 44px; display: flex; align-items: center; justify-content: center; }
+  .note-card button svg.i { width: 20px; height: 20px; }
+  .hint { display: flex; align-items: center; gap: 8px; padding: 10px 16px 4px; font-size: 14px; font-weight: 600; color: var(--n700); }
+  .hint b { width: 18px; height: 18px; background: var(--ink); color: var(--bg); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .hs-tip { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px; background: var(--a100); color: var(--a800); font-size: 14px; font-weight: 600; line-height: 1.3; }
+  .hs-tip svg.i { width: 20px; height: 20px; stroke-width: 2; }
+  .pt-row { width: 100%; min-height: 52px; display: grid; grid-template-columns: 32px minmax(0, 1fr) 24px; align-items: center; gap: 12px; border-bottom: 1px solid var(--divider); }
+  .pt-row:active { background: var(--surface); }
+  .pt-row .c { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--ink); color: var(--bg); font-weight: 800; font-size: 14px; }
+  .pt-row .nt { font-size: 15px; padding: 8px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pt-row .nt.none { color: var(--n600); }
+  .pt-row svg.i { width: 20px; height: 20px; }
+  .col-h { width: 100%; min-height: 58px; display: flex; align-items: center; gap: 12px; border-top: 2px solid var(--ink); }
+  .col-h .t { flex: 1; font-weight: 800; font-size: 19px; line-height: 1.25; padding: 10px 0; }
+  .col-h .s { font-size: 13px; font-weight: 800; color: var(--n700); }
+  .col-h svg.i { width: 22px; height: 22px; transition: transform .15s ease; }
+  .col-h.open { border-bottom: 0; }
+  .col-h:not(.open) { border-bottom: 2px solid var(--ink); }
+  .col-h.open svg.i { transform: rotate(180deg); }
+  .col-b { padding: 14px 0 16px; font-size: 18px; line-height: 1.5; white-space: pre-line; border-bottom: 2px solid var(--ink); text-wrap: pretty; }
+  .ck-h { display: flex; align-items: baseline; gap: 8px; padding-bottom: 8px; border-bottom: 2px solid var(--ink); }
+  .ck-h .t { flex: 1; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .ck-h .p { font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .ck-i { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 52px; border-bottom: 1px solid var(--divider); }
+  .ck-box { flex: none; width: 24px; height: 24px; border: 2px solid var(--ink); display: flex; align-items: center; justify-content: center; color: var(--bg); }
+  .ck-box.on { background: var(--ink); }
+  .ck-box svg.i { width: 16px; height: 16px; stroke-width: 3.5; }
+  .ck-i .tx { font-size: 17px; line-height: 1.35; text-wrap: pretty; }
+  .ck-i.done .tx { color: var(--n600); text-decoration: line-through; }
+  .ck-ed { display: flex; align-items: center; gap: 4px; border-bottom: 1px solid var(--divider); }
+  .ck-ed input { flex: 1; min-width: 0; height: 48px; padding: 0 8px; font-size: 17px; background: transparent; border: 0; }
+  .ck-ed button { width: 44px; height: 48px; display: flex; align-items: center; justify-content: center; color: var(--n600); }
+  .ck-ed button:active { color: var(--accent); }
+  .ck-ed svg.i { width: 18px; height: 18px; }
+  .add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; margin-top: 8px; }
+  .add-row input { border-right: 0; }
+  .add-row button { height: 48px; padding: 0 18px; background: var(--ink); color: var(--bg); font-weight: 800; font-size: 14px; }
+
+  /* sheets */
+  .backdrop { position: fixed; inset: 0; z-index: 60; background: color-mix(in srgb, var(--n900) 55%, transparent); display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { width: 100%; max-width: 480px; background: var(--bg); padding: 8px 8px calc(24px + env(safe-area-inset-bottom)); max-height: 88dvh; overflow-y: auto; }
+  .sheet .grab { height: 4px; width: 36px; background: var(--n600); margin: 6px auto 14px; }
+  .sheet h3 { margin: 0; padding: 0 12px 12px; font-weight: 800; font-size: 18px; }
+  .sheet .pad { padding: 12px 12px 0; }
+  .sheet-row { width: 100%; min-height: 56px; display: flex; align-items: center; gap: 14px; padding: 0 12px; border-top: 1px solid var(--divider); font-size: 16px; }
+  .sheet-row:active { background: var(--surface); }
+  .sheet-row.danger { color: var(--a700); }
+  .sheet-row.danger:active { background: var(--a100); }
+  .sheet-row svg.i { width: 20px; height: 20px; stroke-width: 2.2; }
+  .sheet-row .ic { flex: none; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--surface); font-weight: 800; }
+  .sheet-row .ic svg.i { width: 22px; height: 22px; }
+  .sheet-row b { display: block; font-size: 16px; font-weight: 800; }
+  .sheet-row small { display: block; font-size: 13px; color: var(--n700); margin-top: 2px; }
+  .sheet-row.cur { background: var(--a100); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+  .two button { height: 52px; font-weight: 800; font-size: 15px; text-align: center; justify-content: center; }
+  .b-out { border: 1px solid var(--ink); }
+  .b-out:active { background: var(--surface); }
+  .b-acc { background: var(--accent); color: var(--bg); }
+  .b-acc:active { background: var(--a700); }
+  .b-ink { background: var(--ink); color: var(--bg); }
+  .b-dng { border: 1px solid var(--accent); color: var(--a700); }
+  .code-in { width: 100%; height: 64px; margin-top: 16px; padding: 0 16px; text-align: center; letter-spacing: .5em; font-weight: 800; font-size: 28px; background: var(--surface); border: 2px solid var(--divider); }
+  .code-in.err { border-color: var(--accent); }
+  .err-t { font-size: 14px; font-weight: 600; color: var(--a700); margin-top: 8px; }
+
+  /* full-screen viewer */
+  .viewer { position: fixed; inset: 0; z-index: 80; background: var(--n900); }
+  .viewer .stage { position: absolute; inset: 0; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; display: flex; }
+  .viewer .inner { margin: auto; width: 100%; }
+  .viewer img, .viewer canvas { display: block; width: 100%; height: auto; }
+  .viewer .pages canvas { background: #fff; margin-bottom: 12px; }
+  .viewer .x { position: fixed; top: calc(8px + env(safe-area-inset-top)); right: 8px; z-index: 2; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(0,0,0,.5); }
+  .viewer .msg { margin: auto; color: #fff; font-weight: 800; }
+  .empty-t { font-weight: 800; font-size: 22px; line-height: 1.15; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getFirestore, collection, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCiXcWoZLR37Ildi1Uy1N-cgXkOPuamV2A",
+    authDomain: "dreamteam-9ba54.firebaseapp.com",
+    projectId: "dreamteam-9ba54",
+    storageBucket: "dreamteam-9ba54.firebasestorage.app",
+    messagingSenderId: "796331884443",
+    appId: "1:796331884443:web:a18eb67205ff3799f82b3e"
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  const db = getFirestore(fbApp);
+  const storage = getStorage(fbApp);
+  const manualsCol = collection(db, 'manuals');
+
+  // ---------- config ----------
+  const SITES = ['Konsum', 'Subardo', 'Container Dream Team', 'Container White', 'Palapa', 'Palapita', 'Ballena'];
+  const EDIT_CODE = '482';           // 3-digit code that unlocks editing
+  const slug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const planUrl = (name) => `plans/${slug(name)}.pdf`; // floor plans are dropped in /plans by the developer
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  const BLOCK_TYPES = [
+    { key: 'text', label: 'Text', hint: 'Heading and paragraph', ic: 'Aa' },
+    { key: 'image', label: 'Image', hint: 'Photo with tap-to-zoom', ic: 'img' },
+    { key: 'hotspot', label: 'Hotspot image', hint: 'Photo with numbered points', ic: 'target' },
+    { key: 'collapse', label: 'Collapsible', hint: 'Title that expands', ic: 'chev' },
+    { key: 'checklist', label: 'Checklist', hint: 'Tappable items', ic: 'check' },
+  ];
+  const TYPE_LABEL = Object.fromEntries(BLOCK_TYPES.map(t => [t.key, t.label]));
+
+  // ---------- icons ----------
+  const svg = (p, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24">${p}</svg>`;
+  const IC = {
+    back: svg('<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>'),
+    close: svg('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'),
+    chevR: svg('<path d="m9 18 6-6-6-6"/>'),
+    chevL: svg('<path d="m15 18-6-6 6-6"/>'),
+    chevD: svg('<path d="m6 9 6 6 6-6"/>'),
+    arrowR: svg('<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>'),
+    plus: svg('<path d="M5 12h14"/><path d="M12 5v14"/>'),
+    edit: svg('<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>', 'sm'),
+    more: svg('<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>'),
+    grip: svg('<circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>'),
+    expand: svg('<path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="m21 3-7 7"/><path d="m3 21 7-7"/>'),
+    file: svg('<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>'),
+    map: svg('<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/>'),
+    img: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>'),
+    camera: svg('<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>'),
+    target: svg('<circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/>'),
+    check: svg('<path d="M20 6 9 17l-5-5"/>'),
+    copy: svg('<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>'),
+    trash: svg('<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>'),
+    slides: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>'),
+  };
+  const TYPE_ICON = { text: 'Aa', image: IC.img, hotspot: IC.target, collapse: IC.chevD, checklist: IC.check };
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const genId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  // ---------- seed (Konsum) shown until that tent is first edited ----------
+  function seedKonsum() {
+    const T = (heading, body) => ({ id: genId(), type: 'text', heading, body });
+    const I = (placeholder, caption = '') => ({ id: genId(), type: 'image', url: '', path: '', placeholder, caption });
+    const C = (title, body) => ({ id: genId(), type: 'collapse', title, body });
+    const L = (title, items) => ({ id: genId(), type: 'checklist', title, items: items.map(text => ({ id: genId(), text })) });
+    const H = (placeholder, points) => ({ id: genId(), type: 'hotspot', url: '', path: '', placeholder, caption: '', points: points.map(([x, y, note]) => ({ id: genId(), x, y, note })) });
+    const S = (title, blocks) => ({ id: genId(), title, blocks });
+    return [
+      S('Konsum', [I('Foto: Konsum montada, vista general', 'Manual de montaje — de la marca del suelo a la cúpula cerrada.'), T('', 'Sigue el orden de las diapositivas la primera vez que montes esta carpa.')]),
+      S('Herramientas', [L('Antes de empezar', ['Cinta de medir 50m', 'Aerosol para marcar', 'Campana + soporte + máquina para campana', 'Pallets para apoyar antenas a 45º', 'Al menos 3 cintas loop 4t (para levantar columnas y tirar con forklift)', 'Plásticos blancos (para extender antes de subir la cúpula)'])]),
+      S('Trazado', [I('Foto: trazado marcado en el suelo'), C('Lección aprendida', 'Nos olvidamos de marcar los palos de giro y luego fue un lío a la hora de subir la cúpula y extender la tela.\n\nMarca los palos de giro ANTES de levantar nada.')]),
+      S('Cables y cadenas de seguridad', [T('Medidas', 'LIFT y SIDE\nB — 17 mt · 6x\nA — 10 mt · 6x\n\nDOME\nA — 25 mt (mínimo) · 4x'), C('Cómo se calculó', 'La medida de 25mt se sacó calculando la hipotenusa, contando que la antena mide 12m y la distancia al tirefort desde la base es de 13mt.'), T('Security chains', '6 para las antenas · 4 para la cúpula')]),
+      S('Poles', [T('', '53 poles en total\n2 para el arch\n1 arch — entrance arch'), I('Foto: poles apilados / entrance arch')]),
+      S('Partes — laterales, antenas, tirefort', [H('Foto o diagrama de la conexión tirefort–cables–antenas', [[0.3, 0.3, 'ANTENA — conexión A/B con el tirefort.'], [0.65, 0.4, 'TIREFORT — tensor principal, conecta cables lift y side.'], [0.5, 0.7, 'CÚPULA — conexión A (25mt mínimo).']]), T('', 'Identificar y separar los cables antes de conectar — evita confundir lift, side y dome.')]),
+      S('Lift', [I('Foto: antenas siendo levantadas con forklift', 'Antena — pallets para elevar'), C('Lección aprendida', 'Siempre se habían elevado las antenas del fondo y atado el forklift a las otras. Estaría bien tener las cabras para levantar y no pallets.')]),
+      S('Security chains y ratchets', [L('Por cada tirefort', ['Colocar las cadenas de seguridad (5/8 y 3/4)', 'Acortar cadenas donde haga falta', 'Distribuir las ratchets en las picas'])]),
+      S('Cúpula', [T('', 'Entrar el trailer y colocarlo al medio para conectar la cúpula.\nDesplegar los plásticos blancos para proteger la carpa.'), I('Foto: trailer centrado, plásticos desplegados'), C('Lección aprendida — cuidado, experimental', 'La tela se trababa mucho en las antenas y se giraba. Los palos de giro no estaban marcados.\n\nCuando la cúpula está a cierta altura: cerrar la tela que rodea la antena, cerrar con el tornillo y coser los 3 agujeros de abajo.')]),
+      S('Side walls', [H('Foto: marcas de side walls en el suelo', [[0.15, 0.5, 'Side wall 1 — un equipo empieza aquí.'], [0.85, 0.5, 'Side wall 8 — el otro equipo empieza aquí, en dirección opuesta.']]), T('', 'Un equipo puede empezar desde el 1 y otro desde el 8, en direcciones opuestas, para encontrarse en el medio.')]),
+      S('Almost there', [T('', 'Mientras tanto se pueden ir colocando estas otras ratchets — van con doble ratchet en esas picas.'), I('Foto: Konsum casi terminada', 'Congratulations, you made it.')]),
+    ];
+  }
+
+  // ---------- state ----------
+  const data = {};                       // slug -> slides[]
+  const persisted = new Set();           // slugs that exist in Firestore
+  const plans = {};                      // slug -> true/false (PDF available)
+  const S = {
+    view: 'home', tent: null, idx: 0, editing: false,
+    sheet: null,                         // {type, ...}
+    expanded: {}, checked: {}, openPt: {}, viewer: null,
+    savedAt: 0, saveError: false, codeErr: false, uploading: {},
+  };
+  const app = document.getElementById('app');
+
+  const slides = () => (S.tent ? tentSlides(S.tent) : []);
+  const curSlide = () => slides()[S.idx];
+  const findBlock = (bid) => { const sl = curSlide(); return sl && sl.blocks.find(b => b.id === bid); };
+  const tentSlides = (name) => data[slug(name)] || (name === 'Konsum' && !persisted.has(slug(name)) ? (data[slug(name)] = seedKonsum()) : []);
+
+  // ---------- persistence ----------
+  let saveTimer = null;
+  function scheduleSave() {
+    S.savedAt = Date.now(); S.saveError = false;
+    updateSavedLabel();
+    clearTimeout(saveTimer);
+    const s = slug(S.tent), payload = JSON.parse(JSON.stringify(data[s] || []));
+    saveTimer = setTimeout(() => {
+      setDoc(doc(db, 'manuals', s), { slides: payload }).then(() => persisted.add(s)).catch(err => {
+        console.error('Manual save failed:', err); S.saveError = true; updateSavedLabel();
+      });
+    }, 400);
+  }
+  function updateSavedLabel() {
+    const el = document.getElementById('savedLbl');
+    if (!el) return;
+    if (S.saveError) { el.textContent = "Couldn't save — check connection"; return; }
+    el.textContent = Date.now() - S.savedAt < 4000 ? 'Saved' : 'All changes saved';
+  }
+  setInterval(updateSavedLabel, 1000);
+
+  onSnapshot(manualsCol, (snap) => {
+    snap.docChanges().forEach(ch => {
+      if (ch.type === 'removed') { delete data[ch.doc.id]; persisted.delete(ch.doc.id); return; }
+      persisted.add(ch.doc.id);
+      if (ch.doc.metadata.hasPendingWrites) return;
+      // don't overwrite what the person is typing right now
+      if (S.editing && S.tent && slug(S.tent) === ch.doc.id) return;
+      data[ch.doc.id] = Array.isArray(ch.doc.data().slides) ? ch.doc.data().slides : [];
+    });
+    if (!S.editing || S.view === 'home') render();
+  }, (err) => console.error('Firestore error:', err));
+
+  SITES.forEach(name => {
+    fetch(planUrl(name), { method: 'HEAD' }).then(r => { plans[slug(name)] = r.ok; render(); }).catch(() => { plans[slug(name)] = false; });
+  });
+
+  // ---------- navigation ----------
+  function go(view, extra = {}, push = true) {
+    Object.assign(S, { view, sheet: null, viewer: null }, extra);
+    if (push) history.pushState({ view: S.view, tent: S.tent, idx: S.idx }, '');
+    render();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('popstate', (e) => {
+    const st = e.state || { view: 'home', tent: null, idx: 0 };
+    if (S.viewer) { S.viewer = null; }
+    Object.assign(S, { view: st.view, tent: st.tent, idx: st.idx || 0, sheet: null });
+    if (S.view === 'home') S.editing = false;
+    render();
+  });
+  history.replaceState({ view: 'home', tent: null, idx: 0 }, '');
+
+  // ---------- render ----------
+  function render() {
+    let html = '';
+    if (S.view === 'home') html = homeHtml();
+    else if (S.view === 'tent') html = tentHtml();
+    else html = slideHtml();
+    html += sheetHtml() + viewerHtml();
+    app.innerHTML = html;
+    afterRender();
+  }
+
+  function editBar() {
+    return `<div class="editbar">${IC.edit}<b>Editing</b><span class="st">· <span id="savedLbl">All changes saved</span></span><button data-act="done">Done</button></div>`;
+  }
+
+  function homeHtml() {
+    return `
+      <div style="padding:calc(4px + env(safe-area-inset-top)) 4px 0"><a href="index.html" class="ib" aria-label="Back to tasks">${IC.back}</a></div>
+      <div style="padding:2px 16px 16px">
+        <div class="title34">Manual</div>
+        <div class="muted" style="font-size:14px;margin-top:8px;text-wrap:pretty">How to set up, run and pack down each tent</div>
+      </div>
+      <div style="border-top:2px solid var(--divider);padding-bottom:calc(32px + env(safe-area-inset-bottom))">
+        ${SITES.map(name => {
+          const n = tentSlides(name).length, has = plans[slug(name)];
+          return `<button class="tent-row" data-act="open-tent" data-name="${esc(name)}">
+            <span style="min-width:0"><span class="nm" style="display:block">${esc(name)}</span>
+              <span class="pl ${has ? '' : 'none'}">${IC.map}${has ? 'Plan on file' : 'No plan yet'}</span></span>
+            <span class="ct"><b class="${n ? '' : 'zero'}">${n}</b><span>${n === 1 ? 'slide' : 'slides'}</span></span>
+            ${IC.chevR}
+          </button>`;
+        }).join('')}
+      </div>`;
+  }
+
+  function tentHtml() {
+    const list = slides(), s = slug(S.tent), has = plans[s];
+    const ed = S.editing;
+    return `
+      <div class="sticky">
+        <div class="head line">
+          <button class="ib" data-act="home" aria-label="Back">${IC.back}</button>
+          <div class="h">${esc(S.tent)}</div>
+          ${ed ? '' : `<button class="txt-btn" data-act="edit">${IC.edit}Edit</button>`}
+        </div>
+        ${ed ? editBar() : ''}
+      </div>
+      <div style="padding-bottom:calc(104px + env(safe-area-inset-bottom))">
+        <div style="display:flex;align-items:baseline;gap:8px;padding:18px 16px 10px">
+          <span class="lbl">Floor plan</span>${has ? `<span class="muted" style="font-size:13px">${esc(s)}.pdf</span>` : ''}
+        </div>
+        ${has ? `<div style="padding:0 16px">
+            <button class="plan-btn" data-act="open-plan" aria-label="Open floor plan full screen">
+              <span id="planThumb"></span>
+              <span class="xp">${IC.expand}</span>
+              <span class="tag">${IC.file}PDF plan</span>
+            </button>
+            <div class="muted" style="font-size:13px;padding:8px 0 0">Tap to open full screen · pinch to zoom</div>
+          </div>` : `<div class="dashed" style="margin:0 16px;padding:18px 16px">
+            <div style="font-weight:800;font-size:17px">No plan yet</div>
+            <div class="muted" style="font-size:14px;margin-top:4px;text-wrap:pretty">The floor plan will appear here once it's added.</div>
+          </div>`}
+        <div class="sec-h"><span class="lbl">Slides</span><span class="muted" style="font-size:13px">${list.length} ${list.length === 1 ? 'slide' : 'slides'}</span>
+          ${ed && list.length > 1 ? '<span class="muted" style="margin-left:auto;font-size:12px">Drag ⠿ to reorder</span>' : ''}</div>
+        ${list.map((sl, i) => `
+          <div class="slide-row" data-act="open-slide" data-idx="${i}" data-drag-row="slides" data-i="${i}">
+            <span class="num">${i + 1}</span>
+            <span class="tt ${sl.title ? '' : 'empty'}">${esc(sl.title || 'Untitled slide')}${ed ? `<small>${sl.blocks.length} ${sl.blocks.length === 1 ? 'block' : 'blocks'}</small>` : ''}</span>
+            ${ed ? `<span style="display:flex;align-items:center">
+                <button class="ib" style="width:44px;height:44px" data-act="slide-menu" data-idx="${i}" aria-label="Slide options">${IC.more}</button>
+                <span class="grip" data-grip="slides" aria-label="Drag to reorder">${IC.grip}</span></span>`
+              : `<span style="margin-right:10px">${IC.chevR}</span>`}
+          </div>`).join('')}
+        ${list.length === 0 ? `<div style="padding:28px 16px 24px;border-bottom:1px solid var(--divider)">
+            <div class="empty-t">No slides yet</div>
+            <div class="muted" style="font-size:15px;margin-top:6px;text-wrap:pretty">${ed ? 'Add the first one below.' : 'Turn on edit mode to add the first one.'}</div></div>` : ''}
+        ${ed ? `<div style="padding:12px 16px"><button class="dashed-add" data-act="add-slide">${list.length ? 'Add slide' : 'Add the first slide'}${IC.plus}</button></div>` : ''}
+      </div>
+      ${!ed && list.length ? `<div class="bar"><button class="btn-acc" data-act="start">Start<small>· slide 1 of ${list.length}</small>${IC.arrowR}</button></div>` : ''}`;
+  }
+
+  function slideHtml() {
+    const list = slides(), n = S.idx, sl = list[n], ed = S.editing;
+    if (!sl) return '';
+    return `
+      <div class="sticky">
+        <div class="head">
+          <button class="ib" data-act="close-slides" aria-label="Close slides">${IC.close}</button>
+          <div style="flex:1;min-width:0">
+            <div class="lbl" style="font-size:11px;color:var(--n700);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(S.tent)}</div>
+            <div style="font-weight:800;font-size:16px;font-variant-numeric:tabular-nums">Slide ${n + 1} of ${list.length}</div>
+          </div>
+          ${ed ? `<button class="ib" data-act="slide-menu" data-idx="${n}" aria-label="Slide options">${IC.more}</button>`
+               : `<button class="txt-btn" data-act="edit">${IC.edit}Edit</button>`}
+        </div>
+        <div class="prog">${list.map((_, i) => `<span class="${i === n ? 'cur' : i < n ? 'done' : ''}"></span>`).join('')}</div>
+        ${ed ? editBar() : ''}
+        <div style="height:2px;background:var(--divider)"></div>
+      </div>
+      <div id="slideBody" style="padding-bottom:calc(112px + env(safe-area-inset-bottom));min-height:60dvh">
+        <div style="padding:20px 16px 8px">
+          <div class="slide-num">${String(n + 1).padStart(2, '0')} / ${String(list.length).padStart(2, '0')}</div>
+          ${ed ? `<textarea class="slide-title slide-title-in" rows="2" placeholder="Slide title" data-bind="slideTitle">${esc(sl.title)}</textarea>`
+               : `<div class="slide-title">${esc(sl.title || 'Untitled slide')}</div>`}
+        </div>
+        ${sl.blocks.map((b, bi) => blockHtml(b, bi, ed)).join('')}
+        ${ed ? `<div style="padding:16px"><button class="dashed-add" data-act="block-menu">Add block${IC.plus}</button></div>` : ''}
+        ${!ed && sl.blocks.length === 0 ? `<div style="padding:40px 16px"><div class="empty-t" style="font-size:20px">Nothing here yet</div>
+            <div class="muted" style="font-size:15px;margin-top:6px">Turn on edit mode to add blocks.</div></div>` : ''}
+        ${ed && sl.blocks.length === 0 ? `<div style="padding:0 16px 24px"><div class="empty-t" style="font-size:20px">No blocks yet</div>
+            <div class="muted" style="font-size:15px;margin-top:6px">Tap "Add block" to start this slide.</div></div>` : ''}
+      </div>
+      <div class="bar"><div class="navbar">
+        <button class="prev" data-act="prev" ${n === 0 ? 'disabled' : ''} aria-label="Previous slide">${IC.chevL}</button>
+        <button class="jump" data-act="jump">${IC.slides}Jump to slide…</button>
+        <button class="next" data-act="next" ${n === list.length - 1 ? 'disabled' : ''} aria-label="Next slide">${IC.chevR}</button>
+      </div></div>`;
+  }
+
+  function fileInput(b, label, cls) {
+    const busy = S.uploading[b.id];
+    return `<label class="${cls}"><input type="file" accept="image/*" data-file="${b.id}" style="display:none">${IC.camera}${busy ? 'Uploading…' : label}</label>`;
+  }
+  const bgStyle = (url) => (url ? `style="background-image:url('${esc(url)}')"` : '');
+
+  function blockHtml(b, bi, ed) {
+    let inner = '';
+    if (b.type === 'text') {
+      inner = ed ? `<div class="ed-pad">
+          <input class="in" style="height:52px;font-weight:800;font-size:20px" placeholder="Heading (optional)" value="${esc(b.heading)}" data-bind="b:heading" data-bid="${b.id}">
+          <textarea class="in" rows="4" placeholder="Write the instructions…" data-bind="b:body" data-bid="${b.id}">${esc(b.body)}</textarea></div>`
+        : `<div style="padding:14px 16px 6px">${b.heading ? `<div class="t-heading">${esc(b.heading)}</div>` : ''}${b.body ? `<div class="t-body">${esc(b.body)}</div>` : ''}</div>`;
+    } else if (b.type === 'image') {
+      inner = ed ? `<div class="img-box" ${bgStyle(b.url)}>${b.url ? '' : `<span class="ph">${IC.img}${esc(b.placeholder || 'Add photo')}</span>`}${fileInput(b, b.url ? 'Replace photo' : 'Add photo', 'file-btn')}</div>
+          <div class="ed-pad"><input class="in" placeholder="Caption (optional)" value="${esc(b.caption)}" data-bind="b:caption" data-bid="${b.id}"></div>`
+        : `<button class="img-box" data-act="open-image" data-bid="${b.id}" aria-label="Open photo" ${bgStyle(b.url)}>
+             ${b.url ? '' : `<span class="ph">${IC.img}${esc(b.placeholder || 'Photo')}</span>`}<span class="xp">${IC.expand}</span></button>
+           ${b.caption ? `<div class="cap">${esc(b.caption)}</div>` : ''}`;
+    } else if (b.type === 'hotspot') {
+      const pts = b.points || [], open = pts.find(p => p.id === S.openPt[b.id]);
+      inner = `${ed ? `<div class="hs-tip">${IC.target}Tap the photo to add a point. Drag a point to move it.</div>` : ''}
+        <div class="hs ${ed ? 'ed' : ''}" data-hs="${b.id}" ${bgStyle(b.url)}>
+          ${b.url ? '' : `<span class="ph" style="position:absolute;left:12px;bottom:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--n800);pointer-events:none">${IC.img}${esc(b.placeholder || 'Add photo')}</span>`}
+          ${pts.map((p, i) => `<button class="dot ${ed ? 'ed' : ''} ${open && open.id === p.id ? 'on' : ''}" data-dot="${p.id}" data-bid="${b.id}" style="left:${p.x * 100}%;top:${p.y * 100}%" aria-label="Point ${i + 1}"><span>${i + 1}</span></button>`).join('')}
+        </div>
+        ${open ? `<div class="note-card"><span class="n">${pts.indexOf(open) + 1}</span><span class="tx">${esc(open.note || 'No note yet')}</span><button data-act="close-note" data-bid="${b.id}" aria-label="Close note">${IC.close}</button></div>` : ''}
+        ${!ed && pts.length && !open ? `<div class="hint"><b>1</b>Tap a number to see what it is</div>` : ''}
+        ${ed ? `<div style="padding:4px 12px 12px">
+          ${pts.map((p, i) => `<button class="pt-row" data-act="edit-point" data-bid="${b.id}" data-pid="${p.id}"><span class="c">${i + 1}</span><span class="nt ${p.note ? '' : 'none'}">${esc(p.note || 'No note yet')}</span>${IC.chevR}</button>`).join('')}
+          ${pts.length ? '' : '<div class="muted" style="font-size:14px;padding:10px 0">No points yet</div>'}
+          ${fileInput(b, b.url ? 'Replace photo' : 'Add photo', 'file-row')}
+          <div style="margin-top:8px"><input class="in" placeholder="Caption (optional)" value="${esc(b.caption)}" data-bind="b:caption" data-bid="${b.id}"></div></div>` : (b.caption ? `<div class="cap">${esc(b.caption)}</div>` : '')}`;
+    } else if (b.type === 'collapse') {
+      const open = !!S.expanded[b.id];
+      inner = ed ? `<div class="ed-pad">
+          <input class="in" style="height:52px;font-weight:800;font-size:18px" placeholder="Section title (always visible)" value="${esc(b.title)}" data-bind="b:title" data-bid="${b.id}">
+          <textarea class="in" rows="4" placeholder="Hidden until someone taps the title…" data-bind="b:body" data-bid="${b.id}">${esc(b.body)}</textarea>
+          <div class="muted" style="font-size:13px">Collapsed when viewing. Opens on tap.</div></div>`
+        : `<div style="padding:8px 16px"><button class="col-h ${open ? 'open' : ''}" data-act="toggle-col" data-bid="${b.id}" aria-expanded="${open}">
+            <span class="t">${esc(b.title || 'Section')}</span><span class="s">${open ? 'Hide' : 'Show'}</span>${IC.chevD}</button>
+            ${open ? `<div class="col-b">${esc(b.body)}</div>` : ''}</div>`;
+    } else if (b.type === 'checklist') {
+      const items = b.items || [], done = S.checked[b.id] || {}, dc = items.filter(i => done[i.id]).length;
+      inner = ed ? `<div class="ed-pad" style="gap:0">
+          <input class="in" style="margin-bottom:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:14px" placeholder="Checklist title" value="${esc(b.title)}" data-bind="b:title" data-bid="${b.id}">
+          ${items.map(it => `<div class="ck-ed"><input placeholder="Item" value="${esc(it.text)}" data-bind="item" data-bid="${b.id}" data-iid="${it.id}"><button data-act="del-item" data-bid="${b.id}" data-iid="${it.id}" aria-label="Delete item">${IC.close}</button></div>`).join('')}
+          <div class="add-row"><input class="in" placeholder="Add item…" data-newitem="${b.id}"><button data-act="add-item" data-bid="${b.id}">Add</button></div></div>`
+        : `<div style="padding:14px 16px 8px"><div class="ck-h"><span class="t">${esc(b.title || 'Checklist')}</span><span class="p">${dc} / ${items.length}</span></div>
+            ${items.map(it => `<button class="ck-i ${done[it.id] ? 'done' : ''}" data-act="toggle-item" data-bid="${b.id}" data-iid="${it.id}"><span class="ck-box ${done[it.id] ? 'on' : ''}">${done[it.id] ? IC.check : ''}</span><span class="tx">${esc(it.text)}</span></button>`).join('')}
+            ${items.length ? '' : '<div class="muted" style="font-size:15px;padding:10px 0">No items</div>'}</div>`;
+    }
+    if (!ed) return `<div class="blk" style="margin-bottom:4px">${inner}</div>`;
+    return `<div class="blk ed" data-drag-row="blocks" data-i="${bi}">
+      <div class="blk-tb"><span class="grip" data-grip="blocks" aria-label="Drag to reorder">${IC.grip}</span><span class="ty">${TYPE_LABEL[b.type]}</span>
+        <button class="t" data-act="dup-block" data-bid="${b.id}" aria-label="Duplicate block">${IC.copy}</button>
+        <button class="t del" data-act="del-block" data-bid="${b.id}" aria-label="Delete block">${IC.trash}</button></div>
+      ${inner}</div>`;
+  }
+
+  function sheetHtml() {
+    const sh = S.sheet;
+    if (!sh) return '';
+    const wrap = (inner) => `<div class="backdrop" data-backdrop="1"><div class="sheet"><div class="grab"></div>${inner}</div></div>`;
+    if (sh.type === 'code') return `<div class="backdrop" data-backdrop="1"><div class="sheet" style="padding:20px 20px calc(24px + env(safe-area-inset-bottom))">
+        <div style="font-weight:800;font-size:20px">Enter edit code</div>
+        <div class="muted" style="font-size:14px;margin-top:4px">3-digit code · editing is protected, viewing is open to everyone</div>
+        <input class="code-in ${S.codeErr ? 'err' : ''}" id="codeInput" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="—  —  —" autocomplete="off" data-bind="code">
+        ${S.codeErr ? '<div class="err-t">Wrong code. Try again.</div>' : ''}
+        <div class="two"><button class="b-out" data-act="sheet-close">Cancel</button><button class="b-acc" data-act="code-submit">Unlock</button></div></div></div>`;
+    if (sh.type === 'blocks') return wrap(`<h3>Add block</h3>${BLOCK_TYPES.map(t => `
+        <button class="sheet-row" style="min-height:64px" data-act="add-block" data-type="${t.key}"><span class="ic">${TYPE_ICON[t.key]}</span><span><b>${t.label}</b><small>${t.hint}</small></span></button>`).join('')}`);
+    if (sh.type === 'jump') return `<div class="backdrop" data-backdrop="1"><div class="sheet" style="padding:0;max-height:72dvh;display:flex;flex-direction:column"><div class="grab" style="margin:10px auto 8px"></div>
+        <h3 style="padding:0 16px 10px;border-bottom:2px solid var(--divider)">Jump to slide</h3>
+        <div style="overflow-y:auto;padding-bottom:calc(16px + env(safe-area-inset-bottom))">${slides().map((sl, i) => `
+          <button class="sheet-row ${i === S.idx ? 'cur' : ''}" data-act="jump-to" data-idx="${i}"><span class="muted" style="font-weight:800;min-width:22px">${i + 1}</span><span style="flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${sl.title ? '' : 'color:var(--n600)'}">${esc(sl.title || 'Untitled slide')}</span></button>`).join('')}</div></div></div>`;
+    if (sh.type === 'slide') { const sl = slides()[sh.idx]; if (!sl) return ''; return wrap(`
+        <h3 style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sl.title || 'Untitled slide')}</h3>
+        <div style="padding:0 12px 12px"><input class="in" placeholder="Slide title" value="${esc(sl.title)}" data-bind="renameSlide"></div>
+        <button class="sheet-row" data-act="dup-slide">${IC.copy}Duplicate slide</button>
+        <button class="sheet-row danger" data-act="del-slide">${IC.trash}Delete slide</button>
+        <div style="padding:10px 0 0"><button class="b-out" style="width:100%;height:52px;font-weight:800;font-size:15px;text-align:center" data-act="sheet-close">Done</button></div>`); }
+    if (sh.type === 'point') {
+      const b = findBlock(sh.bid), pts = b ? b.points : [], pt = pts.find(p => p.id === sh.pid);
+      if (!pt) return '';
+      return `<div class="backdrop" data-backdrop="1"><div class="sheet" style="padding:20px 20px calc(24px + env(safe-area-inset-bottom))">
+        <div style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--accent);color:var(--bg);font-weight:800;font-size:15px">${pts.indexOf(pt) + 1}</span><div style="font-weight:800;font-size:18px">Point ${pts.indexOf(pt) + 1}</div></div>
+        <textarea class="in" id="pointNote" rows="3" placeholder="What is this?" style="margin-top:14px;font-size:17px;line-height:1.4;resize:none" data-bind="note">${esc(pt.note)}</textarea>
+        <div class="muted" style="font-size:13px;margin-top:8px">Drag the number on the photo to move it.</div>
+        <div class="two"><button class="b-dng" data-act="del-point">Delete point</button><button class="b-ink" data-act="sheet-close">Done</button></div></div></div>`;
+    }
+    return '';
+  }
+
+  function viewerHtml() {
+    const v = S.viewer;
+    if (!v) return '';
+    return `<div class="viewer"><button class="x" data-act="close-viewer" aria-label="Close">${IC.close}</button>
+      <div class="stage" id="stage"><div class="inner ${v.kind === 'plan' ? 'pages' : ''}" id="zoomInner">
+        ${v.kind === 'image' ? `<img src="${esc(v.url)}" alt="">` : '<div class="msg" id="planMsg">Loading plan…</div>'}
+      </div></div></div>`;
+  }
+
+  // ---------- after render: pdf, zoom, focus ----------
+  const pdfCache = {};
+  function loadPdf(name) {
+    const u = planUrl(name);
+    return pdfCache[u] || (pdfCache[u] = pdfjsLib.getDocument(u).promise);
+  }
+  async function drawPage(page, canvas, width) {
+    const base = page.getViewport({ scale: 1 });
+    const scale = width / base.width;
+    const vp = page.getViewport({ scale });
+    canvas.width = vp.width; canvas.height = vp.height;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+  }
+  let thumbFor = null;
+  function afterRender() {
+    if (S.view === 'tent' && plans[slug(S.tent)]) {
+      const host = document.getElementById('planThumb');
+      if (host) {
+        const name = S.tent; thumbFor = name;
+        loadPdf(name).then(pdf => pdf.getPage(1)).then(async page => {
+          if (thumbFor !== name || !document.getElementById('planThumb')) return;
+          const c = document.createElement('canvas');
+          await drawPage(page, c, 900);
+          const h = document.getElementById('planThumb');
+          if (h && !h.firstChild) h.appendChild(c);
+        }).catch(err => console.error('Plan preview failed:', err));
+      }
+    }
+    if (S.viewer) {
+      const stage = document.getElementById('stage'), inner = document.getElementById('zoomInner');
+      if (stage && inner) makeZoomable(stage, inner);
+      if (S.viewer.kind === 'plan' && !S.viewer.loaded) {
+        S.viewer.loaded = true;
+        const name = S.tent;
+        loadPdf(name).then(async pdf => {
+          const msg = document.getElementById('planMsg');
+          if (msg) msg.remove();
+          const box = document.getElementById('zoomInner');
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const c = document.createElement('canvas');
+            if (!box || !S.viewer) return;
+            box.appendChild(c);
+            await drawPage(page, c, Math.min(2200, Math.round(window.innerWidth * (window.devicePixelRatio || 1) * 2)));
+          }
+        }).catch(err => { console.error('Plan failed:', err); const m = document.getElementById('planMsg'); if (m) m.textContent = "Couldn't load the plan"; });
+      }
+    }
+    if (S.sheet && S.sheet.type === 'code') { const el = document.getElementById('codeInput'); if (el) el.focus(); }
+    if (S.sheet && S.sheet.type === 'point' && S.sheet.focus) { S.sheet.focus = false; const el = document.getElementById('pointNote'); if (el) el.focus(); }
+    if (S.refocusNew) { const el = document.querySelector(`[data-newitem="${S.refocusNew}"]`); S.refocusNew = null; if (el) el.focus(); }
+    document.querySelectorAll('textarea.slide-title-in').forEach(autoGrow);
+  }
+  function autoGrow(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+
+  // pinch to zoom (changes the content width so native scrolling pans it), double-tap toggles 2.5x
+  function makeZoomable(stage, inner) {
+    let scale = 1, pinch = null, lastTap = 0;
+    const apply = (ns, cx, cy) => {
+      const r = stage.getBoundingClientRect();
+      const fx = (stage.scrollLeft + cx - r.left) / inner.offsetWidth, fy = (stage.scrollTop + cy - r.top) / inner.offsetHeight;
+      scale = ns;
+      inner.style.width = (scale * 100) + '%';
+      stage.scrollLeft = fx * inner.offsetWidth - (cx - r.left);
+      stage.scrollTop = fy * inner.offsetHeight - (cy - r.top);
+    };
+    const dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    stage.addEventListener('touchstart', (e) => { if (e.touches.length === 2) pinch = { d: dist(e.touches), s: scale }; }, { passive: true });
+    stage.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && pinch) {
+        e.preventDefault();
+        const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2, cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        apply(Math.min(5, Math.max(1, pinch.s * dist(e.touches) / pinch.d)), cx, cy);
+      }
+    }, { passive: false });
+    stage.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) pinch = null;
+      if (e.touches.length === 0 && e.changedTouches.length === 1) {
+        const now = Date.now();
+        if (now - lastTap < 300) { const t = e.changedTouches[0]; apply(scale > 1 ? 1 : 2.5, t.clientX, t.clientY); lastTap = 0; }
+        else lastTap = now;
+      }
+    });
+  }
+
+  // ---------- image upload ----------
+  function compressImage(file, maxDim = 1280, quality = 0.6) {
+    return new Promise((resolve, reject) => {
+      const img = new Image(), u = URL.createObjectURL(file);
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+          else { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        const c = document.createElement('canvas'); c.width = width; c.height = height;
+        c.getContext('2d').drawImage(img, 0, 0, width, height);
+        c.toBlob(b => { URL.revokeObjectURL(u); resolve(b || file); }, 'image/jpeg', quality);
+      };
+      img.onerror = () => { URL.revokeObjectURL(u); reject(new Error('Could not read the image')); };
+      img.src = u;
+    });
+  }
+  async function uploadBlockPhoto(bid, file) {
+    const b = findBlock(bid);
+    if (!b || !file) return;
+    const tentSlug = slug(S.tent), oldPath = b.path;
+    S.uploading[bid] = true; render();
+    try {
+      const blob = await compressImage(file);
+      const path = `manual/${tentSlug}/${bid}-${Date.now()}.jpg`;
+      const r = storageRef(storage, path);
+      await uploadBytes(r, blob, { contentType: 'image/jpeg' });
+      b.url = await getDownloadURL(r); b.path = path;
+      if (oldPath) deleteObject(storageRef(storage, oldPath)).catch(() => {});
+      scheduleSave();
+    } catch (err) {
+      console.error('Photo upload failed:', err);
+      alert("Couldn't upload the photo. Check your connection and try again.");
+    } finally { delete S.uploading[bid]; render(); }
+  }
+
+  // ---------- reorder by dragging the grip ----------
+  function startDrag(e, grip) {
+    const kind = grip.dataset.grip, row = grip.closest('[data-drag-row]');
+    if (!row) return;
+    e.preventDefault();
+    const rows = [...document.querySelectorAll(`[data-drag-row="${kind}"]`)];
+    const from = rows.indexOf(row), rects = rows.map(r => r.getBoundingClientRect());
+    const startY = e.clientY;
+    let to = from;
+    row.classList.add('drag-src');
+    row.style.position = 'relative'; row.style.zIndex = 10;
+    grip.setPointerCapture(e.pointerId);
+    const move = (ev) => {
+      row.style.transform = `translateY(${ev.clientY - startY}px)`;
+      const y = ev.clientY;
+      to = from;
+      rects.forEach((r, i) => { if (y > r.top + r.height / 2 && i > from) to = i; if (y < r.top + r.height / 2 && i < from && to === from) to = i; });
+      rows.forEach((r, i) => { r.classList.toggle('drop-before', i === to && to < from); r.classList.toggle('drop-after', i === to && to > from); });
+    };
+    const up = () => {
+      grip.removeEventListener('pointermove', move); grip.removeEventListener('pointerup', up); grip.removeEventListener('pointercancel', up);
+      if (to !== from) {
+        const arr = kind === 'slides' ? slides() : curSlide().blocks;
+        const [m] = arr.splice(from, 1); arr.splice(to, 0, m);
+        if (kind === 'slides') S.idx = Math.min(S.idx, arr.length - 1);
+        scheduleSave();
+      }
+      render();
+    };
+    grip.addEventListener('pointermove', move); grip.addEventListener('pointerup', up); grip.addEventListener('pointercancel', up);
+  }
+
+  // ---------- hotspot pin dragging (edit mode) ----------
+  function startDotDrag(e, dot) {
+    const bid = dot.dataset.bid, pid = dot.dataset.dot, b = findBlock(bid);
+    const box = dot.parentElement, p = b && b.points.find(x => x.id === pid);
+    if (!p) return;
+    e.stopPropagation();
+    dot.setPointerCapture(e.pointerId);
+    const sx = e.clientX, sy = e.clientY; let moved = false;
+    const move = (ev) => {
+      if (Math.hypot(ev.clientX - sx, ev.clientY - sy) > 6) moved = true;
+      if (!moved) return;
+      const r = box.getBoundingClientRect();
+      p.x = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
+      p.y = Math.min(1, Math.max(0, (ev.clientY - r.top) / r.height));
+      dot.style.left = p.x * 100 + '%'; dot.style.top = p.y * 100 + '%';
+    };
+    const up = () => {
+      dot.removeEventListener('pointermove', move); dot.removeEventListener('pointerup', up); dot.removeEventListener('pointercancel', up);
+      if (moved) scheduleSave(); else { S.sheet = { type: 'point', bid, pid, focus: true }; render(); }
+    };
+    dot.addEventListener('pointermove', move); dot.addEventListener('pointerup', up); dot.addEventListener('pointercancel', up);
+  }
+
+  // ---------- events ----------
+  app.addEventListener('pointerdown', (e) => {
+    if (!S.editing) return;
+    const dot = e.target.closest('.dot.ed');
+    if (dot) { startDotDrag(e, dot); return; }
+    const grip = e.target.closest('[data-grip]');
+    if (grip) startDrag(e, grip);
+  });
+
+  const editSlide = (fn) => { fn(); scheduleSave(); render(); };
+  function newBlock(type) {
+    const id = genId();
+    if (type === 'text') return { id, type, heading: '', body: '' };
+    if (type === 'image') return { id, type, url: '', path: '', caption: '' };
+    if (type === 'hotspot') return { id, type, url: '', path: '', caption: '', points: [] };
+    if (type === 'collapse') return { id, type, title: '', body: '' };
+    return { id, type: 'checklist', title: '', items: [] };
+  }
+  const dropBlockPhoto = (b) => { if (b.path) deleteObject(storageRef(storage, b.path)).catch(() => {}); };
+
+  app.addEventListener('click', (e) => {
+    if (e.target.hasAttribute && e.target.hasAttribute('data-backdrop')) { S.sheet = null; render(); return; }
+    // tap on the photo of a hotspot block
+    const hs = e.target.closest('[data-hs]');
+    if (hs && !e.target.closest('.dot')) {
+      if (S.editing) {
+        const b = findBlock(hs.dataset.hs), r = hs.getBoundingClientRect();
+        const p = { id: genId(), x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height, note: '' };
+        b.points.push(p); scheduleSave();
+        S.sheet = { type: 'point', bid: b.id, pid: p.id, focus: true }; render();
+      } else if (S.openPt[hs.dataset.hs]) { delete S.openPt[hs.dataset.hs]; render(); }
+      return;
+    }
+    const dot = e.target.closest('.dot');
+    if (dot && !S.editing) {
+      const bid = dot.dataset.bid;
+      if (S.openPt[bid] === dot.dataset.dot) delete S.openPt[bid]; else S.openPt[bid] = dot.dataset.dot;
+      render(); return;
+    }
+    if (e.target.closest('[data-grip]')) return;
+    const el = e.target.closest('[data-act]');
+    if (!el) return;
+    const a = el.dataset.act, bid = el.dataset.bid;
+    const list = slides(), sl = curSlide();
+    switch (a) {
+      case 'home': S.editing = false; if (history.state && history.state.view === 'tent') history.back(); else go('home', { tent: null }); break;
+      case 'open-tent': go('tent', { tent: el.dataset.name, editing: false }); break;
+      case 'edit': S.codeErr = false; S.sheet = { type: 'code' }; render(); break;
+      case 'done': S.editing = false; S.sheet = null; render(); break;
+      case 'code-submit': submitCode(); break;
+      case 'sheet-close': S.sheet = null; render(); break;
+      case 'start': go('slide', { idx: 0 }); break;
+      case 'open-slide': go('slide', { idx: Number(el.dataset.idx) }); break;
+      case 'close-slides': if (history.state && history.state.view === 'slide') history.back(); else go('tent'); break;
+      case 'prev': if (S.idx > 0) { S.idx--; render(); window.scrollTo(0, 0); } break;
+      case 'next': if (S.idx < list.length - 1) { S.idx++; render(); window.scrollTo(0, 0); } break;
+      case 'jump': S.sheet = { type: 'jump' }; render(); break;
+      case 'jump-to': S.idx = Number(el.dataset.idx); S.sheet = null; render(); window.scrollTo(0, 0); break;
+      case 'add-slide': list.push({ id: genId(), title: '', blocks: [] }); data[slug(S.tent)] = list; scheduleSave(); render(); break;
+      case 'slide-menu': e.stopPropagation(); S.sheet = { type: 'slide', idx: Number(el.dataset.idx) }; render(); break;
+      case 'dup-slide': {
+        const i = S.sheet.idx, src = list[i];
+        list.splice(i + 1, 0, { ...JSON.parse(JSON.stringify(src)), id: genId(), blocks: JSON.parse(JSON.stringify(src.blocks)).map(b => ({ ...b, id: genId(), path: '' })) });
+        S.sheet = null; scheduleSave(); render(); break;
+      }
+      case 'del-slide': {
+        if (!confirm('Delete this slide?')) break;
+        const i = S.sheet.idx;
+        list[i].blocks.forEach(dropBlockPhoto);
+        list.splice(i, 1); S.sheet = null; scheduleSave();
+        if (S.view === 'slide') { if (list.length === 0) go('tent', {}, false); else { S.idx = Math.min(S.idx, list.length - 1); render(); } } else render();
+        break;
+      }
+      case 'block-menu': S.sheet = { type: 'blocks' }; render(); break;
+      case 'add-block': sl.blocks.push(newBlock(el.dataset.type)); S.sheet = null; scheduleSave(); render(); requestAnimationFrame(() => window.scrollTo(0, document.body.scrollHeight)); break;
+      case 'dup-block': { const i = sl.blocks.findIndex(b => b.id === bid), c = JSON.parse(JSON.stringify(sl.blocks[i])); c.id = genId(); c.path = ''; (c.items || []).forEach(x => x.id = genId()); (c.points || []).forEach(x => x.id = genId()); sl.blocks.splice(i + 1, 0, c); scheduleSave(); render(); break; }
+      case 'del-block': { const i = sl.blocks.findIndex(b => b.id === bid); dropBlockPhoto(sl.blocks[i]); sl.blocks.splice(i, 1); scheduleSave(); render(); break; }
+      case 'toggle-col': S.expanded[bid] = !S.expanded[bid]; render(); break;
+      case 'toggle-item': { const c = S.checked[bid] || (S.checked[bid] = {}); c[el.dataset.iid] = !c[el.dataset.iid]; render(); break; }
+      case 'add-item': addChecklistItem(bid); break;
+      case 'del-item': { const b = findBlock(bid); b.items = b.items.filter(i => i.id !== el.dataset.iid); scheduleSave(); render(); break; }
+      case 'edit-point': S.sheet = { type: 'point', bid, pid: el.dataset.pid, focus: true }; render(); break;
+      case 'del-point': { const b = findBlock(S.sheet.bid); b.points = b.points.filter(p => p.id !== S.sheet.pid); S.sheet = null; scheduleSave(); render(); break; }
+      case 'close-note': delete S.openPt[bid]; render(); break;
+      case 'open-image': { const b = findBlock(bid); if (b && b.url) { S.viewer = { kind: 'image', url: b.url }; render(); } break; }
+      case 'open-plan': S.viewer = { kind: 'plan' }; render(); break;
+      case 'close-viewer': S.viewer = null; render(); break;
+    }
+  });
+
+  function addChecklistItem(bid) {
+    const input = document.querySelector(`[data-newitem="${bid}"]`), text = input ? input.value.trim() : '';
+    if (!text) return;
+    findBlock(bid).items.push({ id: genId(), text });
+    scheduleSave(); S.refocusNew = bid; render();
+  }
+  function submitCode() {
+    const v = (document.getElementById('codeInput') || {}).value || '';
+    if (v === EDIT_CODE) { S.editing = true; S.sheet = null; S.codeErr = false; render(); }
+    else { S.codeErr = true; render(); }
+  }
+
+  // typing edits the data in place without re-rendering (so the keyboard/focus stays put)
+  app.addEventListener('input', (e) => {
+    const t = e.target, bind = t.dataset && t.dataset.bind;
+    if (!bind) return;
+    if (bind === 'code') { t.value = t.value.replace(/\D/g, '').slice(0, 3); if (S.codeErr) { S.codeErr = false; t.classList.remove('err'); const m = document.querySelector('.err-t'); if (m) m.remove(); } return; }
+    if (bind === 'slideTitle') { curSlide().title = t.value; autoGrow(t); scheduleSave(); return; }
+    if (bind === 'renameSlide') { slides()[S.sheet.idx].title = t.value; scheduleSave(); return; }
+    if (bind === 'note') { const b = findBlock(S.sheet.bid); b.points.find(p => p.id === S.sheet.pid).note = t.value; scheduleSave(); return; }
+    if (bind === 'item') { findBlock(t.dataset.bid).items.find(i => i.id === t.dataset.iid).text = t.value; scheduleSave(); return; }
+    if (bind.startsWith('b:')) { findBlock(t.dataset.bid)[bind.slice(2)] = t.value; scheduleSave(); }
+  });
+  app.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    if (e.target.id === 'codeInput') { e.preventDefault(); submitCode(); }
+    else if (e.target.dataset && e.target.dataset.newitem) { e.preventDefault(); addChecklistItem(e.target.dataset.newitem); }
+  });
+  app.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.dataset && t.dataset.file) { const f = t.files[0]; t.value = ''; uploadBlockPhoto(t.dataset.file, f); }
+  });
+
+  // swipe between slides (view mode only)
+  let tx = null, ty = null;
+  app.addEventListener('touchstart', (e) => { if (e.touches.length === 1) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; } else tx = null; }, { passive: true });
+  app.addEventListener('touchend', (e) => {
+    if (tx == null || S.view !== 'slide' || S.editing || S.sheet || S.viewer) { tx = null; return; }
+    const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty; tx = null;
+    if (Math.abs(dx) < 70 || Math.abs(dy) > 50) return;
+    const list = slides();
+    if (dx < 0 && S.idx < list.length - 1) { S.idx++; render(); window.scrollTo(0, 0); }
+    else if (dx > 0 && S.idx > 0) { S.idx--; render(); window.scrollTo(0, 0); }
+  });
+
+  render();
+</script>
+</body>
+</html>
