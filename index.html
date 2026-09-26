@@ -225,6 +225,15 @@
   .item-x:active { color: var(--accent); }
   .item-x svg.i { width: 18px; height: 18px; stroke-width: 2.5; }
   .none { font-size: 14px; color: var(--n700); padding: 6px 0; }
+  .sub-item { gap: 12px; touch-action: pan-y; }
+  .sub-item .sb { width: 22px; height: 22px; cursor: pointer; }
+  .sub-item .sb svg.i { width: 14px; height: 14px; }
+  .sub-text { flex: 1; min-width: 0; min-height: 48px; display: flex; align-items: center; font-size: 16px; cursor: text; user-select: none; -webkit-user-select: none; }
+  .sub-text.done { color: var(--n600); text-decoration: line-through; }
+  .sub-edit-input { flex: 1; min-width: 0; min-height: 48px; border: none; background: none; color: var(--ink); font-family: inherit; font-size: 16px; padding: 0; }
+  .sub-edit-input:focus { outline: none; }
+  .sub-item.dragging { position: relative; z-index: 10; background: var(--surface); border-radius: 8px; box-shadow: 0 6px 16px rgba(0,0,0,.18); touch-action: none; }
+  .sub-item.dragging .sub-text { cursor: grabbing; }
 
   .photos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
   .ph { position: relative; aspect-ratio: 1 / 1; background: var(--surface); overflow: hidden; }
@@ -1350,17 +1359,54 @@
     scheduleFieldSave(task.id, 'text', detailTitleInput.value, 500);
   });
 
+  let editingSubtaskId = null;
+  let subPress = null;   // { itemId, startX, startY, rowEl }
+  let subPressTimer = null;
+  let subDrag = null;    // { itemId, rowEl, startY, rects }
+  let justDraggedSubtask = false;
+
+  function subtaskRowHtml(item) {
+    const isEditing = editingSubtaskId === item.id;
+    const nameHtml = isEditing
+      ? `<input type="text" class="sub-edit-input" data-item-id="${item.id}" value="${escapeAttr(item.text)}">`
+      : `<span class="sub-text ${item.done ? 'done' : ''}" data-action="edit-subtask" data-item-id="${item.id}">${escapeHtml(item.text)}</span>`;
+    return `
+      <div class="item sub-item" data-item-id="${item.id}">
+        <button type="button" class="sb ${item.done ? 'on' : ''}" data-action="toggle-subtask-detail" data-item-id="${item.id}" aria-label="Toggle done">${item.done ? ICON.check : ''}</button>
+        ${nameHtml}
+        <button type="button" class="item-x" data-action="delete-subtask" data-item-id="${item.id}" aria-label="Delete">${ICON.x}</button>
+      </div>`;
+  }
+
   function renderDetailSubtasks() {
     const task = currentTask();
     if (!task) return;
     const items = task.subtasks || [];
     detailSubtasksList.innerHTML = items.length
-      ? items.map(s => itemRowHtml(s.text, s.done, `data-action="toggle-subtask-detail" data-item-id="${s.id}"`, `data-action="delete-subtask" data-item-id="${s.id}"`)).join('')
+      ? items.map(s => subtaskRowHtml(s)).join('')
       : `<div class="none">No subtasks yet</div>`;
+    if (editingSubtaskId) {
+      const input = detailSubtasksList.querySelector(`.sub-edit-input[data-item-id="${editingSubtaskId}"]`);
+      if (input) { input.focus(); input.select(); }
+    }
   }
+
+  function commitSubtaskEdit(input) {
+    const id = currentDetailId;
+    const itemId = input.dataset.itemId;
+    const text = input.value.trim();
+    editingSubtaskId = null;
+    if (id && text) {
+      updateTaskSubtasks(id, list => list.map(s => s.id === itemId ? { ...s, text } : s));
+    } else {
+      renderDetailSubtasks();
+    }
+  }
+
   detailSubtasksList.addEventListener('click', (e) => {
     const id = currentDetailId;
     if (!id) return;
+    if (justDraggedSubtask) { justDraggedSubtask = false; return; }
     const toggleBtn = e.target.closest('[data-action="toggle-subtask-detail"]');
     if (toggleBtn) {
       const itemId = toggleBtn.dataset.itemId;
@@ -1370,9 +1416,99 @@
     const delBtn = e.target.closest('[data-action="delete-subtask"]');
     if (delBtn) {
       const itemId = delBtn.dataset.itemId;
+      if (editingSubtaskId === itemId) editingSubtaskId = null;
       updateTaskSubtasks(id, list => list.filter(s => s.id !== itemId));
+      return;
+    }
+    const editEl = e.target.closest('[data-action="edit-subtask"]');
+    if (editEl) {
+      editingSubtaskId = editEl.dataset.itemId;
+      renderDetailSubtasks();
     }
   });
+
+  detailSubtasksList.addEventListener('keydown', (e) => {
+    const input = e.target.closest('.sub-edit-input');
+    if (!input) return;
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    else if (e.key === 'Escape') { editingSubtaskId = null; renderDetailSubtasks(); }
+  });
+
+  detailSubtasksList.addEventListener('focusout', (e) => {
+    const input = e.target.closest && e.target.closest('.sub-edit-input');
+    if (!input) return;
+    commitSubtaskEdit(input);
+  });
+
+  // Long-press (500ms) on the subtask name to pick it up and drag-reorder
+  detailSubtasksList.addEventListener('pointerdown', (e) => {
+    if (editingSubtaskId) return;
+    const nameEl = e.target.closest('[data-action="edit-subtask"]');
+    if (!nameEl) return;
+    const rowEl = nameEl.closest('.sub-item');
+    if (!rowEl) return;
+    subPress = { itemId: nameEl.dataset.itemId, startX: e.clientX, startY: e.clientY, rowEl };
+    subPressTimer = setTimeout(startSubtaskDrag, 500);
+  });
+
+  function cancelSubPress() {
+    clearTimeout(subPressTimer);
+    subPress = null;
+  }
+
+  function startSubtaskDrag() {
+    if (!subPress) return;
+    const { itemId, rowEl, startY } = subPress;
+    const rows = Array.from(detailSubtasksList.querySelectorAll('.sub-item'));
+    const rects = rows.map(el => {
+      const r = el.getBoundingClientRect();
+      return { id: el.dataset.itemId, top: r.top, height: r.height };
+    });
+    subDrag = { itemId, rowEl, startY, rects };
+    subPress = null;
+    rowEl.classList.add('dragging');
+    if (navigator.vibrate) navigator.vibrate(10);
+  }
+
+  document.addEventListener('pointermove', (e) => {
+    if (subDrag) {
+      e.preventDefault();
+      const deltaY = e.clientY - subDrag.startY;
+      subDrag.rowEl.style.transform = `translateY(${deltaY}px)`;
+      subDrag.lastY = e.clientY;
+      return;
+    }
+    if (!subPress) return;
+    const dx = e.clientX - subPress.startX, dy = e.clientY - subPress.startY;
+    if (Math.hypot(dx, dy) > 8) cancelSubPress();
+  }, { passive: false });
+
+  function endSubtaskDrag() {
+    if (!subDrag) return;
+    const { itemId, rowEl, rects, lastY } = subDrag;
+    rowEl.classList.remove('dragging');
+    rowEl.style.transform = '';
+    const id = currentDetailId;
+    const task = currentTask();
+    if (id && task && typeof lastY === 'number') {
+      const others = rects.filter(r => r.id !== itemId);
+      let newIndex = 0;
+      others.forEach(r => { if (lastY > r.top + r.height / 2) newIndex++; });
+      const list = [...(task.subtasks || [])];
+      const fromIndex = list.findIndex(s => s.id === itemId);
+      if (fromIndex !== -1) {
+        const [moved] = list.splice(fromIndex, 1);
+        list.splice(newIndex, 0, moved);
+        updateTaskSubtasks(id, () => list);
+      }
+    }
+    subDrag = null;
+    justDraggedSubtask = true;
+    renderDetailSubtasks();
+  }
+
+  document.addEventListener('pointerup', () => { if (subDrag) endSubtaskDrag(); else cancelSubPress(); });
+  document.addEventListener('pointercancel', () => { if (subDrag) endSubtaskDrag(); else cancelSubPress(); });
   function addDetailSubtask() {
     const id = currentDetailId;
     const text = detailSubtaskInput.value.trim();
