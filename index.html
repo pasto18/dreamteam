@@ -97,8 +97,10 @@
   .site-add:active { background: var(--a200); }
   .site-add svg.i { width: 20px; height: 20px; stroke-width: 2.5; }
 
-  .task { display: grid; grid-template-columns: 52px minmax(0, 1fr); border-bottom: 1px solid var(--divider); }
+  .task { display: grid; grid-template-columns: 52px minmax(0, 1fr); border-bottom: 1px solid var(--divider); transition: transform 150ms ease; }
   .task.hl { background: var(--a200); }
+  .task.dragging { position: relative; z-index: 10; background: var(--surface); box-shadow: 0 6px 16px rgba(0,0,0,.18); transition: none; }
+  .task.dragging .t-text { cursor: grabbing; }
   .box-btn { display: flex; justify-content: center; padding-top: 14px; min-height: 60px; }
   .box-btn:active { background: var(--surface); }
   .box { width: 26px; height: 26px; border: 2px solid var(--ink); display: flex; align-items: center; justify-content: center; color: var(--bg); }
@@ -106,7 +108,11 @@
   .box.progress, .box.today { background: var(--accent); border-color: var(--accent); }
   .box.done { background: var(--ink); }
   .t-body { padding: 16px 16px 14px 0; cursor: pointer; min-width: 0; }
-  .t-text { font-size: 16px; line-height: 1.38; text-wrap: pretty; overflow-wrap: anywhere; }
+  .t-text {
+    font-size: 16px; line-height: 1.38; text-wrap: pretty; overflow-wrap: anywhere;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    touch-action: none; /* must be fixed before the gesture starts so a long-press-drag isn't stolen by page scroll */
+  }
   .t-text::first-letter, .tt-task::first-letter, .task-link::first-letter { text-transform: uppercase; }
   .t-text.done { color: var(--n600); text-decoration: line-through; }
   .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; font-size: 13px; color: var(--n700); }
@@ -225,7 +231,7 @@
   .item-x:active { color: var(--accent); }
   .item-x svg.i { width: 18px; height: 18px; stroke-width: 2.5; }
   .none { font-size: 14px; color: var(--n700); padding: 6px 0; }
-  .sub-item { gap: 12px; }
+  .sub-item { gap: 12px; transition: transform 150ms ease; }
   .sub-item .sb { width: 22px; height: 22px; cursor: pointer; }
   .sub-item .sb svg.i { width: 14px; height: 14px; }
   .sub-text {
@@ -236,7 +242,7 @@
   .sub-text.done { color: var(--n600); text-decoration: line-through; }
   .sub-edit-input { flex: 1; min-width: 0; min-height: 48px; border: none; background: none; color: var(--ink); font-family: inherit; font-size: 16px; padding: 0; }
   .sub-edit-input:focus { outline: none; }
-  .sub-item.dragging { position: relative; z-index: 10; background: var(--surface); border-radius: 8px; box-shadow: 0 6px 16px rgba(0,0,0,.18); }
+  .sub-item.dragging { position: relative; z-index: 10; background: var(--surface); border-radius: 8px; box-shadow: 0 6px 16px rgba(0,0,0,.18); transition: none; }
   .sub-item.dragging .sub-text { cursor: grabbing; }
 
   .photos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
@@ -691,7 +697,20 @@
     return manual + blockers;
   }
 
-  function taskRowHtml(t, todayStr) {
+  function computeDropPlan(rects, draggedId, pointerY) {
+    const dIdx = rects.findIndex(r => r.id === draggedId);
+    const others = rects.filter(r => r.id !== draggedId);
+    let newIndex = 0;
+    others.forEach(r => { if (pointerY > r.top + r.height / 2) newIndex++; });
+    const shifts = {};
+    others.forEach((r, rank) => {
+      const fullIdx = rects.findIndex(x => x.id === r.id);
+      shifts[r.id] = fullIdx < dIdx ? (rank >= newIndex ? 1 : 0) : (rank < newIndex ? -1 : 0);
+    });
+    return { newIndex, shifts };
+  }
+
+  function taskRowHtml(t, todayStr, section) {
     const isDone = t.status === 'done';
     const isToday = !!t.todayDate;
     const assignees = t.assignees || [];
@@ -709,7 +728,7 @@
     if ((t.peopleNeeded || 1) > 1) meta.push(`<span class="ic">${ICON.users}${t.peopleNeeded} people</span>`);
     if (toolsVisible && (t.toolsList || []).length) meta.push(`<span class="ic">${ICON.wrench}${escapeHtml(t.toolsList.join(', '))}</span>`);
     return `
-      <div class="task ${planModeActive && isToday ? 'hl' : ''}">
+      <div class="task ${planModeActive && isToday ? 'hl' : ''}" data-id="${t.id}" data-section="${section}" data-location="${escapeAttr(t.location || '')}">
         <button type="button" class="box-btn" data-action="${boxAction}" data-id="${t.id}" aria-label="${planModeActive ? 'Toggle today' : 'Change status'}">
           <span class="box ${boxClass}">${boxIcon}</span>
         </button>
@@ -735,10 +754,10 @@
       const cmp = a.location.localeCompare(b.location);
       if (cmp !== 0) return cmp;
     }
-    return (b.highPriority ? 1 : 0) - (a.highPriority ? 1 : 0);
+    return a.order - b.order;
   }
 
-  function renderGroupWithSiteHeaders(list, todayStr, isDoneGroup) {
+  function renderGroupWithSiteHeaders(list, todayStr, isDoneGroup, section) {
     const groups = [];
     list.forEach(t => {
       const loc = t.location || '';
@@ -752,7 +771,7 @@
         ${isDoneGroup ? '<span class="done-tag">Done</span>' : ''}
         <button type="button" class="site-add" data-action="add-for-site" data-location="${escapeAttr(g.loc)}" aria-label="Add task here">${ICON.plus}</button>
       </div>
-      ${g.items.map(t => taskRowHtml(t, todayStr)).join('')}`).join('');
+      ${g.items.map(t => taskRowHtml(t, todayStr, section)).join('')}`).join('');
   }
 
   function todayToolsHtml(todayTasksList) {
@@ -803,16 +822,16 @@
 
     let html = '';
     if (planModeActive) {
-      html = renderGroupWithSiteHeaders(notDone, todayStr, false) + renderGroupWithSiteHeaders(done, todayStr, true);
+      html = renderGroupWithSiteHeaders(notDone, todayStr, false, 'notDone') + renderGroupWithSiteHeaders(done, todayStr, true, 'done');
     } else {
       if (todayTasks.length) {
         html += `<div class="today"><div class="today-h"><b>Today</b><span>${todayTasks.length} task${todayTasks.length === 1 ? '' : 's'}</span></div>`;
-        html += renderGroupWithSiteHeaders(todayTasks, todayStr, false);
+        html += renderGroupWithSiteHeaders(todayTasks, todayStr, false, 'today');
         html += todayToolsHtml(todayTasks);
         html += `</div>`;
       }
-      html += renderGroupWithSiteHeaders(restTasks, todayStr, false);
-      html += renderGroupWithSiteHeaders(done, todayStr, true);
+      html += renderGroupWithSiteHeaders(restTasks, todayStr, false, 'rest');
+      html += renderGroupWithSiteHeaders(done, todayStr, true, 'done');
     }
     if (!visible.length) html = `<div class="empty"><b>Nothing here</b><span>Change the filters above or add a new task.</span></div>`;
     listEl.innerHTML = html;
@@ -890,6 +909,7 @@
   }
 
   listEl.addEventListener('click', (e) => {
+    if (justDraggedTask) { justDraggedTask = false; return; }
     const siteHeaderEl = e.target.closest('[data-action="add-for-site"]');
     if (siteHeaderEl) { openAddFormForLocation(siteHeaderEl.dataset.location); return; }
     const subtaskBtn = e.target.closest('[data-action="toggle-subtask"]');
@@ -938,6 +958,109 @@
       scheduleFieldSave(id, 'todayDate', task.todayDate, 0);
     }
   });
+
+  // Long-press (500ms) on the task title to pick it up and drag-reorder within its site group
+  let taskPress = null;    // { id, section, location, startX, startY, rowEl }
+  let taskPressTimer = null;
+  let taskDrag = null;     // { id, rowEl, startY, rects, section, plan }
+  let justDraggedTask = false;
+
+  listEl.addEventListener('pointerdown', (e) => {
+    const nameEl = e.target.closest('.t-text');
+    if (!nameEl) return;
+    const rowEl = nameEl.closest('.task');
+    if (!rowEl) return;
+    taskPress = {
+      id: rowEl.dataset.id, section: rowEl.dataset.section, location: rowEl.dataset.location,
+      startX: e.clientX, startY: e.clientY, rowEl,
+    };
+    taskPressTimer = setTimeout(startTaskDrag, 500);
+  });
+
+  function cancelTaskPress() {
+    clearTimeout(taskPressTimer);
+    taskPress = null;
+  }
+
+  function startTaskDrag() {
+    if (!taskPress) return;
+    const { id, rowEl, startY, section, location } = taskPress;
+    const rows = Array.from(listEl.querySelectorAll(`.task[data-section="${CSS.escape(section)}"][data-location="${CSS.escape(location)}"]`));
+    const rects = rows.map(el => {
+      const r = el.getBoundingClientRect();
+      return { id: el.dataset.id, top: r.top, height: r.height };
+    });
+    taskDrag = { id, rowEl, startY, rects, section };
+    taskPress = null;
+    rowEl.classList.add('dragging');
+    if (navigator.vibrate) navigator.vibrate(10);
+  }
+
+  document.addEventListener('pointermove', (e) => {
+    if (taskDrag) {
+      e.preventDefault();
+      const deltaY = e.clientY - taskDrag.startY;
+      taskDrag.rowEl.style.transform = `scale(1.02) translateY(${deltaY}px)`;
+      const plan = computeDropPlan(taskDrag.rects, taskDrag.id, e.clientY);
+      taskDrag.plan = plan;
+      const dragH = taskDrag.rects.find(r => r.id === taskDrag.id).height;
+      taskDrag.rects.forEach(r => {
+        if (r.id === taskDrag.id) return;
+        const shift = plan.shifts[r.id] || 0;
+        const el = listEl.querySelector(`.task[data-id="${r.id}"][data-section="${taskDrag.section}"]`);
+        if (el) el.style.transform = shift ? `translateY(${shift * dragH}px)` : '';
+      });
+      return;
+    }
+    if (!taskPress) return;
+    const dx = e.clientX - taskPress.startX, dy = e.clientY - taskPress.startY;
+    if (Math.hypot(dx, dy) > 8) cancelTaskPress();
+  }, { passive: false });
+
+  function persistTaskOrder(orderedTasks) {
+    orderedTasks.forEach((t, i) => {
+      const newOrder = i * 1000;
+      if (t.order !== newOrder) {
+        t.order = newOrder;
+        setDoc(doc(db, 'tasks', t.id), { order: newOrder }, { merge: true }).catch(console.error);
+      }
+    });
+  }
+
+  function endTaskDrag() {
+    if (!taskDrag) return;
+    const { id, rowEl, section, plan } = taskDrag;
+    rowEl.classList.remove('dragging');
+    rowEl.style.transform = '';
+    if (plan) {
+      const visible = tasks.filter(t => !isTaskHidden(t));
+      const notDone = visible.filter(t => t.status !== 'done').sort(taskSortCompare);
+      const done = visible.filter(t => t.status === 'done').sort(taskSortCompare);
+      let sectionArr;
+      if (section === 'done') sectionArr = done;
+      else if (section === 'today') sectionArr = notDone.filter(t => t.todayDate);
+      else if (section === 'rest') sectionArr = notDone.filter(t => !t.todayDate);
+      else sectionArr = notDone;
+      const dragged = sectionArr.find(t => t.id === id);
+      if (dragged) {
+        // rects/plan only span rows sharing the dragged task's site, so reorder within that same-location subset
+        const loc = dragged.location || '';
+        const arr = sectionArr.filter(t => (t.location || '') === loc);
+        const fromIndex = arr.findIndex(t => t.id === id);
+        if (fromIndex !== -1) {
+          const [moved] = arr.splice(fromIndex, 1);
+          arr.splice(plan.newIndex, 0, moved);
+          persistTaskOrder(arr);
+        }
+      }
+    }
+    taskDrag = null;
+    justDraggedTask = true;
+    renderList();
+  }
+
+  document.addEventListener('pointerup', () => { if (taskDrag) endTaskDrag(); else cancelTaskPress(); });
+  document.addEventListener('pointercancel', () => { if (taskDrag) endTaskDrag(); else cancelTaskPress(); });
 
   function setPlanMode(on) {
     planModeActive = on;
@@ -1479,7 +1602,15 @@
       e.preventDefault();
       const deltaY = e.clientY - subDrag.startY;
       subDrag.rowEl.style.transform = `scale(1.02) translateY(${deltaY}px)`;
-      subDrag.lastY = e.clientY;
+      const plan = computeDropPlan(subDrag.rects, subDrag.itemId, e.clientY);
+      subDrag.plan = plan;
+      const dragH = subDrag.rects.find(r => r.id === subDrag.itemId).height;
+      subDrag.rects.forEach(r => {
+        if (r.id === subDrag.itemId) return;
+        const shift = plan.shifts[r.id] || 0;
+        const el = detailSubtasksList.querySelector(`.sub-item[data-item-id="${r.id}"]`);
+        if (el) el.style.transform = shift ? `translateY(${shift * dragH}px)` : '';
+      });
       return;
     }
     if (!subPress) return;
@@ -1489,20 +1620,17 @@
 
   function endSubtaskDrag() {
     if (!subDrag) return;
-    const { itemId, rowEl, rects, lastY } = subDrag;
+    const { itemId, rowEl, plan } = subDrag;
     rowEl.classList.remove('dragging');
     rowEl.style.transform = '';
     const id = currentDetailId;
     const task = currentTask();
-    if (id && task && typeof lastY === 'number') {
-      const others = rects.filter(r => r.id !== itemId);
-      let newIndex = 0;
-      others.forEach(r => { if (lastY > r.top + r.height / 2) newIndex++; });
+    if (id && task && plan) {
       const list = [...(task.subtasks || [])];
       const fromIndex = list.findIndex(s => s.id === itemId);
       if (fromIndex !== -1) {
         const [moved] = list.splice(fromIndex, 1);
-        list.splice(newIndex, 0, moved);
+        list.splice(plan.newIndex, 0, moved);
         updateTaskSubtasks(id, () => list);
       }
     }
