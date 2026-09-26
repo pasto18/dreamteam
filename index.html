@@ -225,14 +225,18 @@
   .item-x:active { color: var(--accent); }
   .item-x svg.i { width: 18px; height: 18px; stroke-width: 2.5; }
   .none { font-size: 14px; color: var(--n700); padding: 6px 0; }
-  .sub-item { gap: 12px; touch-action: pan-y; }
+  .sub-item { gap: 12px; }
   .sub-item .sb { width: 22px; height: 22px; cursor: pointer; }
   .sub-item .sb svg.i { width: 14px; height: 14px; }
-  .sub-text { flex: 1; min-width: 0; min-height: 48px; display: flex; align-items: center; font-size: 16px; cursor: text; user-select: none; -webkit-user-select: none; }
+  .sub-text {
+    flex: 1; min-width: 0; min-height: 48px; display: flex; align-items: center; font-size: 16px; cursor: text;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    touch-action: none; /* must be fixed before the gesture starts so a long-press-drag isn't stolen by page scroll */
+  }
   .sub-text.done { color: var(--n600); text-decoration: line-through; }
   .sub-edit-input { flex: 1; min-width: 0; min-height: 48px; border: none; background: none; color: var(--ink); font-family: inherit; font-size: 16px; padding: 0; }
   .sub-edit-input:focus { outline: none; }
-  .sub-item.dragging { position: relative; z-index: 10; background: var(--surface); border-radius: 8px; box-shadow: 0 6px 16px rgba(0,0,0,.18); touch-action: none; }
+  .sub-item.dragging { position: relative; z-index: 10; background: var(--surface); border-radius: 8px; box-shadow: 0 6px 16px rgba(0,0,0,.18); }
   .sub-item.dragging .sub-text { cursor: grabbing; }
 
   .photos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
@@ -1474,7 +1478,7 @@
     if (subDrag) {
       e.preventDefault();
       const deltaY = e.clientY - subDrag.startY;
-      subDrag.rowEl.style.transform = `translateY(${deltaY}px)`;
+      subDrag.rowEl.style.transform = `scale(1.02) translateY(${deltaY}px)`;
       subDrag.lastY = e.clientY;
       return;
     }
