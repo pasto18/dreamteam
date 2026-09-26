@@ -89,7 +89,8 @@
   .today-h { display: flex; align-items: baseline; gap: 10px; padding: 20px 16px 4px; }
   .today-h b { font-weight: 800; font-size: 30px; line-height: 1; letter-spacing: -0.015em; color: var(--a700); }
   .today-h span { font-size: 13px; color: var(--a800); }
-  .site-h { display: flex; align-items: center; gap: 8px; padding: 16px 4px 6px 16px; border-bottom: 2px solid var(--divider); }
+  .site-h { display: flex; align-items: center; gap: 8px; padding: 16px 4px 6px 16px; border-bottom: 2px solid var(--divider); position: sticky; top: var(--head-h, 0px); z-index: 8; background: var(--bg); }
+  .today .site-h { background: var(--a100); }
   .site-h b { font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
   .site-h .cnt { font-size: 13px; color: var(--n700); }
   .site-h .done-tag { font-size: 11px; padding: 3px 10px; background: #f8f4f4; color: var(--n800); }
@@ -1105,6 +1106,17 @@
       requestAnimationFrame(updateHeaderScroll);
     }
   }, { passive: true });
+
+  // Keep the site/tent group headers' sticky offset matched to the header's real
+  // (possibly animating/collapsing) height, so they tuck in right below it.
+  const headEl = document.querySelector('.head');
+  if (headEl) {
+    const syncHeadHeight = () => {
+      document.documentElement.style.setProperty('--head-h', headEl.getBoundingClientRect().height + 'px');
+    };
+    new ResizeObserver(syncHeadHeight).observe(headEl);
+    syncHeadHeight();
+  }
 
   document.querySelectorAll('#statusFilters .stat[data-status]').forEach(btn => {
     btn.addEventListener('click', () => {
