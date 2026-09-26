@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#f3f2f2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DreamTeam">
 <title>DreamTeam - Tasks</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap">
@@ -33,7 +37,7 @@
   .wrap { max-width: 480px; margin: 0 auto; padding-bottom: calc(112px + env(safe-area-inset-bottom)); }
 
   /* header */
-  .head { position: sticky; top: 0; z-index: 20; background: var(--bg); }
+  .head { position: sticky; top: 0; z-index: 20; background: var(--bg); padding-top: env(safe-area-inset-top); }
   .top { display: flex; align-items: center; padding: 14px 4px 10px 16px; transition: padding .35s ease; }
   .top-text { flex: 1; min-width: 0; }
   .title { font-weight: 800; font-size: 34px; line-height: 1; letter-spacing: -0.02em; transition: font-size .35s ease; }
@@ -87,7 +91,8 @@
   .today-h { display: flex; align-items: baseline; gap: 10px; padding: 20px 16px 4px; }
   .today-h b { font-weight: 800; font-size: 30px; line-height: 1; letter-spacing: -0.015em; color: var(--a700); }
   .today-h span { font-size: 13px; color: var(--a800); }
-  .site-h { display: flex; align-items: center; gap: 8px; padding: 16px 4px 6px 16px; border-bottom: 2px solid var(--divider); }
+  .site-h { display: flex; align-items: center; gap: 8px; padding: 16px 4px 6px 16px; border-bottom: 2px solid var(--divider); position: sticky; top: var(--head-h, 0px); z-index: 8; background: var(--bg); }
+  .today .site-h { background: var(--a100); }
   .site-h b { font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
   .site-h .cnt { font-size: 13px; color: var(--n700); }
   .site-h .done-tag { font-size: 11px; padding: 3px 10px; background: #f8f4f4; color: var(--n800); }
@@ -95,7 +100,7 @@
   .site-add:active { background: var(--a200); }
   .site-add svg.i { width: 20px; height: 20px; stroke-width: 2.5; }
 
-  .task { display: grid; grid-template-columns: 52px minmax(0, 1fr); border-bottom: 1px solid var(--divider); }
+  .task { display: grid; grid-template-columns: 52px minmax(0, 1fr); border-bottom: 1px solid var(--divider); transition: transform 150ms ease; }
   .task.is-today { position: relative; background: var(--accent); color: var(--bg); }
   .task.is-today .box { border-color: var(--bg); }
   .task.is-today .box.progress, .task.is-today .box.today { background: var(--bg); color: var(--accent); }
@@ -103,6 +108,8 @@
   .task.is-today .tag-prio, .task.is-today .tag-today { background: transparent; color: var(--bg); box-shadow: inset 0 0 0 1.5px var(--bg); }
   .task.is-today .t-body { padding-bottom: 34px; }
   .task.is-today .tag-today { position: absolute; right: 10px; bottom: 10px; }
+  .task.dragging { position: relative; z-index: 10; background: var(--surface); box-shadow: 0 6px 16px rgba(0,0,0,.18); transition: none; }
+  .task.dragging .t-text { cursor: grabbing; }
   .box-btn { display: flex; justify-content: center; padding-top: 14px; min-height: 60px; }
   .box-btn:active { background: var(--surface); }
   .box { width: 26px; height: 26px; border: 2px solid var(--ink); display: flex; align-items: center; justify-content: center; color: var(--bg); }
@@ -110,7 +117,11 @@
   .box.progress, .box.today { background: var(--accent); border-color: var(--accent); }
   .box.done { background: var(--ink); }
   .t-body { padding: 16px 16px 14px 0; cursor: pointer; min-width: 0; }
-  .t-text { font-size: 16px; line-height: 1.38; text-wrap: pretty; overflow-wrap: anywhere; }
+  .t-text {
+    font-size: 16px; line-height: 1.38; text-wrap: pretty; overflow-wrap: anywhere;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    touch-action: none; /* must be fixed before the gesture starts so a long-press-drag isn't stolen by page scroll */
+  }
   .t-text::first-letter, .tt-task::first-letter, .task-link::first-letter { text-transform: uppercase; }
   .t-text.done { color: var(--n600); text-decoration: line-through; }
   .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; font-size: 13px; color: var(--n700); }
@@ -165,7 +176,7 @@
   .overlay { position: fixed; inset: 0; z-index: 50; background: var(--bg); overflow-y: auto; -webkit-overflow-scrolling: touch; display: none; }
   .overlay.open { display: block; }
   .ov-inner { max-width: 480px; margin: 0 auto; min-height: 100%; }
-  .ov-head { position: sticky; top: 0; z-index: 5; background: var(--bg); display: flex; align-items: center; border-bottom: 2px solid var(--divider); padding: 4px; }
+  .ov-head { position: sticky; top: 0; z-index: 5; background: var(--bg); display: flex; align-items: center; border-bottom: 2px solid var(--divider); padding: 4px; padding-top: calc(4px + env(safe-area-inset-top)); }
   .ov-head .h { flex: 1; font-weight: 800; font-size: 17px; }
   .ov-head .h.big { font-size: 22px; letter-spacing: -0.01em; padding-left: 12px; }
   .ov-head .meta-r { font-size: 12px; color: var(--n700); padding-right: 12px; }
@@ -229,6 +240,19 @@
   .item-x:active { color: var(--accent); }
   .item-x svg.i { width: 18px; height: 18px; stroke-width: 2.5; }
   .none { font-size: 14px; color: var(--n700); padding: 6px 0; }
+  .sub-item { gap: 12px; transition: transform 150ms ease; }
+  .sub-item .sb { width: 22px; height: 22px; cursor: pointer; }
+  .sub-item .sb svg.i { width: 14px; height: 14px; }
+  .sub-text {
+    flex: 1; min-width: 0; min-height: 48px; display: flex; align-items: center; font-size: 16px; cursor: text;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    touch-action: none; /* must be fixed before the gesture starts so a long-press-drag isn't stolen by page scroll */
+  }
+  .sub-text.done { color: var(--n600); text-decoration: line-through; }
+  .sub-edit-input { flex: 1; min-width: 0; min-height: 48px; border: none; background: none; color: var(--ink); font-family: inherit; font-size: 16px; padding: 0; }
+  .sub-edit-input:focus { outline: none; }
+  .sub-item.dragging { position: relative; z-index: 10; background: var(--surface); border-radius: 8px; box-shadow: 0 6px 16px rgba(0,0,0,.18); transition: none; }
+  .sub-item.dragging .sub-text { cursor: grabbing; }
 
   .photos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
   .ph { position: relative; aspect-ratio: 1 / 1; background: var(--surface); overflow: hidden; }
@@ -638,7 +662,20 @@
     return manual + blockers;
   }
 
-  function taskRowHtml(t, todayStr) {
+  function computeDropPlan(rects, draggedId, pointerY) {
+    const dIdx = rects.findIndex(r => r.id === draggedId);
+    const others = rects.filter(r => r.id !== draggedId);
+    let newIndex = 0;
+    others.forEach(r => { if (pointerY > r.top + r.height / 2) newIndex++; });
+    const shifts = {};
+    others.forEach((r, rank) => {
+      const fullIdx = rects.findIndex(x => x.id === r.id);
+      shifts[r.id] = fullIdx < dIdx ? (rank >= newIndex ? 1 : 0) : (rank < newIndex ? -1 : 0);
+    });
+    return { newIndex, shifts };
+  }
+
+  function taskRowHtml(t, todayStr, section) {
     const isDone = t.status === 'done';
     const isToday = !!t.todayDate;
     const assignees = t.assignees || [];
@@ -654,7 +691,7 @@
     if ((t.peopleNeeded || 1) > 1) meta.push(`<span class="ic">${ICON.users}${t.peopleNeeded} people</span>`);
     if (toolsVisible && (t.toolsList || []).length) meta.push(`<span class="ic">${ICON.wrench}${escapeHtml(t.toolsList.join(', '))}</span>`);
     return `
-      <div class="task ${isToday ? 'is-today' : ''}">
+      <div class="task ${isToday ? 'is-today' : ''}" data-id="${t.id}" data-section="${section}" data-location="${escapeAttr(t.location || '')}">
         <button type="button" class="box-btn" data-action="${boxAction}" data-id="${t.id}" aria-label="Change status">
           <span class="box ${boxClass}">${boxIcon}</span>
         </button>
@@ -681,10 +718,10 @@
       const cmp = a.location.localeCompare(b.location);
       if (cmp !== 0) return cmp;
     }
-    return (b.highPriority ? 1 : 0) - (a.highPriority ? 1 : 0);
+    return a.order - b.order;
   }
 
-  function renderGroupWithSiteHeaders(list, todayStr, isDoneGroup) {
+  function renderGroupWithSiteHeaders(list, todayStr, isDoneGroup, section) {
     const groups = [];
     list.forEach(t => {
       const loc = t.location || '';
@@ -698,7 +735,7 @@
         ${isDoneGroup ? '<span class="done-tag">Done</span>' : ''}
         <button type="button" class="site-add" data-action="add-for-site" data-location="${escapeAttr(g.loc)}" aria-label="Add task here">${ICON.plus}</button>
       </div>
-      ${g.items.map(t => taskRowHtml(t, todayStr)).join('')}`).join('');
+      ${g.items.map(t => taskRowHtml(t, todayStr, section)).join('')}`).join('');
   }
 
   function todayToolsHtml(todayTasksList) {
@@ -750,13 +787,13 @@
     if (todayView && !planModeActive) {
       if (todayTasks.length) {
         html += `<div class="today"><div class="today-h"><b>Today</b><span>${todayTasks.length} task${todayTasks.length === 1 ? '' : 's'}</span></div>`;
-        html += renderGroupWithSiteHeaders(todayTasks, todayStr, false);
+        html += renderGroupWithSiteHeaders(todayTasks, todayStr, false, 'today');
         html += todayToolsHtml(todayTasks);
         html += `</div>`;
       }
     } else {
-      html += renderGroupWithSiteHeaders(notDone, todayStr, false);
-      html += renderGroupWithSiteHeaders(done, todayStr, true);
+      html += renderGroupWithSiteHeaders(notDone, todayStr, false, 'notDone');
+      html += renderGroupWithSiteHeaders(done, todayStr, true, 'done');
     }
     if (!html) html = `<div class="empty"><b>Nothing here</b><span>Change the filters above or add a new task.</span></div>`;
     listEl.innerHTML = html;
@@ -834,6 +871,7 @@
   }
 
   listEl.addEventListener('click', (e) => {
+    if (justDraggedTask) { justDraggedTask = false; return; }
     const siteHeaderEl = e.target.closest('[data-action="add-for-site"]');
     if (siteHeaderEl) { createTask(siteHeaderEl.dataset.location); return; }
     const subtaskBtn = e.target.closest('[data-action="toggle-subtask"]');
@@ -883,6 +921,109 @@
     }
   });
 
+  // Long-press (500ms) on the task title to pick it up and drag-reorder within its site group
+  let taskPress = null;    // { id, section, location, startX, startY, rowEl }
+  let taskPressTimer = null;
+  let taskDrag = null;     // { id, rowEl, startY, rects, section, plan }
+  let justDraggedTask = false;
+
+  listEl.addEventListener('pointerdown', (e) => {
+    const nameEl = e.target.closest('.t-text');
+    if (!nameEl) return;
+    const rowEl = nameEl.closest('.task');
+    if (!rowEl) return;
+    taskPress = {
+      id: rowEl.dataset.id, section: rowEl.dataset.section, location: rowEl.dataset.location,
+      startX: e.clientX, startY: e.clientY, rowEl,
+    };
+    taskPressTimer = setTimeout(startTaskDrag, 500);
+  });
+
+  function cancelTaskPress() {
+    clearTimeout(taskPressTimer);
+    taskPress = null;
+  }
+
+  function startTaskDrag() {
+    if (!taskPress) return;
+    const { id, rowEl, startY, section, location } = taskPress;
+    const rows = Array.from(listEl.querySelectorAll(`.task[data-section="${CSS.escape(section)}"][data-location="${CSS.escape(location)}"]`));
+    const rects = rows.map(el => {
+      const r = el.getBoundingClientRect();
+      return { id: el.dataset.id, top: r.top, height: r.height };
+    });
+    taskDrag = { id, rowEl, startY, rects, section };
+    taskPress = null;
+    rowEl.classList.add('dragging');
+    if (navigator.vibrate) navigator.vibrate(10);
+  }
+
+  document.addEventListener('pointermove', (e) => {
+    if (taskDrag) {
+      e.preventDefault();
+      const deltaY = e.clientY - taskDrag.startY;
+      taskDrag.rowEl.style.transform = `scale(1.02) translateY(${deltaY}px)`;
+      const plan = computeDropPlan(taskDrag.rects, taskDrag.id, e.clientY);
+      taskDrag.plan = plan;
+      const dragH = taskDrag.rects.find(r => r.id === taskDrag.id).height;
+      taskDrag.rects.forEach(r => {
+        if (r.id === taskDrag.id) return;
+        const shift = plan.shifts[r.id] || 0;
+        const el = listEl.querySelector(`.task[data-id="${r.id}"][data-section="${taskDrag.section}"]`);
+        if (el) el.style.transform = shift ? `translateY(${shift * dragH}px)` : '';
+      });
+      return;
+    }
+    if (!taskPress) return;
+    const dx = e.clientX - taskPress.startX, dy = e.clientY - taskPress.startY;
+    if (Math.hypot(dx, dy) > 8) cancelTaskPress();
+  }, { passive: false });
+
+  function persistTaskOrder(orderedTasks) {
+    orderedTasks.forEach((t, i) => {
+      const newOrder = i * 1000;
+      if (t.order !== newOrder) {
+        t.order = newOrder;
+        setDoc(doc(db, 'tasks', t.id), { order: newOrder }, { merge: true }).catch(console.error);
+      }
+    });
+  }
+
+  function endTaskDrag() {
+    if (!taskDrag) return;
+    const { id, rowEl, section, plan } = taskDrag;
+    rowEl.classList.remove('dragging');
+    rowEl.style.transform = '';
+    if (plan) {
+      const visible = tasks.filter(t => !isTaskHidden(t));
+      const notDone = visible.filter(t => t.status !== 'done').sort(taskSortCompare);
+      const done = visible.filter(t => t.status === 'done').sort(taskSortCompare);
+      let sectionArr;
+      if (section === 'done') sectionArr = done;
+      else if (section === 'today') sectionArr = notDone.filter(t => t.todayDate);
+      else if (section === 'rest') sectionArr = notDone.filter(t => !t.todayDate);
+      else sectionArr = notDone;
+      const dragged = sectionArr.find(t => t.id === id);
+      if (dragged) {
+        // rects/plan only span rows sharing the dragged task's site, so reorder within that same-location subset
+        const loc = dragged.location || '';
+        const arr = sectionArr.filter(t => (t.location || '') === loc);
+        const fromIndex = arr.findIndex(t => t.id === id);
+        if (fromIndex !== -1) {
+          const [moved] = arr.splice(fromIndex, 1);
+          arr.splice(plan.newIndex, 0, moved);
+          persistTaskOrder(arr);
+        }
+      }
+    }
+    taskDrag = null;
+    justDraggedTask = true;
+    renderList();
+  }
+
+  document.addEventListener('pointerup', () => { if (taskDrag) endTaskDrag(); else cancelTaskPress(); });
+  document.addEventListener('pointercancel', () => { if (taskDrag) endTaskDrag(); else cancelTaskPress(); });
+
   function setPlanMode(on) {
     const before = listEl.getBoundingClientRect().top;
     planModeActive = on;
@@ -928,6 +1069,17 @@
       requestAnimationFrame(updateHeaderScroll);
     }
   }, { passive: true });
+
+  // Keep the site/tent group headers' sticky offset matched to the header's real
+  // (possibly animating/collapsing) height, so they tuck in right below it.
+  const headEl = document.querySelector('.head');
+  if (headEl) {
+    const syncHeadHeight = () => {
+      document.documentElement.style.setProperty('--head-h', headEl.getBoundingClientRect().height + 'px');
+    };
+    new ResizeObserver(syncHeadHeight).observe(headEl);
+    syncHeadHeight();
+  }
 
   document.querySelectorAll('#statusFilters .stat[data-status]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1141,17 +1293,54 @@
     scheduleFieldSave(task.id, 'text', detailTitleInput.value, 500);
   });
 
+  let editingSubtaskId = null;
+  let subPress = null;   // { itemId, startX, startY, rowEl }
+  let subPressTimer = null;
+  let subDrag = null;    // { itemId, rowEl, startY, rects }
+  let justDraggedSubtask = false;
+
+  function subtaskRowHtml(item) {
+    const isEditing = editingSubtaskId === item.id;
+    const nameHtml = isEditing
+      ? `<input type="text" class="sub-edit-input" data-item-id="${item.id}" value="${escapeAttr(item.text)}">`
+      : `<span class="sub-text ${item.done ? 'done' : ''}" data-action="edit-subtask" data-item-id="${item.id}">${escapeHtml(item.text)}</span>`;
+    return `
+      <div class="item sub-item" data-item-id="${item.id}">
+        <button type="button" class="sb ${item.done ? 'on' : ''}" data-action="toggle-subtask-detail" data-item-id="${item.id}" aria-label="Toggle done">${item.done ? ICON.check : ''}</button>
+        ${nameHtml}
+        <button type="button" class="item-x" data-action="delete-subtask" data-item-id="${item.id}" aria-label="Delete">${ICON.x}</button>
+      </div>`;
+  }
+
   function renderDetailSubtasks() {
     const task = currentTask();
     if (!task) return;
     const items = task.subtasks || [];
     detailSubtasksList.innerHTML = items.length
-      ? items.map(s => itemRowHtml(s.text, s.done, `data-action="toggle-subtask-detail" data-item-id="${s.id}"`, `data-action="delete-subtask" data-item-id="${s.id}"`)).join('')
+      ? items.map(s => subtaskRowHtml(s)).join('')
       : `<div class="none">No subtasks yet</div>`;
+    if (editingSubtaskId) {
+      const input = detailSubtasksList.querySelector(`.sub-edit-input[data-item-id="${editingSubtaskId}"]`);
+      if (input) { input.focus(); input.select(); }
+    }
   }
+
+  function commitSubtaskEdit(input) {
+    const id = currentDetailId;
+    const itemId = input.dataset.itemId;
+    const text = input.value.trim();
+    editingSubtaskId = null;
+    if (id && text) {
+      updateTaskSubtasks(id, list => list.map(s => s.id === itemId ? { ...s, text } : s));
+    } else {
+      renderDetailSubtasks();
+    }
+  }
+
   detailSubtasksList.addEventListener('click', (e) => {
     const id = currentDetailId;
     if (!id) return;
+    if (justDraggedSubtask) { justDraggedSubtask = false; return; }
     const toggleBtn = e.target.closest('[data-action="toggle-subtask-detail"]');
     if (toggleBtn) {
       const itemId = toggleBtn.dataset.itemId;
@@ -1161,9 +1350,104 @@
     const delBtn = e.target.closest('[data-action="delete-subtask"]');
     if (delBtn) {
       const itemId = delBtn.dataset.itemId;
+      if (editingSubtaskId === itemId) editingSubtaskId = null;
       updateTaskSubtasks(id, list => list.filter(s => s.id !== itemId));
+      return;
+    }
+    const editEl = e.target.closest('[data-action="edit-subtask"]');
+    if (editEl) {
+      editingSubtaskId = editEl.dataset.itemId;
+      renderDetailSubtasks();
     }
   });
+
+  detailSubtasksList.addEventListener('keydown', (e) => {
+    const input = e.target.closest('.sub-edit-input');
+    if (!input) return;
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    else if (e.key === 'Escape') { editingSubtaskId = null; renderDetailSubtasks(); }
+  });
+
+  detailSubtasksList.addEventListener('focusout', (e) => {
+    const input = e.target.closest && e.target.closest('.sub-edit-input');
+    if (!input) return;
+    commitSubtaskEdit(input);
+  });
+
+  // Long-press (500ms) on the subtask name to pick it up and drag-reorder
+  detailSubtasksList.addEventListener('pointerdown', (e) => {
+    if (editingSubtaskId) return;
+    const nameEl = e.target.closest('[data-action="edit-subtask"]');
+    if (!nameEl) return;
+    const rowEl = nameEl.closest('.sub-item');
+    if (!rowEl) return;
+    subPress = { itemId: nameEl.dataset.itemId, startX: e.clientX, startY: e.clientY, rowEl };
+    subPressTimer = setTimeout(startSubtaskDrag, 500);
+  });
+
+  function cancelSubPress() {
+    clearTimeout(subPressTimer);
+    subPress = null;
+  }
+
+  function startSubtaskDrag() {
+    if (!subPress) return;
+    const { itemId, rowEl, startY } = subPress;
+    const rows = Array.from(detailSubtasksList.querySelectorAll('.sub-item'));
+    const rects = rows.map(el => {
+      const r = el.getBoundingClientRect();
+      return { id: el.dataset.itemId, top: r.top, height: r.height };
+    });
+    subDrag = { itemId, rowEl, startY, rects };
+    subPress = null;
+    rowEl.classList.add('dragging');
+    if (navigator.vibrate) navigator.vibrate(10);
+  }
+
+  document.addEventListener('pointermove', (e) => {
+    if (subDrag) {
+      e.preventDefault();
+      const deltaY = e.clientY - subDrag.startY;
+      subDrag.rowEl.style.transform = `scale(1.02) translateY(${deltaY}px)`;
+      const plan = computeDropPlan(subDrag.rects, subDrag.itemId, e.clientY);
+      subDrag.plan = plan;
+      const dragH = subDrag.rects.find(r => r.id === subDrag.itemId).height;
+      subDrag.rects.forEach(r => {
+        if (r.id === subDrag.itemId) return;
+        const shift = plan.shifts[r.id] || 0;
+        const el = detailSubtasksList.querySelector(`.sub-item[data-item-id="${r.id}"]`);
+        if (el) el.style.transform = shift ? `translateY(${shift * dragH}px)` : '';
+      });
+      return;
+    }
+    if (!subPress) return;
+    const dx = e.clientX - subPress.startX, dy = e.clientY - subPress.startY;
+    if (Math.hypot(dx, dy) > 8) cancelSubPress();
+  }, { passive: false });
+
+  function endSubtaskDrag() {
+    if (!subDrag) return;
+    const { itemId, rowEl, plan } = subDrag;
+    rowEl.classList.remove('dragging');
+    rowEl.style.transform = '';
+    const id = currentDetailId;
+    const task = currentTask();
+    if (id && task && plan) {
+      const list = [...(task.subtasks || [])];
+      const fromIndex = list.findIndex(s => s.id === itemId);
+      if (fromIndex !== -1) {
+        const [moved] = list.splice(fromIndex, 1);
+        list.splice(plan.newIndex, 0, moved);
+        updateTaskSubtasks(id, () => list);
+      }
+    }
+    subDrag = null;
+    justDraggedSubtask = true;
+    renderDetailSubtasks();
+  }
+
+  document.addEventListener('pointerup', () => { if (subDrag) endSubtaskDrag(); else cancelSubPress(); });
+  document.addEventListener('pointercancel', () => { if (subDrag) endSubtaskDrag(); else cancelSubPress(); });
   function addDetailSubtask() {
     const id = currentDetailId;
     const text = detailSubtaskInput.value.trim();
