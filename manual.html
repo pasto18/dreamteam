@@ -247,7 +247,7 @@
   const manualsCol = collection(db, 'manuals');
 
   // ---------- config ----------
-  const SITES = ['Konsum', 'Subardo', 'Container Dream Team', 'Container White', 'Palapa', 'Palapita', 'Ballena'];
+  const SITES = ['Konsum', 'Subardo', 'Palapa', 'Palapita', 'Ballena'];
   const EDIT_CODE = '482';           // 3-digit code that unlocks editing
   const slug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const planUrl = (name) => `plans/${slug(name)}.pdf`; // floor plans are dropped in /plans by the developer
