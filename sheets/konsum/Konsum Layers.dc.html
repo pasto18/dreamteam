@@ -299,8 +299,8 @@ class Component extends DCLogic {
       const el = this.scrollRef.current;
       if (!el) return;
       el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
-      const centerTop = (el.scrollHeight - el.clientHeight) / 2, maxTop = el.scrollHeight - el.clientHeight;
-      el.scrollTop = Math.min(maxTop, centerTop + 40); // nudge the default view down a bit from dead-centre
+      const centerTop = (el.scrollHeight - el.clientHeight) / 2;
+      el.scrollTop = Math.max(0, centerTop - 40); // nudge the default view down a bit from dead-centre (lower scrollTop = tent sits lower in the box)
     });
   }
   geometry(S, CX, CY) {
@@ -540,7 +540,7 @@ class Component extends DCLogic {
       g, pm, wm, tm, L, layers, legendRows, measureRef: this.measureRef, scrollRef: this.scrollRef,
       longCables: g.allCables.slice(0, 6), mArrows: g.arrows.slice(0, 2), frontArrow: g.arrows[2],
       mDims: g.dims.map(d => ({ ...d, tone: mAct ? d.tone : 'ink' })),
-      boxH: Math.round(crop.h * fit), innerW: Math.round(crop.w * z), innerH: Math.round(crop.h * z),
+      boxH: Math.round(crop.h * fit * 1.18), innerW: Math.round(crop.w * z), innerH: Math.round(crop.h * z),
       tr: 'scale(' + z.toFixed(4) + ') translate(' + (-crop.x) + 'px,' + (-crop.y) + 'px)',
       overflow: zoomLevel > ZMIN ? 'auto' : 'hidden',
       zoomPct: Math.round((zoomLevel / ZBASE) * 100) + '%',
