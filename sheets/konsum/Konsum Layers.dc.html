@@ -25,7 +25,7 @@
   </div>
   <div ref="{{ measureRef }}" style="height:0;margin:0 16px;"></div>
   <div style="position:relative;margin:0 16px;">
-    <div style="position:relative;height:{{ boxH }}px;overflow:{{ overflow }};-webkit-overflow-scrolling:touch;">
+    <div ref="{{ scrollRef }}" style="position:relative;height:{{ boxH }}px;overflow:{{ overflow }};-webkit-overflow-scrolling:touch;">
       <div style="position:relative;width:{{ innerW }}px;height:{{ innerH }}px;overflow:hidden;">
         <div style="position:absolute;left:0;top:0;width:595px;height:680px;transform-origin:0 0;transform:{{ tr }};">
           <svg style="position:absolute;left:0;top:0;width:595px;height:680px;overflow:visible;">
@@ -257,25 +257,9 @@
       </ol>
     </div>
   </sc-if>
-  <div style="display:flex;flex-direction:column;margin:12px 16px 0;border-top:1px solid var(--ink);">
-    <div style="display:flex;justify-content:space-between;align-items:center;height:36px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-soft);">
-      <span>Layers</span><span>Tap to highlight</span>
-    </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));margin:14px 16px 0;border-top:1px solid var(--ink);border-left:1px solid var(--ink);">
     <sc-for list="{{ layers }}" as="l" hint-placeholder-count="5">
-      <div style="display:flex;align-items:stretch;height:56px;border-top:1px solid var(--line-grid);background:{{ l.rowBg }};">
-        <button onClick="{{ l.toggle }}" aria-label="Show layer" style="flex:none;width:48px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">
-          <span style="width:18px;height:18px;border:1.5px solid var(--ink);box-sizing:border-box;display:flex;align-items:center;justify-content:center;">
-            <span style="width:8px;height:8px;background:{{ l.chkBg }};"></span>
-          </span>
-        </button>
-        <button onClick="{{ l.select }}" style="flex:1;min-width:0;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;gap:10px;padding:0 4px 0 0;text-align:left;">
-          <span style="flex:1;font-family:var(--font-display);font-weight:600;font-size:20px;letter-spacing:0.04em;text-transform:uppercase;color:{{ l.nameCol }};">{{ l.name }}</span>
-          <span style="display:flex;align-items:baseline;gap:4px;">
-            <span style="font-family:var(--font-display);font-weight:700;font-size:26px;line-height:1;color:{{ l.statCol }};">{{ l.stat }}</span>
-            <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);">{{ l.unit }}</span>
-          </span>
-        </button>
-      </div>
+      <button onClick="{{ l.toggle }}" style="border:none;border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);background:{{ l.chipBg }};cursor:pointer;padding:13px 8px;font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:0.03em;text-transform:uppercase;color:{{ l.chipFg }};">{{ l.name }}</button>
     </sc-for>
   </div>
   <div style="display:flex;flex-direction:column;gap:10px;margin:0 16px;padding:16px 0 32px;border-top:1px solid var(--ink);">
@@ -290,8 +274,9 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { w: 358, zoomLevel: 1, notesOpen: false, on: { nails: true }, active: 'nails', layoutSlide: 'abside', abIdx: 0 };
+  state = { w: 358, zoomLevel: 1.15, notesOpen: false, on: { nails: true }, active: 'nails', layoutSlide: 'abside', abIdx: 0 };
   measureRef = React.createRef();
+  scrollRef = React.createRef();
   componentDidMount() {
     if (!window.TrazadoTechnicalDrawingSystem_c49611) {
       this._t = setInterval(() => { if (window.TrazadoTechnicalDrawingSystem_c49611) { clearInterval(this._t); this.forceUpdate(); } }, 100);
@@ -301,8 +286,20 @@ class Component extends DCLogic {
       const upd = () => { const w = Math.round(el.getBoundingClientRect().width); if (w && w !== this.state.w) this.setState({ w }); };
       upd(); this._ro = new ResizeObserver(upd); this._ro.observe(el);
     }
+    this.centerDrawing();
+  }
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.zoomLevel !== this.state.zoomLevel || prevState.w !== this.state.w) this.centerDrawing();
   }
   componentWillUnmount() { clearInterval(this._t); this._ro && this._ro.disconnect(); }
+  centerDrawing() {
+    requestAnimationFrame(() => {
+      const el = this.scrollRef.current;
+      if (!el) return;
+      el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+      el.scrollTop = (el.scrollHeight - el.clientHeight) / 2;
+    });
+  }
   geometry(S, CX, CY) {
     this._gc = this._gc || {}; const ck = S + '|' + CX + '|' + CY; if (this._gc[ck]) return this._gc[ck];
     const R = 14, RO = 16.4, E = 18.42, AX = 5, AY = 4.93, STEP = 6.25;
@@ -459,7 +456,7 @@ class Component extends DCLogic {
     const S = 10.5, g = this.geometry(S, 297, 290), pm = this.poleMarks(g, S), wm = this.wallMarks(g, S), tm = this.tireMarks(g, S);
     const { on, active, w, zoomLevel, notesOpen, layoutSlide, abIdx } = this.state;
     const crop = { x: 46, y: 34, w: 504, h: 556 }, fit = w / crop.w;
-    const ZMIN = 1, ZMAX = 4, ZSTEP = 0.15; // temporary: fine manual zoom steps + counter, to find the right default and then drop the controls
+    const ZMIN = 1, ZMAX = 4, ZSTEP = 0.15, ZBASE = 1.15; // temporary: fine manual zoom steps + counter, to find the right default and then drop the controls. 115% is the new default, shown as 100%
     const z = fit * zoomLevel;
     const DEF = [
       { k: 'measures', name: 'Measures', stat: '28.00', unit: 'm' },
@@ -474,10 +471,8 @@ class Component extends DCLogic {
       const isOn = !!on[l.k], isAct = active === l.k && isOn;
       L[l.k] = { on: isOn, c: isAct ? 'var(--accent)' : 'var(--ink)' };
       return { ...l, on: isOn, act: isAct,
-        chkBg: isOn ? 'var(--ink)' : 'transparent', statCol: isAct ? 'var(--accent)' : (isOn ? 'var(--ink)' : 'var(--ink-faint)'),
-        nameCol: isOn ? 'var(--ink)' : 'var(--ink-soft)', rowBg: isAct ? 'color-mix(in srgb, var(--plan-fill) 60%, var(--paper))' : 'transparent',
-        toggle: () => this.setState(s => { const wasOn = !!s.on[l.k]; const o = {}; DEF.forEach(x => { o[x.k] = false; }); if (!wasOn) o[l.k] = true; return { on: o, active: wasOn ? null : l.k }; }),
-        select: () => this.setState(s => { const o = {}; DEF.forEach(x => { o[x.k] = false; }); o[l.k] = true; return { on: o, active: l.k }; }) };
+        chipBg: isAct ? 'var(--accent)' : 'var(--paper)', chipFg: isAct ? 'var(--paper)' : 'var(--ink)',
+        toggle: () => this.setState(s => { const wasOn = !!s.on[l.k]; const o = {}; DEF.forEach(x => { o[x.k] = false; }); if (!wasOn) o[l.k] = true; return { on: o, active: wasOn ? null : l.k }; }) };
     });
     const mAct = active === 'measures';
     const base = [{ label: 'Tent, centre', fill: 'var(--plan-fill)' }, { label: 'Tent, sides', fill: 'color-mix(in srgb, var(--plan-fill) 50%, var(--paper))' }, { label: 'Abside', pattern: 'hatch-45' }, { label: 'Dome', fill: 'var(--ink)' }, { label: 'Antenna (4)', fill: 'var(--ink)' }, { label: 'Nail (57)', shape: 'dot', fill: 'var(--ink)' }];
@@ -539,13 +534,13 @@ class Component extends DCLogic {
     const unnumberedNote = 'First nail is front door, 16m from the centre, then next nail is 1.62m apart. Start at the front door and work to the left. Return to the front door and repeat, working to the right.';
     const notesActive = active && active !== 'layout';
     return {
-      g, pm, wm, tm, L, layers, legendRows, measureRef: this.measureRef,
+      g, pm, wm, tm, L, layers, legendRows, measureRef: this.measureRef, scrollRef: this.scrollRef,
       longCables: g.allCables.slice(0, 6), mArrows: g.arrows.slice(0, 2), frontArrow: g.arrows[2],
       mDims: g.dims.map(d => ({ ...d, tone: mAct ? d.tone : 'ink' })),
       boxH: Math.round(crop.h * fit), innerW: Math.round(crop.w * z), innerH: Math.round(crop.h * z),
       tr: 'scale(' + z.toFixed(4) + ') translate(' + (-crop.x) + 'px,' + (-crop.y) + 'px)',
       overflow: zoomLevel > ZMIN ? 'auto' : 'hidden',
-      zoomPct: Math.round(zoomLevel * 100) + '%',
+      zoomPct: Math.round((zoomLevel / ZBASE) * 100) + '%',
       zoomIn: () => this.setState(s => ({ zoomLevel: Math.min(ZMAX, +(s.zoomLevel + ZSTEP).toFixed(2)) })),
       zoomOut: () => this.setState(s => ({ zoomLevel: Math.max(ZMIN, +(s.zoomLevel - ZSTEP).toFixed(2)) })),
       notesOpen: notesOpen && notesActive, activeNotes: notesActive ? (NOTES[active] || []) : [],
