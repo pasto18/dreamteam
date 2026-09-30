@@ -34,6 +34,7 @@
                 <line x1="0" y1="0" x2="0" y2="5" style="stroke:var(--ink);stroke-width:0.6;"></line>
               </pattern>
             </defs>
+            <g style="display:{{ planDisplay }};">
             <sc-if value="{{ L.measures.on }}" hint-placeholder-val="{{ false }}">
               <sc-for list="{{ g.ext }}" as="e" hint-placeholder-count="0">
                 <line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" style="stroke:var(--ink-faint);stroke-width:0.6;stroke-dasharray:2 2;"></line>
@@ -156,7 +157,61 @@
             <line x1="{{ frontArrow.x1 }}" y1="{{ frontArrow.y1 }}" x2="{{ frontArrow.x2 }}" y2="{{ frontArrow.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
             <polyline points="{{ frontArrow.head }}" style="stroke:var(--ink);stroke-width:1;fill:none;"></polyline>
             <text x="{{ g.front.x }}" y="{{ g.front.y }}" text-anchor="middle" dominant-baseline="central" style="font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:0.14em;fill:var(--ink);">FRONT</text>
+            </g>
+            <sc-if value="{{ L.elev.on }}" hint-placeholder-val="{{ false }}">
+              <sc-for list="{{ elevs }}" as="ev" hint-placeholder-count="0">
+                <sc-for list="{{ ev.ext }}" as="e" hint-placeholder-count="0">
+                  <line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" style="stroke:var(--ink-faint);stroke-width:0.6;stroke-dasharray:2 2;"></line>
+                </sc-for>
+                <sc-for list="{{ ev.guys }}" as="c" hint-placeholder-count="0">
+                  <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:0.7;stroke-dasharray:7 2 1.5 2;"></line>
+                </sc-for>
+                <sc-for list="{{ ev.dashed }}" as="c" hint-placeholder-count="0">
+                  <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:0.6;stroke-dasharray:3 2;"></line>
+                </sc-for>
+                <path d="{{ ev.body }}" style="fill:var(--paper);stroke:none;"></path>
+                <path d="{{ ev.body }}" fill="var(--plan-fill)" stroke="{{ L.elev.c }}" style="stroke-width:1.5;stroke-linejoin:round;"></path>
+                <line x1="{{ ev.eave.x1 }}" y1="{{ ev.eave.y1 }}" x2="{{ ev.eave.x2 }}" y2="{{ ev.eave.y2 }}" style="stroke:var(--ink-soft);stroke-width:0.6;stroke-dasharray:4 3;"></line>
+                <sc-for list="{{ ev.mastBoxes }}" as="m" hint-placeholder-count="0">
+                  <rect x="{{ m.x }}" y="{{ m.y }}" width="{{ m.w }}" height="{{ m.h }}" style="fill:var(--paper);stroke:var(--ink);stroke-width:1;"></rect>
+                </sc-for>
+                <sc-for list="{{ ev.members }}" as="c" hint-placeholder-count="0">
+                  <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:0.7;"></line>
+                </sc-for>
+                <sc-for list="{{ ev.trussOutline }}" as="p" hint-placeholder-count="0">
+                  <path d="{{ p }}" style="fill:none;stroke:var(--ink);stroke-width:1.1;stroke-linejoin:round;"></path>
+                </sc-for>
+                <sc-for list="{{ ev.rings }}" as="r" hint-placeholder-count="0">
+                  <ellipse cx="{{ r.cx }}" cy="{{ r.cy }}" rx="{{ r.rx }}" ry="{{ r.ry }}" style="fill:none;stroke:var(--ink);stroke-width:1;"></ellipse>
+                </sc-for>
+                <sc-for list="{{ ev.leaders }}" as="c" hint-placeholder-count="0">
+                  <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:0.7;"></line>
+                  <circle cx="{{ c.x2 }}" cy="{{ c.y2 }}" r="1.6" style="fill:var(--ink);"></circle>
+                </sc-for>
+                <line x1="{{ ev.ground.x1 }}" y1="{{ ev.ground.y1 }}" x2="{{ ev.ground.x2 }}" y2="{{ ev.ground.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
+                <rect x="{{ ev.groundBand.x }}" y="{{ ev.groundBand.y }}" width="{{ ev.groundBand.w }}" height="4" fill="url(#h45-k)"></rect>
+              </sc-for>
+            </sc-if>
           </svg>
+          <sc-if value="{{ L.elev.on }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ elevs }}" as="ev" hint-placeholder-count="0">
+              <div style="position:absolute;left:100px;top:{{ ev.titleY }}px;display:flex;flex-direction:column;gap:5px;">
+                <span style="font-family:var(--font-display);font-weight:600;font-size:16px;line-height:1;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink);">{{ ev.title }}</span>
+                <div style="width:28px;height:4px;background-color:var(--accent);"></div>
+              </div>
+              <sc-for list="{{ ev.dims }}" as="dm" hint-placeholder-count="0">
+                <div style="position:absolute;left:{{ dm.left }}px;top:{{ dm.top }}px;">
+                  <x-import component-from-global-scope="TrazadoTechnicalDrawingSystem_c49611.DimensionLine" value="{{ dm.value }}" length="{{ dm.length }}" orientation="horizontal" label-position="inline" tone="{{ dm.tone }}" hint-size="40px,14px"></x-import>
+                </div>
+              </sc-for>
+              <sc-for list="{{ ev.dimOut }}" as="lb" hint-placeholder-count="0">
+                <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-mono);font-size:13px;line-height:12px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ lb.text }}</span>
+              </sc-for>
+              <sc-for list="{{ ev.labels }}" as="lb" hint-placeholder-count="0">
+                <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:{{ lb.tr }};font-family:var(--font-mono);font-size:11px;line-height:1.2;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink);white-space:nowrap;background:var(--paper);padding:1px 3px;">{{ lb.text }}</span>
+              </sc-for>
+            </sc-for>
+          </sc-if>
           <sc-if value="{{ L.measures.on }}" hint-placeholder-val="{{ false }}">
             <sc-for list="{{ mDims }}" as="dm" hint-placeholder-count="0">
               <div style="position:absolute;left:{{ dm.left }}px;top:{{ dm.top }}px;">
@@ -448,6 +503,62 @@ class Component extends DCLogic {
     const badges = J.map((t, i) => { const nx = i === J.length - 1 ? J[0] + 360 : J[i + 1]; const p = P((t + nx) / 2, 14); return { x: p[0], y: p[1], n: String(i + 1) }; });
     return { joints, badges };
   }
+  elevation(view, CX, G0, S, titleY) {
+    const f = v => +v.toFixed(2), side = view === 'side';
+    const X = m => f(CX + m * S), Y = m => f(G0 - m * S);
+    const p = (x, y) => X(x) + ' ' + Y(y);
+    const seg = (a, b, c, d) => ({ x1: X(a), y1: Y(b), x2: X(c), y2: Y(d) });
+    const H = 12.2, W = 3.5, E = 18.42;
+    const body = side
+      ? `M ${p(-14, 0)} L ${p(-14, W)} Q ${p(-8.4, 5)} ${p(-5, 9.25)} L ${p(5, 9.25)} Q ${p(8.4, 5)} ${p(14, W)} L ${p(14, 0)} Z`
+      : `M ${p(-14, 0)} L ${p(-14, W)} Q ${p(-8.8, 4.3)} ${p(-5, 6.8)} L ${p(-1, 8.9)} L ${p(1, 8.9)} L ${p(5, 6.8)} Q ${p(8.8, 4.3)} ${p(14, W)} L ${p(14, 0)} Z`;
+    const mastBoxes = [], members = [], trussOutline = [], rings = [], guys = [], dashed = [], leaders = [], labels = [], dims = [], dimOut = [], ext = [];
+    [-1, 1].forEach(d => {
+      const x0 = d * 5 - 0.15;
+      mastBoxes.push({ x: X(x0), y: Y(H), w: f(0.3 * S), h: f(H * S) });
+      for (let y = 0.45; y < H; y += 0.45) members.push(seg(x0, y, x0 + 0.3, y));
+      guys.push(seg(d * 5, H, d * E, 0));
+      dashed.push(seg(d * 14, W, d * 16, 0));
+      if (!side) { dashed.push(seg(d * 5, H - 0.3, d * 3.5, 9.05)); rings.push({ cx: X(d * 5), cy: Y(6.8), rx: f(0.55 * S), ry: f(0.28 * S) }); }
+    });
+    if (side) {
+      trussOutline.push(`M ${p(-4.85, 9.3)} L ${p(4.85, 9.3)} L ${p(4.85, 10.3)} L ${p(-4.85, 10.3)} Z`);
+      for (let x = -4.85; x < 4.8; x += 0.485) { members.push(seg(x, 9.3, x, 10.3)); members.push(seg(x, 9.3, x + 0.485, 10.3)); }
+      guys.push(seg(-5, H, 5, H));
+    } else {
+      const topY = x => { const a = Math.abs(x); return a <= 1 ? 9.9 : 9.9 - (a - 1) / 2.5 * 0.85; };
+      trussOutline.push(`M ${p(-3.5, 8.9)} L ${p(-3.5, 9.05)} L ${p(-1, 9.9)} L ${p(1, 9.9)} L ${p(3.5, 9.05)} L ${p(3.5, 8.9)} Z`);
+      [-2.8, -2.2, -1.6, -1, 0, 1, 1.6, 2.2, 2.8].forEach(x => members.push(seg(x, 8.9, x, topY(x))));
+      members.push(seg(-1, 9.9, 0, 8.9)); members.push(seg(0, 8.9, 1, 9.9));
+    }
+    const at = (t, a, b) => [f(a[0] + (b[0] - a[0]) * t), f(a[1] + (b[1] - a[1]) * t)];
+    const gp = at(0.52, [X(-5), Y(H)], [X(-E), Y(0)]);
+    const lx = X(-17.2), ly = f(gp[1] - 30);
+    leaders.push({ x1: f(lx + 58), y1: f(ly + 6), x2: gp[0], y2: gp[1] });
+    labels.push({ x: lx, y: ly, text: side ? '14.50 m · Ø12 mm' : 'Ø12 mm', tr: 'translate(0,0)' });
+    if (side) {
+      labels.push({ x: X(0), y: f(Y(H) - 6), text: '10.10', tr: 'translate(-50%,-100%)' });
+      leaders.push({ x1: X(-3.2), y1: Y(7.3), x2: X(-4.85), y2: Y(7.9) });
+      labels.push({ x: X(-3.3), y: Y(7.3), text: 'Mast 30×30 cm', tr: 'translate(0,-50%)' });
+    }
+    const y1 = f(G0 + 22), y2 = f(G0 + 46);
+    const dm = (a, b, v, y, acc) => dims.push({ left: X(a), top: f(y - 7), length: f((b - a) * S), value: v, tone: acc ? 'accent' : 'ink' });
+    if (side) {
+      [[-16, -14, ''], [-14, -5, '9.000'], [-5, 5, '10.000'], [5, 14, '9.000'], [14, 16, '']].forEach(([a, b, v]) => dm(a, b, v, y1));
+      dimOut.push({ x: X(-15), y: f(y1 - 10), text: '2.000' }, { x: X(15), y: f(y1 - 10), text: '2.000' });
+      [-16, -5, 5, 16].forEach(m => ext.push(seg(m, 0, m, (G0 - y1 - 5) / S)));
+    }
+    const yc = side ? y2 : y1;
+    [[-E, -14, '4.420'], [-14, 14, 'Ø 28.000', 1], [14, E, '4.420']].forEach(([a, b, v, acc]) => dm(a, b, v, yc, acc));
+    [-E, -14, 14, E].forEach(m => ext.push(seg(m, 0, m, (G0 - yc - 5) / S)));
+    if (!side) {
+      const yd = Y(7.9);
+      [[-3.5, -1], [-1, 1], [1, 3.5]].forEach(([a, b]) => dims.push({ left: X(a), top: f(yd - 7), length: f((b - a) * S), value: '', tone: 'ink' }));
+      dimOut.push({ x: X(-2.25), y: f(yd + 11), text: '2.50' }, { x: X(0), y: f(yd + 11), text: '2.00' }, { x: X(2.25), y: f(yd + 11), text: '2.50' });
+    }
+    return { title: side ? 'Side view' : 'Front view', titleY, body, mastBoxes, members, trussOutline, rings, guys, dashed, leaders, labels, dims, dimOut, ext,
+      eave: seg(-14, W, 14, W), ground: seg(-20.5, 0, 20.5, 0), groundBand: { x: X(-20.5), y: f(G0 + 0.5), w: f(41 * S) } };
+  }
   renderVals() {
     const S = 10.5, g = this.geometry(S, 297, 290), pm = this.poleMarks(g, S), wm = this.wallMarks(g, S), tm = this.tireMarks(g, S);
     const { on, active, w, zoom, notesOpen, layoutSlide, abIdx } = this.state;
@@ -459,7 +570,8 @@ class Component extends DCLogic {
       { k: 'poles', name: 'Poles', stat: '57', unit: 'pcs' },
       { k: 'walls', name: 'Sidewalls', stat: '8', unit: 'pcs' },
       { k: 'tire', name: 'Tireforts', stat: '10', unit: 'pcs' },
-      { k: 'layout', name: 'Nail Layout', stat: '57', unit: 'pcs' }
+      { k: 'layout', name: 'Nail Layout', stat: '57', unit: 'pcs' },
+      { k: 'elev', name: 'Front & Side View', stat: '14.50', unit: 'm' }
     ];
     const L = {};
     const layers = DEF.map(l => {
@@ -477,18 +589,22 @@ class Component extends DCLogic {
       poles: [{ label: 'Pole (57)', shape: 'dot', fill: 'var(--accent)' }],
       walls: [{ label: 'Sidewall', shape: 'line', fill: 'var(--accent)', weight: 3 }, { label: 'Panel joint', shape: 'line', fill: 'var(--ink)', weight: 3 }],
       tire: [{ label: 'Tirefort (10)', fill: 'var(--accent)' }],
-      layout: [{ label: 'Abside nail, numbered (28)', shape: 'dot', fill: 'var(--accent)' }, { label: 'Unnumbered nail (29)', shape: 'dot', fill: 'var(--ink)' }]
+      layout: [{ label: 'Abside nail, numbered (28)', shape: 'dot', fill: 'var(--accent)' }, { label: 'Unnumbered nail (29)', shape: 'dot', fill: 'var(--ink)' }],
+      elev: [{ label: 'Tent outline', shape: 'line', fill: 'var(--accent)', weight: 2 }, { label: 'Mast & dome', fill: 'var(--paper)', outline: true }, { label: 'Guy cable', shape: 'line', fill: 'var(--ink)', weight: 1 }]
     };
-    const legendRows = (active && on[active] ? EXTRA[active] : []).concat(base).map(it => ({ items: [it] }));
+    const legendRows = (active && on[active] ? EXTRA[active] : []).concat(active === 'elev' ? [] : base).map(it => ({ items: [it] }));
     // notes: copied verbatim from the source A4 sheets (Konsum Measures.dc.html), one set per sheet/layer
     const NOTES = {
       measures: ['All dimensions in metres.', 'Nail line 2.00 m beyond tent edge.', 'Cables anchored 4.42 m beyond tent edge.'],
       nails: ['The back door doesn\u2019t use a nail (it\u2019s an arch put up right after Konsum Crew arrives).', 'All keys hang on a nail, and are also tied to the nails on the sides.', 'The front door uses a nail until the festival starts.'],
       poles: ['First pole is front door, 16m from the centre, then next pole is 1.51m apart. Start at the front door and work to the left. Return to the front door and repeat, working to the right.', 'Repeat from back door.'],
       walls: ['8 sidewall panels, numbered clockwise from the back.', 'Panel joints are marked across the tent edge.'],
-      tire: ['10 tireforts: 2 front, 2 rear, 2 sides, 4 diagonal.', 'All tireforts: 4.42 m beyond the tent edge.']
+      tire: ['10 tireforts: 2 front, 2 rear, 2 sides, 4 diagonal.', 'All tireforts: 4.42 m beyond the tent edge.'],
+      elev: ['Guy cables 14.50 m, \u00d812 mm, anchored 4.42 m beyond the tent edge.', 'Wall guys anchored 2.00 m beyond the tent edge.', 'Masts: lattice, 30 \u00d7 30 cm.']
     };
     const activeDef = DEF.find(x => x.k === active);
+    // front & side view: stacked one above the other, like the source A4 sheet (they fit within the same crop)
+    const elevs = L.elev.on ? [this.elevation('side', 297, 222, 12, 90), this.elevation('front', 297, 505, 12, 350)] : [];
     // nail-layout mobile pager: slide 1 = abside nails (B1-B14, one row at a time), slide 2 = unnumbered nails
     const isAbsideSlide = layoutSlide !== 'unnumbered', isUnnumberedSlide = layoutSlide === 'unnumbered';
     const layoutLo = isAbsideSlide ? g.lower : g.upper;
@@ -541,7 +657,8 @@ class Component extends DCLogic {
       notesBg: notesOpen && notesActive ? 'var(--ink)' : 'var(--paper)', notesFg: notesOpen && notesActive ? 'var(--paper)' : 'var(--ink)',
       notesOpacity: notesActive ? 1 : 0.35,
       toggleNotes: () => this.setState(s => (s.active && s.active !== 'layout' ? { notesOpen: !s.notesOpen } : s)),
-      isAbsideSlide, isUnnumberedSlide, layoutHiSmall, layoutHiBig, layoutLo, layoutFlow, layoutLabels, abLabels, abRow, abMeas, abCenterLbl, abAntennaLbl, unnumberedNote,
+      isAbsideSlide, isUnnumberedSlide, layoutHiSmall, layoutHiBig, layoutLo, layoutFlow, layoutLabels, abLabels, abRow, abMeas, abCenterLbl, abAntennaLbl, unnumberedNote, elevs,
+      planDisplay: L.elev.on ? 'none' : 'inline',
       abRowLabel: (abIdxSafe + 1) + ' / ' + AB.length,
       showPrevSlide: !!L.layout.on && isUnnumberedSlide, showNextSlide: !!L.layout.on && isAbsideSlide,
       layoutPanelBorder: L.layout.on ? '1px solid var(--ink)' : 'none',
