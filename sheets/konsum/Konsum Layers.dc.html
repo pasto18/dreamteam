@@ -83,13 +83,13 @@
                 <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
                 <circle cx="{{ c.x2 }}" cy="{{ c.y2 }}" r="2.2" style="fill:var(--ink);stroke:var(--paper);stroke-width:0.8;"></circle>
               </sc-for>
-              <text x="{{ g.diagLbl.x }}" y="{{ g.diagLbl.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ g.diagLbl.tr }}" style="font-family:var(--font-mono);font-size:10px;fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:3px;">16 m from centre</text>
+              <text x="{{ g.diagLbl.x }}" y="{{ g.diagLbl.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ g.diagLbl.tr }}" style="font-family:var(--font-mono);font-size:11.5px;fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:3px;">16 m from centre</text>
               <sc-for list="{{ mArrows }}" as="ar" hint-placeholder-count="0">
                 <line x1="{{ ar.x1 }}" y1="{{ ar.y1 }}" x2="{{ ar.x2 }}" y2="{{ ar.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
                 <polyline points="{{ ar.head }}" style="stroke:var(--ink);stroke-width:1;fill:none;"></polyline>
               </sc-for>
-              <text x="{{ g.pal.x }}" y="{{ g.pal.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ g.pal.tr }}" style="font-family:var(--font-mono);font-size:11.5px;letter-spacing:0.14em;fill:var(--ink);">PALAPAS</text>
-              <text x="{{ g.sub.x }}" y="{{ g.sub.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ g.sub.tr }}" style="font-family:var(--font-mono);font-size:11.5px;letter-spacing:0.14em;fill:var(--ink);">SUBARDO</text>
+              <text x="{{ g.pal.x }}" y="{{ g.pal.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ g.pal.tr }}" style="font-family:var(--font-mono);font-size:13px;letter-spacing:0.14em;fill:var(--ink);">PALAPAS</text>
+              <text x="{{ g.sub.x }}" y="{{ g.sub.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ g.sub.tr }}" style="font-family:var(--font-mono);font-size:13px;letter-spacing:0.14em;fill:var(--ink);">SUBARDO</text>
             </sc-if>
             <sc-if value="{{ L.tire.on }}" hint-placeholder-val="{{ false }}">
               <sc-for list="{{ tm.guides }}" as="c" hint-placeholder-count="0">
@@ -105,10 +105,10 @@
             </sc-if>
             <sc-if value="{{ L.poles.on }}" hint-placeholder-val="{{ false }}">
               <line x1="{{ pm.pd.x1 }}" y1="{{ pm.pd.y1 }}" x2="{{ pm.pd.x2 }}" y2="{{ pm.pd.y2 }}" style="stroke:var(--ink-soft);stroke-width:0.8;stroke-dasharray:2 2;"></line>
-              <text x="{{ pm.pdl.x }}" y="{{ pm.pdl.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ pm.pdl.tr }}" style="font-family:var(--font-mono);font-size:10.5px;fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:4px;">14.00</text>
+              <text x="{{ pm.pdl.x }}" y="{{ pm.pdl.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ pm.pdl.tr }}" style="font-family:var(--font-mono);font-size:12px;fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:4px;">14.00</text>
               <line x1="{{ pm.pa.x1 }}" y1="{{ pm.pa.y1 }}" x2="{{ pm.pa.x2 }}" y2="{{ pm.pa.y2 }}" stroke="{{ L.poles.c }}" style="stroke-width:1;stroke-dasharray:1.5 1.5;"></line>
               <polyline points="{{ pm.pa.head }}" stroke="{{ L.poles.c }}" style="stroke-width:1;fill:none;"></polyline>
-              <text x="{{ pm.pal.x }}" y="{{ pm.pal.y }}" text-anchor="middle" dominant-baseline="central" fill="{{ L.poles.c }}" style="font-family:var(--font-mono);font-size:10px;paint-order:stroke;stroke:var(--paper);stroke-width:6px;stroke-linejoin:round;">1.51</text>
+              <text x="{{ pm.pal.x }}" y="{{ pm.pal.y }}" text-anchor="middle" dominant-baseline="central" fill="{{ L.poles.c }}" style="font-family:var(--font-mono);font-size:11.5px;paint-order:stroke;stroke:var(--paper);stroke-width:6px;stroke-linejoin:round;">1.51</text>
               <sc-for list="{{ pm.pflow }}" as="ar" hint-placeholder-count="0">
                 <line x1="{{ ar.x1 }}" y1="{{ ar.y1 }}" x2="{{ ar.x2 }}" y2="{{ ar.y2 }}" style="stroke:var(--ink);stroke-width:1.25;"></line>
                 <polyline points="{{ ar.head }}" style="stroke:var(--ink);stroke-width:1.25;fill:none;"></polyline>
@@ -141,10 +141,10 @@
               </sc-if>
               <sc-if value="{{ isUnnumberedSlide }}" hint-placeholder-val="{{ false }}">
                 <line x1="{{ g.doorLine.x1 }}" y1="{{ g.doorLine.y1 }}" x2="{{ g.doorLine.x2 }}" y2="{{ g.doorLine.y2 }}" style="stroke:var(--accent);stroke-width:1;stroke-dasharray:2 2;"></line>
-                <text x="{{ g.doorLbl16.x }}" y="{{ g.doorLbl16.y }}" dominant-baseline="central" style="font-family:var(--font-mono);font-size:10.5px;fill:var(--accent);">16.00</text>
+                <text x="{{ g.doorLbl16.x }}" y="{{ g.doorLbl16.y }}" dominant-baseline="central" style="font-family:var(--font-mono);font-size:12px;fill:var(--accent);">16.00</text>
                 <line x1="{{ g.doorArrow.x1 }}" y1="{{ g.doorArrow.y1 }}" x2="{{ g.doorArrow.x2 }}" y2="{{ g.doorArrow.y2 }}" style="stroke:var(--accent);stroke-width:1;stroke-dasharray:1.5 1.5;"></line>
                 <polyline points="{{ g.doorArrow.head }}" style="stroke:var(--accent);stroke-width:1;fill:none;"></polyline>
-                <text x="{{ g.doorLbl151.x }}" y="{{ g.doorLbl151.y }}" text-anchor="middle" dominant-baseline="central" style="font-family:var(--font-mono);font-size:10.5px;fill:var(--accent);">1.62</text>
+                <text x="{{ g.doorLbl151.x }}" y="{{ g.doorLbl151.y }}" text-anchor="middle" dominant-baseline="central" style="font-family:var(--font-mono);font-size:12px;fill:var(--accent);">1.62</text>
               </sc-if>
               <sc-for list="{{ layoutHiSmall }}" as="n" hint-placeholder-count="0">
                 <circle cx="{{ n.x2 }}" cy="{{ n.y2 }}" r="1.8" style="fill:var(--ink);"></circle>
@@ -164,7 +164,7 @@
               </div>
             </sc-for>
             <sc-for list="{{ g.dimOut }}" as="lb" hint-placeholder-count="0">
-              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:{{ lb.tr }};font-family:var(--font-mono);font-size:11.5px;line-height:12px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ lb.text }}</span>
+              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:{{ lb.tr }};font-family:var(--font-mono);font-size:13px;line-height:12px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ lb.text }}</span>
             </sc-for>
           </sc-if>
           <sc-if value="{{ L.tire.on }}" hint-placeholder-val="{{ false }}">
@@ -174,12 +174,12 @@
               </div>
             </sc-for>
             <sc-for list="{{ tm.dlabels }}" as="lb" hint-placeholder-count="0">
-              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%) rotate(45deg);font-family:var(--font-mono);font-size:11.5px;line-height:12px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ lb.text }}</span>
+              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%) rotate(45deg);font-family:var(--font-mono);font-size:13px;line-height:12px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ lb.text }}</span>
             </sc-for>
           </sc-if>
           <sc-if value="{{ L.walls.on }}" hint-placeholder-val="{{ false }}">
             <sc-for list="{{ wm.badges }}" as="b" hint-placeholder-count="0">
-              <span style="position:absolute;left:{{ b.x }}px;top:{{ b.y }}px;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:600;font-size:12.5px;line-height:1;color:var(--ink);">{{ b.n }}</span>
+              <span style="position:absolute;left:{{ b.x }}px;top:{{ b.y }}px;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:600;font-size:14px;line-height:1;color:var(--ink);">{{ b.n }}</span>
             </sc-for>
           </sc-if>
           <sc-if value="{{ L.nails.on }}" hint-placeholder-val="{{ true }}">
@@ -189,14 +189,14 @@
           </sc-if>
           <sc-if value="{{ L.layout.on }}" hint-placeholder-val="{{ false }}">
             <sc-for list="{{ layoutLabels }}" as="lb" hint-placeholder-count="0">
-              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-mono);font-weight:600;font-size:9.5px;line-height:1;letter-spacing:0.04em;color:var(--ink);white-space:nowrap;background:var(--paper);padding:1px 2px;">{{ lb.text }}</span>
+              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-mono);font-weight:600;font-size:11px;line-height:1;letter-spacing:0.04em;color:var(--ink);white-space:nowrap;background:var(--paper);padding:1px 2px;">{{ lb.text }}</span>
             </sc-for>
             <sc-for list="{{ abLabels }}" as="lb" hint-placeholder-count="0">
-              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:700;font-size:12.5px;line-height:1;letter-spacing:0.04em;color:var(--accent);white-space:nowrap;background:var(--paper);padding:1px 3px;border:1px solid var(--accent);">{{ lb.text }}</span>
+              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:700;font-size:14px;line-height:1;letter-spacing:0.04em;color:var(--accent);white-space:nowrap;background:var(--paper);padding:1px 3px;border:1px solid var(--accent);">{{ lb.text }}</span>
             </sc-for>
             <sc-if value="{{ isAbsideSlide }}" hint-placeholder-val="{{ true }}">
-              <span style="position:absolute;left:{{ abCenterLbl.x }}px;top:{{ abCenterLbl.y }}px;transform:translate(-50%,-50%) rotate({{ abCenterLbl.deg }}deg);font-family:var(--font-mono);font-size:10.5px;line-height:1;color:var(--accent);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ abCenterLbl.text }}</span>
-              <span style="position:absolute;left:{{ abAntennaLbl.x }}px;top:{{ abAntennaLbl.y }}px;transform:translate(-50%,-50%) rotate({{ abAntennaLbl.deg }}deg);font-family:var(--font-mono);font-size:10.5px;line-height:1;color:var(--accent);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ abAntennaLbl.text }}</span>
+              <span style="position:absolute;left:{{ abCenterLbl.x }}px;top:{{ abCenterLbl.y }}px;transform:translate(-50%,-50%) rotate({{ abCenterLbl.deg }}deg);font-family:var(--font-mono);font-size:12px;line-height:1;color:var(--accent);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ abCenterLbl.text }}</span>
+              <span style="position:absolute;left:{{ abAntennaLbl.x }}px;top:{{ abAntennaLbl.y }}px;transform:translate(-50%,-50%) rotate({{ abAntennaLbl.deg }}deg);font-family:var(--font-mono);font-size:12px;line-height:1;color:var(--accent);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ abAntennaLbl.text }}</span>
             </sc-if>
           </sc-if>
         </div>
@@ -299,7 +299,8 @@ class Component extends DCLogic {
       const el = this.scrollRef.current;
       if (!el) return;
       el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
-      el.scrollTop = (el.scrollHeight - el.clientHeight) / 2;
+      const centerTop = (el.scrollHeight - el.clientHeight) / 2, maxTop = el.scrollHeight - el.clientHeight;
+      el.scrollTop = Math.min(maxTop, centerTop + 40); // nudge the default view down a bit from dead-centre
     });
   }
   geometry(S, CX, CY) {
