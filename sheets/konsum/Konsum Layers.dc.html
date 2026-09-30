@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
+<script src="./support.js?v=2"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
-<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/tokens/typography.css">
-<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/tokens/colors.css">
-<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/tokens/spacing.css">
-<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/tokens/patterns.css">
-<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/styles.css">
-<script src="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/_ds_bundle.js"></script>
+<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/tokens/typography.css?v=2">
+<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/tokens/colors.css?v=2">
+<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/tokens/spacing.css?v=2">
+<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/tokens/patterns.css?v=2">
+<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/styles.css?v=2">
+<script src="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/_ds_bundle.js?v=2"></script>
 <style>html,body{margin:0;background:#D9D6CC;-webkit-text-size-adjust:100%;} a{color:#181815;} a:hover{color:#E24A1E;} button{font:inherit;}</style>
 </helmet>
 <div data-theme="color" style="max-width:480px;margin:0 auto;min-height:100vh;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;">
@@ -83,13 +83,13 @@
                 <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
                 <circle cx="{{ c.x2 }}" cy="{{ c.y2 }}" r="2.2" style="fill:var(--ink);stroke:var(--paper);stroke-width:0.8;"></circle>
               </sc-for>
-              <text x="{{ g.diagLbl.x }}" y="{{ g.diagLbl.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ g.diagLbl.tr }}" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:3px;">16 m from centre</text>
+              <text x="{{ g.diagLbl.x }}" y="{{ g.diagLbl.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ g.diagLbl.tr }}" style="font-family:var(--font-mono);font-size:10px;fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:3px;">16 m from centre</text>
               <sc-for list="{{ mArrows }}" as="ar" hint-placeholder-count="0">
                 <line x1="{{ ar.x1 }}" y1="{{ ar.y1 }}" x2="{{ ar.x2 }}" y2="{{ ar.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
                 <polyline points="{{ ar.head }}" style="stroke:var(--ink);stroke-width:1;fill:none;"></polyline>
               </sc-for>
-              <text x="{{ g.pal.x }}" y="{{ g.pal.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ g.pal.tr }}" style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;fill:var(--ink);">PALAPAS</text>
-              <text x="{{ g.sub.x }}" y="{{ g.sub.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ g.sub.tr }}" style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;fill:var(--ink);">SUBARDO</text>
+              <text x="{{ g.pal.x }}" y="{{ g.pal.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ g.pal.tr }}" style="font-family:var(--font-mono);font-size:11.5px;letter-spacing:0.14em;fill:var(--ink);">PALAPAS</text>
+              <text x="{{ g.sub.x }}" y="{{ g.sub.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ g.sub.tr }}" style="font-family:var(--font-mono);font-size:11.5px;letter-spacing:0.14em;fill:var(--ink);">SUBARDO</text>
             </sc-if>
             <sc-if value="{{ L.tire.on }}" hint-placeholder-val="{{ false }}">
               <sc-for list="{{ tm.guides }}" as="c" hint-placeholder-count="0">
@@ -105,10 +105,10 @@
             </sc-if>
             <sc-if value="{{ L.poles.on }}" hint-placeholder-val="{{ false }}">
               <line x1="{{ pm.pd.x1 }}" y1="{{ pm.pd.y1 }}" x2="{{ pm.pd.x2 }}" y2="{{ pm.pd.y2 }}" style="stroke:var(--ink-soft);stroke-width:0.8;stroke-dasharray:2 2;"></line>
-              <text x="{{ pm.pdl.x }}" y="{{ pm.pdl.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ pm.pdl.tr }}" style="font-family:var(--font-mono);font-size:9px;fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:4px;">14.00</text>
+              <text x="{{ pm.pdl.x }}" y="{{ pm.pdl.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ pm.pdl.tr }}" style="font-family:var(--font-mono);font-size:10.5px;fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:4px;">14.00</text>
               <line x1="{{ pm.pa.x1 }}" y1="{{ pm.pa.y1 }}" x2="{{ pm.pa.x2 }}" y2="{{ pm.pa.y2 }}" stroke="{{ L.poles.c }}" style="stroke-width:1;stroke-dasharray:1.5 1.5;"></line>
               <polyline points="{{ pm.pa.head }}" stroke="{{ L.poles.c }}" style="stroke-width:1;fill:none;"></polyline>
-              <text x="{{ pm.pal.x }}" y="{{ pm.pal.y }}" text-anchor="middle" dominant-baseline="central" fill="{{ L.poles.c }}" style="font-family:var(--font-mono);font-size:8.5px;paint-order:stroke;stroke:var(--paper);stroke-width:6px;stroke-linejoin:round;">1.51</text>
+              <text x="{{ pm.pal.x }}" y="{{ pm.pal.y }}" text-anchor="middle" dominant-baseline="central" fill="{{ L.poles.c }}" style="font-family:var(--font-mono);font-size:10px;paint-order:stroke;stroke:var(--paper);stroke-width:6px;stroke-linejoin:round;">1.51</text>
               <sc-for list="{{ pm.pflow }}" as="ar" hint-placeholder-count="0">
                 <line x1="{{ ar.x1 }}" y1="{{ ar.y1 }}" x2="{{ ar.x2 }}" y2="{{ ar.y2 }}" style="stroke:var(--ink);stroke-width:1.25;"></line>
                 <polyline points="{{ ar.head }}" style="stroke:var(--ink);stroke-width:1.25;fill:none;"></polyline>
@@ -141,10 +141,10 @@
               </sc-if>
               <sc-if value="{{ isUnnumberedSlide }}" hint-placeholder-val="{{ false }}">
                 <line x1="{{ g.doorLine.x1 }}" y1="{{ g.doorLine.y1 }}" x2="{{ g.doorLine.x2 }}" y2="{{ g.doorLine.y2 }}" style="stroke:var(--accent);stroke-width:1;stroke-dasharray:2 2;"></line>
-                <text x="{{ g.doorLbl16.x }}" y="{{ g.doorLbl16.y }}" dominant-baseline="central" style="font-family:var(--font-mono);font-size:9px;fill:var(--accent);">16.00</text>
+                <text x="{{ g.doorLbl16.x }}" y="{{ g.doorLbl16.y }}" dominant-baseline="central" style="font-family:var(--font-mono);font-size:10.5px;fill:var(--accent);">16.00</text>
                 <line x1="{{ g.doorArrow.x1 }}" y1="{{ g.doorArrow.y1 }}" x2="{{ g.doorArrow.x2 }}" y2="{{ g.doorArrow.y2 }}" style="stroke:var(--accent);stroke-width:1;stroke-dasharray:1.5 1.5;"></line>
                 <polyline points="{{ g.doorArrow.head }}" style="stroke:var(--accent);stroke-width:1;fill:none;"></polyline>
-                <text x="{{ g.doorLbl151.x }}" y="{{ g.doorLbl151.y }}" text-anchor="middle" dominant-baseline="central" style="font-family:var(--font-mono);font-size:9px;fill:var(--accent);">1.62</text>
+                <text x="{{ g.doorLbl151.x }}" y="{{ g.doorLbl151.y }}" text-anchor="middle" dominant-baseline="central" style="font-family:var(--font-mono);font-size:10.5px;fill:var(--accent);">1.62</text>
               </sc-if>
               <sc-for list="{{ layoutHiSmall }}" as="n" hint-placeholder-count="0">
                 <circle cx="{{ n.x2 }}" cy="{{ n.y2 }}" r="1.8" style="fill:var(--ink);"></circle>
@@ -164,7 +164,7 @@
               </div>
             </sc-for>
             <sc-for list="{{ g.dimOut }}" as="lb" hint-placeholder-count="0">
-              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:{{ lb.tr }};font-family:var(--font-mono);font-size:10px;line-height:12px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ lb.text }}</span>
+              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:{{ lb.tr }};font-family:var(--font-mono);font-size:11.5px;line-height:12px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ lb.text }}</span>
             </sc-for>
           </sc-if>
           <sc-if value="{{ L.tire.on }}" hint-placeholder-val="{{ false }}">
@@ -174,35 +174,39 @@
               </div>
             </sc-for>
             <sc-for list="{{ tm.dlabels }}" as="lb" hint-placeholder-count="0">
-              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%) rotate(45deg);font-family:var(--font-mono);font-size:10px;line-height:12px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ lb.text }}</span>
+              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%) rotate(45deg);font-family:var(--font-mono);font-size:11.5px;line-height:12px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ lb.text }}</span>
             </sc-for>
           </sc-if>
           <sc-if value="{{ L.walls.on }}" hint-placeholder-val="{{ false }}">
             <sc-for list="{{ wm.badges }}" as="b" hint-placeholder-count="0">
-              <span style="position:absolute;left:{{ b.x }}px;top:{{ b.y }}px;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:600;font-size:11px;line-height:1;color:var(--ink);">{{ b.n }}</span>
+              <span style="position:absolute;left:{{ b.x }}px;top:{{ b.y }}px;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:600;font-size:12.5px;line-height:1;color:var(--ink);">{{ b.n }}</span>
             </sc-for>
           </sc-if>
           <sc-if value="{{ L.nails.on }}" hint-placeholder-val="{{ true }}">
             <sc-for list="{{ g.labels }}" as="lb" hint-placeholder-count="0">
-              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-mono);font-size:7.5px;line-height:1;letter-spacing:0.02em;color:var(--ink);white-space:nowrap;">{{ lb.text }}</span>
+              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-mono);font-size:9px;line-height:1;letter-spacing:0.02em;color:var(--ink);white-space:nowrap;">{{ lb.text }}</span>
             </sc-for>
           </sc-if>
           <sc-if value="{{ L.layout.on }}" hint-placeholder-val="{{ false }}">
             <sc-for list="{{ layoutLabels }}" as="lb" hint-placeholder-count="0">
-              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-mono);font-weight:600;font-size:8px;line-height:1;letter-spacing:0.04em;color:var(--ink);white-space:nowrap;background:var(--paper);padding:1px 2px;">{{ lb.text }}</span>
+              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-mono);font-weight:600;font-size:9.5px;line-height:1;letter-spacing:0.04em;color:var(--ink);white-space:nowrap;background:var(--paper);padding:1px 2px;">{{ lb.text }}</span>
             </sc-for>
             <sc-for list="{{ abLabels }}" as="lb" hint-placeholder-count="0">
-              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:700;font-size:11px;line-height:1;letter-spacing:0.04em;color:var(--accent);white-space:nowrap;background:var(--paper);padding:1px 3px;border:1px solid var(--accent);">{{ lb.text }}</span>
+              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:700;font-size:12.5px;line-height:1;letter-spacing:0.04em;color:var(--accent);white-space:nowrap;background:var(--paper);padding:1px 3px;border:1px solid var(--accent);">{{ lb.text }}</span>
             </sc-for>
             <sc-if value="{{ isAbsideSlide }}" hint-placeholder-val="{{ true }}">
-              <span style="position:absolute;left:{{ abCenterLbl.x }}px;top:{{ abCenterLbl.y }}px;transform:translate(-50%,-50%) rotate({{ abCenterLbl.deg }}deg);font-family:var(--font-mono);font-size:9px;line-height:1;color:var(--accent);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ abCenterLbl.text }}</span>
-              <span style="position:absolute;left:{{ abAntennaLbl.x }}px;top:{{ abAntennaLbl.y }}px;transform:translate(-50%,-50%) rotate({{ abAntennaLbl.deg }}deg);font-family:var(--font-mono);font-size:9px;line-height:1;color:var(--accent);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ abAntennaLbl.text }}</span>
+              <span style="position:absolute;left:{{ abCenterLbl.x }}px;top:{{ abCenterLbl.y }}px;transform:translate(-50%,-50%) rotate({{ abCenterLbl.deg }}deg);font-family:var(--font-mono);font-size:10.5px;line-height:1;color:var(--accent);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ abCenterLbl.text }}</span>
+              <span style="position:absolute;left:{{ abAntennaLbl.x }}px;top:{{ abAntennaLbl.y }}px;transform:translate(-50%,-50%) rotate({{ abAntennaLbl.deg }}deg);font-family:var(--font-mono);font-size:10.5px;line-height:1;color:var(--accent);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ abAntennaLbl.text }}</span>
             </sc-if>
           </sc-if>
         </div>
       </div>
     </div>
-    <button onClick="{{ toggleZoom }}" aria-label="Zoom" style="position:absolute;right:0;bottom:0;width:44px;height:44px;border:1px solid var(--ink);background:var(--paper);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:20px;line-height:1;color:var(--ink);">{{ zoomSign }}</button>
+    <div style="position:absolute;right:0;bottom:0;display:flex;border:1px solid var(--ink);background:var(--paper);">
+      <button onClick="{{ zoomOut }}" aria-label="Zoom out" style="width:36px;height:44px;border:none;border-right:1px solid var(--ink);background:var(--paper);cursor:pointer;font-family:var(--font-mono);font-size:18px;line-height:1;color:var(--ink);">−</button>
+      <span style="min-width:44px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.02em;color:var(--ink);border-right:1px solid var(--ink);padding:0 4px;">{{ zoomPct }}</span>
+      <button onClick="{{ zoomIn }}" aria-label="Zoom in" style="width:36px;height:44px;border:none;background:var(--paper);cursor:pointer;font-family:var(--font-mono);font-size:18px;line-height:1;color:var(--ink);">+</button>
+    </div>
     <button onClick="{{ toggleNotes }}" aria-label="Notes" style="position:absolute;left:0;bottom:0;width:44px;height:44px;border:1px solid var(--ink);background:{{ notesBg }};cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:14px;letter-spacing:0.04em;line-height:1;color:{{ notesFg }};opacity:{{ notesOpacity }};">i</button>
     <sc-if value="{{ showPrevSlide }}" hint-placeholder-val="{{ false }}">
       <button onClick="{{ prevLayoutSlide }}" aria-label="Previous view" style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:36px;height:48px;border:1px solid var(--ink);background:var(--paper);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:18px;line-height:1;color:var(--ink);">‹</button>
@@ -284,9 +288,9 @@
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;zoomFactor&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:1.5,&quot;max&quot;:3,&quot;step&quot;:0.25,&quot;default&quot;:2,&quot;tsType&quot;:&quot;number&quot;}}">
+<script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { w: 358, zoom: false, notesOpen: false, on: { nails: true }, active: 'nails', layoutSlide: 'abside', abIdx: 0 };
+  state = { w: 358, zoomLevel: 1, notesOpen: false, on: { nails: true }, active: 'nails', layoutSlide: 'abside', abIdx: 0 };
   measureRef = React.createRef();
   componentDidMount() {
     if (!window.TrazadoTechnicalDrawingSystem_c49611) {
@@ -453,8 +457,10 @@ class Component extends DCLogic {
   }
   renderVals() {
     const S = 10.5, g = this.geometry(S, 297, 290), pm = this.poleMarks(g, S), wm = this.wallMarks(g, S), tm = this.tireMarks(g, S);
-    const { on, active, w, zoom, notesOpen, layoutSlide, abIdx } = this.state;
-    const crop = { x: 46, y: 34, w: 504, h: 556 }, fit = w / crop.w, z = zoom ? Math.max(1.3, fit * (this.props.zoomFactor ?? 2)) : fit;
+    const { on, active, w, zoomLevel, notesOpen, layoutSlide, abIdx } = this.state;
+    const crop = { x: 46, y: 34, w: 504, h: 556 }, fit = w / crop.w;
+    const ZMIN = 1, ZMAX = 4, ZSTEP = 0.15; // temporary: fine manual zoom steps + counter, to find the right default and then drop the controls
+    const z = fit * zoomLevel;
     const DEF = [
       { k: 'measures', name: 'Measures', stat: '28.00', unit: 'm' },
       { k: 'nails', name: 'Tent nails', stat: '57', unit: 'pcs' },
@@ -538,8 +544,10 @@ class Component extends DCLogic {
       mDims: g.dims.map(d => ({ ...d, tone: mAct ? d.tone : 'ink' })),
       boxH: Math.round(crop.h * fit), innerW: Math.round(crop.w * z), innerH: Math.round(crop.h * z),
       tr: 'scale(' + z.toFixed(4) + ') translate(' + (-crop.x) + 'px,' + (-crop.y) + 'px)',
-      overflow: zoom ? 'auto' : 'hidden', zoomSign: zoom ? '\u2212' : '+',
-      toggleZoom: () => this.setState(s => ({ zoom: !s.zoom })),
+      overflow: zoomLevel > ZMIN ? 'auto' : 'hidden',
+      zoomPct: Math.round(zoomLevel * 100) + '%',
+      zoomIn: () => this.setState(s => ({ zoomLevel: Math.min(ZMAX, +(s.zoomLevel + ZSTEP).toFixed(2)) })),
+      zoomOut: () => this.setState(s => ({ zoomLevel: Math.max(ZMIN, +(s.zoomLevel - ZSTEP).toFixed(2)) })),
       notesOpen: notesOpen && notesActive, activeNotes: notesActive ? (NOTES[active] || []) : [],
       notesLabel: 'Notes — ' + (activeDef ? activeDef.name : ''),
       notesBg: notesOpen && notesActive ? 'var(--ink)' : 'var(--paper)', notesFg: notesOpen && notesActive ? 'var(--paper)' : 'var(--ink)',
