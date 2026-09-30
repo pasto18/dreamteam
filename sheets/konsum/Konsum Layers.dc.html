@@ -26,7 +26,7 @@
   <div ref="{{ measureRef }}" style="height:0;margin:0 16px;"></div>
   <div style="position:relative;margin:0 16px;">
     <div style="position:relative;height:{{ boxH }}px;overflow:{{ overflow }};-webkit-overflow-scrolling:touch;">
-      <div style="position:relative;width:{{ innerW }}px;height:{{ innerH }}px;overflow:hidden;">
+      <div style="position:relative;width:{{ innerW }}px;height:{{ innerH }}px;margin:0 auto;overflow:hidden;">
         <div style="position:absolute;left:0;top:0;width:595px;height:680px;transform-origin:0 0;transform:{{ tr }};">
           <svg style="position:absolute;left:0;top:0;width:595px;height:680px;overflow:visible;">
             <defs>
@@ -525,7 +525,7 @@ class Component extends DCLogic {
       mDims: g.dims.map(d => ({ ...d, tone: mAct ? d.tone : 'ink' })),
       boxH: Math.round(crop.h * fit), innerW: Math.round(crop.w * z), innerH: Math.round(crop.h * z),
       tr: 'scale(' + z.toFixed(4) + ') translate(' + (-crop.x) + 'px,' + (-crop.y) + 'px)',
-      overflow: zoom ? 'auto' : 'hidden', zoomSign: zoom ? '−' : '+',
+      overflow: 'auto', zoomSign: zoom ? '−' : '+',
       toggleZoom: () => this.setState(s => ({ zoom: !s.zoom })),
       notesOpen: notesOpen && notesActive, activeNotes: notesActive ? (NOTES[active] || []) : [],
       notesLabel: 'Notes — ' + (activeDef ? activeDef.name : ''),
