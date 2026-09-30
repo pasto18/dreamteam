@@ -446,6 +446,10 @@
             <div style="font-weight:800;font-size:17px">No plan yet</div>
             <div class="muted" style="font-size:14px;margin-top:4px;text-wrap:pretty">The floor plan will appear here once it's added.</div>
           </div>`}
+        ${S.tent === 'Konsum' ? `<div style="padding:10px 16px 0">
+            <a href="sheets/konsum/Konsum Layers.dc.html" target="_blank" rel="noopener" class="dashed-add" style="text-decoration:none;color:inherit">Interactive mobile plan${IC.arrowR}</a>
+            <div class="muted" style="font-size:13px;padding:8px 0 0">Layers, measures &amp; nail layout — opens in a new tab</div>
+          </div>` : ''}
         <div class="sec-h"><span class="lbl">Slides</span><span class="muted" style="font-size:13px">${list.length} ${list.length === 1 ? 'slide' : 'slides'}</span>
           ${ed && list.length > 1 ? '<span class="muted" style="margin-left:auto;font-size:12px">Drag ⠿ to reorder</span>' : ''}</div>
         ${list.map((sl, i) => `

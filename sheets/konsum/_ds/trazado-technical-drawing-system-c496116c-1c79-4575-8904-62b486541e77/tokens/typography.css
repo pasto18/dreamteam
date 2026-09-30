@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Caveat:wght@500;600&display=swap');
+:root{
+--font-display:'Oswald',sans-serif;
+--font-mono:'IBM Plex Mono',monospace;
+--font-hand:'Caveat',cursive;
+--text-title:32px;
+--text-subtitle:13px;
+--text-label:11px;
+--text-annotation:12px;
+--text-body:14px;
+--tracking-wide:0.08em;
+--tracking-label:0.12em;
+--leading-tight:1.1;
+--leading-body:1.5;
+}

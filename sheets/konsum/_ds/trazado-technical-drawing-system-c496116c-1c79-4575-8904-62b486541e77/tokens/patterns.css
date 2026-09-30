@@ -1,0 +1,11 @@
+:root{
+--pattern-hatch-45:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M0 8L8 0' stroke='%23111111' stroke-width='1'/%3E%3C/svg%3E"); /* @kind other */
+--pattern-hatch-cross:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M0 8L8 0M0 0L8 8' stroke='%23111111' stroke-width='0.75'/%3E%3C/svg%3E"); /* @kind other */
+--pattern-dots:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='2' cy='2' r='1.1' fill='%23111111'/%3E%3C/svg%3E"); /* @kind other */
+--pattern-vertical:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2 0V8' stroke='%23111111' stroke-width='1'/%3E%3C/svg%3E"); /* @kind other */
+--pattern-brick:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8'%3E%3Cpath d='M0 4H16M8 0V4M0 4V8M16 4V8M4 4V8M12 4V8' stroke='%23111111' stroke-width='0.75' fill='none'/%3E%3C/svg%3E"); /* @kind other */
+.hatch-45{background-image:var(--pattern-hatch-45);}
+.hatch-cross{background-image:var(--pattern-hatch-cross);}
+.hatch-dots{background-image:var(--pattern-dots);}
+.hatch-vertical{background-image:var(--pattern-vertical);}
+.hatch-brick{background-image:var(--pattern-brick);}

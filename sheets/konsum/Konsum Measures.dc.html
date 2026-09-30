@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/tokens/typography.css">
+<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/tokens/colors.css">
+<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/tokens/patterns.css">
+<link rel="stylesheet" href="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/styles.css">
+<script src="_ds/trazado-technical-drawing-system-c496116c-1c79-4575-8904-62b486541e77/_ds_bundle.js"></script>
+<style>body{margin:0;background:#E6E3DA;} a{color:#181815;} a:hover{color:#E24A1E;}</style>
+</helmet>
+<div style="display:flex;flex-wrap:wrap;gap:48px;justify-content:center;padding:48px 32px;max-width:1400px;margin:0 auto;">
+  <sc-for list="{{ sheets }}" as="sh" hint-placeholder-count="4">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#54524B;">{{ sh.caption }}</span>
+      <x-import component-from-global-scope="TrazadoTechnicalDrawingSystem_c49611.SheetFrame" theme="{{ sh.theme }}" border="{{ false }}" crop-marks="{{ false }}" header="{{ sh.header }}" footer="{{ sh.footer }}" hint-size="595px,842px">
+        <svg style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;">
+          <defs>
+            <pattern id="h45-{{ sh.key }}" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="5" style="stroke:var(--ink);stroke-width:0.6;"></line>
+            </pattern>
+            <pattern id="hx-{{ sh.key }}" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="5" style="stroke:var(--ink);stroke-width:0.45;"></line>
+              <line x1="0" y1="0" x2="5" y2="0" style="stroke:var(--ink);stroke-width:0.45;"></line>
+            </pattern>
+            <pattern id="hd-{{ sh.key }}" patternUnits="userSpaceOnUse" width="4.5" height="4.5">
+              <circle cx="1.5" cy="1.5" r="0.75" style="fill:var(--ink);"></circle>
+            </pattern>
+          </defs>
+          <sc-for list="{{ sh.views }}" as="vw" hint-placeholder-count="1">
+          <sc-for list="{{ sh.ext }}" as="e" hint-placeholder-count="0">
+            <line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" style="stroke:var(--ink-faint);stroke-width:0.6;stroke-dasharray:2 2;"></line>
+          </sc-for>
+          <path d="{{ vw.g.ring }}" style="fill:var(--paper);stroke:none;"></path>
+          <path d="{{ vw.g.ring }}" fill="{{ sh.ringFill }}" style="stroke:var(--ink);stroke-width:1;"></path>
+          <circle cx="{{ vw.g.cx }}" cy="{{ vw.g.cy }}" r="{{ vw.g.rp }}" style="fill:var(--paper);"></circle>
+          <path d="{{ vw.g.center }}" fill="{{ sh.centerFill }}"></path>
+          <path d="{{ vw.g.left }}" fill="{{ sh.sideFill }}"></path>
+          <path d="{{ vw.g.right }}" fill="{{ sh.sideFill }}"></path>
+          <circle cx="{{ vw.g.cx }}" cy="{{ vw.g.cy }}" r="{{ vw.g.rp }}" style="fill:none;stroke:var(--ink);stroke-width:1.25;"></circle>
+          <line x1="{{ vw.g.axis.x1 }}" y1="{{ vw.g.cy }}" x2="{{ vw.g.axis.x2 }}" y2="{{ vw.g.cy }}" style="stroke:var(--ink-faint);stroke-width:0.6;stroke-dasharray:3 3;"></line>
+          <sc-for list="{{ vw.g.nails }}" as="n" hint-placeholder-count="0">
+            <line x1="{{ n.x1 }}" y1="{{ n.y1 }}" x2="{{ n.x2 }}" y2="{{ n.y2 }}" style="stroke:var(--ink);stroke-width:1.25;stroke-linecap:round;"></line>
+          </sc-for>
+          <sc-for list="{{ vw.g.vees }}" as="v" hint-placeholder-count="0">
+            <line x1="{{ v.x1 }}" y1="{{ v.y1 }}" x2="{{ v.x2 }}" y2="{{ v.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
+          </sc-for>
+          <sc-if value="{{ sh.showDivision }}" hint-placeholder-val="{{ true }}">
+            <sc-for list="{{ vw.g.division }}" as="d" hint-placeholder-count="0">
+              <line x1="{{ d.x1 }}" y1="{{ d.y1 }}" x2="{{ d.x2 }}" y2="{{ d.y2 }}" style="stroke:var(--accent);stroke-width:1.5;"></line>
+              <circle cx="{{ d.x1 }}" cy="{{ d.y1 }}" r="2.6" style="fill:var(--accent);stroke:var(--paper);stroke-width:1;"></circle>
+            </sc-for>
+          </sc-if>
+          <sc-if value="{{ sh.isNails }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ vw.g.nails }}" as="n" hint-placeholder-count="0">
+              <circle cx="{{ n.x2 }}" cy="{{ n.y2 }}" r="3" style="fill:var(--accent);stroke:var(--paper);stroke-width:0.8;"></circle>
+            </sc-for>
+          </sc-if>
+          <sc-if value="{{ sh.isMeasures }}" hint-placeholder-val="{{ true }}">
+            <sc-for list="{{ vw.g.nails }}" as="n" hint-placeholder-count="0">
+              <circle cx="{{ n.x2 }}" cy="{{ n.y2 }}" r="1.8" style="fill:var(--ink);"></circle>
+            </sc-for>
+          </sc-if>
+          <sc-for list="{{ sh.cables }}" as="c" hint-placeholder-count="0">
+            <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
+          </sc-for>
+          <sc-if value="{{ sh.showDome }}" hint-placeholder-val="{{ true }}"><rect x="{{ vw.g.dome.x }}" y="{{ vw.g.dome.y }}" width="{{ vw.g.dome.w }}" height="{{ vw.g.dome.h }}" rx="{{ vw.g.dome.rx }}" style="fill:var(--ink);stroke:var(--paper);stroke-width:1.2;"></rect>
+          <line x1="{{ vw.g.dome.cl1 }}" y1="{{ vw.g.cy }}" x2="{{ vw.g.dome.cl2 }}" y2="{{ vw.g.cy }}" style="stroke:var(--paper);stroke-width:0.8;stroke-dasharray:2 2;"></line>
+          <sc-for list="{{ vw.g.wings }}" as="w" hint-placeholder-count="0">
+            <rect x="{{ w.x }}" y="{{ w.y }}" width="{{ w.w }}" height="{{ w.h }}" style="fill:var(--ink);"></rect>
+          </sc-for>
+          </sc-if>
+          <sc-for list="{{ vw.g.antennas }}" as="a" hint-placeholder-count="0">
+            <rect x="{{ a.x }}" y="{{ a.y }}" width="{{ a.w }}" height="{{ a.w }}" style="fill:var(--ink);stroke:var(--paper);stroke-width:1;"></rect>
+          </sc-for>
+          <sc-if value="{{ vw.poles }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ vw.g.nails }}" as="n" hint-placeholder-count="0">
+              <circle cx="{{ n.x2 }}" cy="{{ n.y2 }}" r="1.5" style="fill:var(--ink);"></circle>
+            </sc-for>
+            <line x1="{{ vw.pd.x1 }}" y1="{{ vw.pd.y1 }}" x2="{{ vw.pd.x2 }}" y2="{{ vw.pd.y2 }}" style="stroke:var(--ink-soft);stroke-width:0.8;stroke-dasharray:2 2;"></line>
+            <text x="{{ vw.pdl.x }}" y="{{ vw.pdl.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ vw.pdl.tr }}" style="font-family:var(--font-mono);font-size:9px;fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:4px;">14.00</text>
+            <line x1="{{ vw.pa.x1 }}" y1="{{ vw.pa.y1 }}" x2="{{ vw.pa.x2 }}" y2="{{ vw.pa.y2 }}" style="stroke:var(--accent);stroke-width:1;stroke-dasharray:1.5 1.5;"></line>
+            <polyline points="{{ vw.pa.head }}" style="stroke:var(--accent);stroke-width:1;fill:none;"></polyline>
+            <text x="{{ vw.pal.x }}" y="{{ vw.pal.y }}" text-anchor="middle" dominant-baseline="central" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--accent);paint-order:stroke;stroke:var(--paper);stroke-width:6px;stroke-linejoin:round;">1.51</text>
+            <sc-for list="{{ vw.pflow }}" as="ar" hint-placeholder-count="0">
+              <line x1="{{ ar.x1 }}" y1="{{ ar.y1 }}" x2="{{ ar.x2 }}" y2="{{ ar.y2 }}" style="stroke:var(--ink);stroke-width:1.25;"></line>
+              <polyline points="{{ ar.head }}" style="stroke:var(--ink);stroke-width:1.25;fill:none;"></polyline>
+            </sc-for>
+            <sc-for list="{{ vw.pts }}" as="p" hint-placeholder-count="0">
+              <circle cx="{{ p.x }}" cy="{{ p.y }}" r="2.9" fill="{{ sh.poleFill }}" style="stroke:var(--paper);stroke-width:0.8;"></circle>
+            </sc-for>
+            <line x1="{{ vw.g.frontA.x1 }}" y1="{{ vw.g.frontA.y1 }}" x2="{{ vw.g.frontA.x2 }}" y2="{{ vw.g.frontA.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
+            <polyline points="{{ vw.g.frontA.head }}" style="stroke:var(--ink);stroke-width:1;fill:none;"></polyline>
+            <text x="{{ vw.g.cx }}" y="{{ vw.g.frontY }}" text-anchor="middle" dominant-baseline="central" style="font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:0.14em;fill:var(--ink);">FRONT</text>
+          </sc-if>
+          <sc-if value="{{ vw.walls }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ vw.g.nails }}" as="n" hint-placeholder-count="0">
+              <circle cx="{{ n.x2 }}" cy="{{ n.y2 }}" r="1.6" style="fill:var(--ink);"></circle>
+            </sc-for>
+            <circle cx="{{ vw.g.cx }}" cy="{{ vw.g.cy }}" r="{{ vw.g.rp }}" fill="none" stroke="{{ sh.wallStroke }}" style="stroke-width:3.2;"></circle>
+            <sc-for list="{{ vw.joints }}" as="j" hint-placeholder-count="0">
+              <line x1="{{ j.x1 }}" y1="{{ j.y1 }}" x2="{{ j.x2 }}" y2="{{ j.y2 }}" style="stroke:var(--ink);stroke-width:3.2;stroke-linecap:round;"></line>
+            </sc-for>
+            <sc-for list="{{ vw.badges }}" as="b" hint-placeholder-count="0">
+              <circle cx="{{ b.x }}" cy="{{ b.y }}" r="8.5" style="fill:var(--paper);stroke:var(--ink);stroke-width:1;"></circle>
+            </sc-for>
+            <line x1="{{ vw.g.frontA.x1 }}" y1="{{ vw.g.frontA.y1 }}" x2="{{ vw.g.frontA.x2 }}" y2="{{ vw.g.frontA.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
+            <polyline points="{{ vw.g.frontA.head }}" style="stroke:var(--ink);stroke-width:1;fill:none;"></polyline>
+            <text x="{{ vw.g.cx }}" y="{{ vw.g.frontY }}" text-anchor="middle" dominant-baseline="central" style="font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:0.14em;fill:var(--ink);">FRONT</text>
+          </sc-if>
+          <sc-if value="{{ vw.tire }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ vw.g.nails }}" as="n" hint-placeholder-count="0">
+              <circle cx="{{ n.x2 }}" cy="{{ n.y2 }}" r="1.6" style="fill:var(--ink);"></circle>
+            </sc-for>
+            <sc-for list="{{ vw.guides }}" as="c" hint-placeholder-count="0">
+              <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink-soft);stroke-width:0.7;stroke-dasharray:2.5 2;"></line>
+            </sc-for>
+            <line x1="{{ vw.ddim.x1 }}" y1="{{ vw.ddim.y1 }}" x2="{{ vw.ddim.x2 }}" y2="{{ vw.ddim.y2 }}" style="stroke:var(--ink);stroke-width:0.8;"></line>
+            <sc-for list="{{ vw.dticks }}" as="c" hint-placeholder-count="0">
+              <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:0.9;"></line>
+            </sc-for>
+            <sc-for list="{{ vw.boxes }}" as="b" hint-placeholder-count="0">
+              <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" transform="{{ b.tr }}" fill="{{ sh.tireFill }}" style="stroke:var(--paper);stroke-width:1;"></rect>
+            </sc-for>
+            <line x1="{{ vw.frontA.x1 }}" y1="{{ vw.frontA.y1 }}" x2="{{ vw.frontA.x2 }}" y2="{{ vw.frontA.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
+            <polyline points="{{ vw.frontA.head }}" style="stroke:var(--ink);stroke-width:1;fill:none;"></polyline>
+            <text x="{{ vw.g.cx }}" y="{{ vw.frontY }}" text-anchor="middle" dominant-baseline="central" style="font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:0.14em;fill:var(--ink);">FRONT</text>
+          </sc-if>
+          <sc-if value="{{ sh.isMeasures }}" hint-placeholder-val="{{ true }}">
+            <sc-for list="{{ vw.g.diag }}" as="c" hint-placeholder-count="0">
+              <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
+              <circle cx="{{ c.x2 }}" cy="{{ c.y2 }}" r="2.2" style="fill:var(--ink);stroke:var(--paper);stroke-width:0.8;"></circle>
+            </sc-for>
+            <text x="{{ vw.g.diagLbl.x }}" y="{{ vw.g.diagLbl.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ vw.g.diagLbl.tr }}" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:3px;">16 m from centre</text>
+            <sc-for list="{{ vw.g.arrows }}" as="ar" hint-placeholder-count="0">
+              <line x1="{{ ar.x1 }}" y1="{{ ar.y1 }}" x2="{{ ar.x2 }}" y2="{{ ar.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
+              <polyline points="{{ ar.head }}" style="stroke:var(--ink);stroke-width:1;fill:none;"></polyline>
+            </sc-for>
+            <text x="{{ vw.g.pal.x }}" y="{{ vw.g.pal.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ vw.g.pal.tr }}" style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;fill:var(--ink);">PALAPAS</text>
+            <text x="{{ vw.g.sub.x }}" y="{{ vw.g.sub.y }}" text-anchor="middle" dominant-baseline="central" transform="{{ vw.g.sub.tr }}" style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;fill:var(--ink);">SUBARDO</text>
+            <text x="{{ vw.g.front.x }}" y="{{ vw.g.front.y }}" text-anchor="middle" dominant-baseline="central" style="font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:0.14em;fill:var(--ink);">FRONT</text>
+          </sc-if>
+          <sc-if value="{{ sh.isLayout }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ vw.hi }}" as="n" hint-placeholder-count="0">
+              <circle cx="{{ n.x2 }}" cy="{{ n.y2 }}" r="2.4" style="fill:var(--accent);stroke:var(--paper);stroke-width:0.8;"></circle>
+            </sc-for>
+            <sc-for list="{{ vw.lo }}" as="n" hint-placeholder-count="0">
+              <circle cx="{{ n.x2 }}" cy="{{ n.y2 }}" r="1.8" style="fill:var(--paper);stroke:var(--ink);stroke-width:0.9;"></circle>
+            </sc-for>
+            <sc-for list="{{ vw.flow }}" as="ar" hint-placeholder-count="0">
+              <line x1="{{ ar.x1 }}" y1="{{ ar.y1 }}" x2="{{ ar.x2 }}" y2="{{ ar.y2 }}" style="stroke:var(--ink);stroke-width:1.25;"></line>
+              <polyline points="{{ ar.head }}" style="stroke:var(--ink);stroke-width:1.25;fill:none;"></polyline>
+            </sc-for>
+            <sc-if value="{{ vw.up }}" hint-placeholder-val="{{ true }}">
+              <circle cx="{{ vw.g.antM.x }}" cy="{{ vw.g.antM.y }}" r="1.6" style="fill:var(--paper);"></circle>
+              <sc-for list="{{ vw.g.meas }}" as="m" hint-placeholder-count="0">
+                <line x1="{{ m.x1 }}" y1="{{ m.y1 }}" x2="{{ m.x2 }}" y2="{{ m.y2 }}" style="stroke:var(--accent);stroke-width:1;stroke-dasharray:2 2;"></line>
+              </sc-for>
+              <text x="{{ vw.g.m16.x }}" y="{{ vw.g.m16.y }}" text-anchor="middle" transform="{{ vw.g.m16.tr }}" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--accent);">16.00</text>
+              <text x="{{ vw.g.m1175.x }}" y="{{ vw.g.m1175.y }}" text-anchor="middle" transform="{{ vw.g.m1175.tr }}" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--accent);">11.75</text>
+            </sc-if>
+            <sc-if value="{{ vw.down }}" hint-placeholder-val="{{ false }}">
+              <line x1="{{ vw.g.doorLine.x1 }}" y1="{{ vw.g.doorLine.y1 }}" x2="{{ vw.g.doorLine.x2 }}" y2="{{ vw.g.doorLine.y2 }}" style="stroke:var(--accent);stroke-width:1;stroke-dasharray:2 2;"></line>
+              <text x="{{ vw.g.doorLbl16.x }}" y="{{ vw.g.doorLbl16.y }}" dominant-baseline="central" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--accent);">16.00</text>
+              <line x1="{{ vw.g.doorArrow.x1 }}" y1="{{ vw.g.doorArrow.y1 }}" x2="{{ vw.g.doorArrow.x2 }}" y2="{{ vw.g.doorArrow.y2 }}" style="stroke:var(--accent);stroke-width:1;stroke-dasharray:1.5 1.5;"></line>
+              <polyline points="{{ vw.g.doorArrow.head }}" style="stroke:var(--accent);stroke-width:1;fill:none;"></polyline>
+              <text x="{{ vw.g.doorLbl151.x }}" y="{{ vw.g.doorLbl151.y }}" text-anchor="middle" dominant-baseline="central" style="font-family:var(--font-mono);font-size:8.5px;fill:var(--accent);">1.62</text>
+              <line x1="{{ vw.g.frontA.x1 }}" y1="{{ vw.g.frontA.y1 }}" x2="{{ vw.g.frontA.x2 }}" y2="{{ vw.g.frontA.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
+              <polyline points="{{ vw.g.frontA.head }}" style="stroke:var(--ink);stroke-width:1;fill:none;"></polyline>
+              <text x="{{ vw.g.cx }}" y="{{ vw.g.frontY }}" text-anchor="middle" dominant-baseline="central" style="font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:0.14em;fill:var(--ink);">FRONT</text>
+            </sc-if>
+            <circle cx="{{ vw.g.cx }}" cy="{{ vw.g.cy }}" r="2.6" style="fill:var(--paper);stroke:var(--ink);stroke-width:1;"></circle>
+          </sc-if>
+          </sc-for>
+        </svg>
+        <sc-if value="{{ sh.isElev }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ sh.elevs }}" as="ev" hint-placeholder-count="0">
+            <svg style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;">
+              <sc-for list="{{ ev.ext }}" as="e" hint-placeholder-count="0">
+                <line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" style="stroke:var(--ink-faint);stroke-width:0.6;stroke-dasharray:2 2;"></line>
+              </sc-for>
+              <sc-for list="{{ ev.guys }}" as="c" hint-placeholder-count="0">
+                <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:0.7;stroke-dasharray:7 2 1.5 2;"></line>
+              </sc-for>
+              <sc-for list="{{ ev.dashed }}" as="c" hint-placeholder-count="0">
+                <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:0.6;stroke-dasharray:3 2;"></line>
+              </sc-for>
+              <path d="{{ ev.body }}" style="fill:var(--paper);stroke:none;"></path>
+              <path d="{{ ev.body }}" fill="{{ sh.elevFill }}" style="stroke:var(--accent);stroke-width:1.5;stroke-linejoin:round;"></path>
+              <line x1="{{ ev.eave.x1 }}" y1="{{ ev.eave.y1 }}" x2="{{ ev.eave.x2 }}" y2="{{ ev.eave.y2 }}" style="stroke:var(--ink-soft);stroke-width:0.6;stroke-dasharray:4 3;"></line>
+              <sc-for list="{{ ev.mastBoxes }}" as="m" hint-placeholder-count="0">
+                <rect x="{{ m.x }}" y="{{ m.y }}" width="{{ m.w }}" height="{{ m.h }}" style="fill:var(--paper);stroke:var(--ink);stroke-width:1;"></rect>
+              </sc-for>
+              <sc-for list="{{ ev.members }}" as="c" hint-placeholder-count="0">
+                <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:0.7;"></line>
+              </sc-for>
+              <sc-for list="{{ ev.trussOutline }}" as="p" hint-placeholder-count="0">
+                <path d="{{ p }}" style="fill:none;stroke:var(--ink);stroke-width:1.1;stroke-linejoin:round;"></path>
+              </sc-for>
+              <sc-for list="{{ ev.rings }}" as="r" hint-placeholder-count="0">
+                <ellipse cx="{{ r.cx }}" cy="{{ r.cy }}" rx="{{ r.rx }}" ry="{{ r.ry }}" style="fill:none;stroke:var(--ink);stroke-width:1;"></ellipse>
+              </sc-for>
+              <sc-for list="{{ ev.leaders }}" as="c" hint-placeholder-count="0">
+                <line x1="{{ c.x1 }}" y1="{{ c.y1 }}" x2="{{ c.x2 }}" y2="{{ c.y2 }}" style="stroke:var(--ink);stroke-width:0.7;"></line>
+                <circle cx="{{ c.x2 }}" cy="{{ c.y2 }}" r="1.6" style="fill:var(--ink);"></circle>
+              </sc-for>
+              <line x1="{{ ev.ground.x1 }}" y1="{{ ev.ground.y1 }}" x2="{{ ev.ground.x2 }}" y2="{{ ev.ground.y2 }}" style="stroke:var(--ink);stroke-width:1;"></line>
+              <rect x="{{ ev.groundBand.x }}" y="{{ ev.groundBand.y }}" width="{{ ev.groundBand.w }}" height="4" fill="url(#h45-{{ sh.key }})"></rect>
+            </svg>
+            <div style="position:absolute;left:20px;top:{{ ev.titleY }}px;display:flex;flex-direction:column;gap:5px;">
+              <span style="font-family:var(--font-display);font-weight:600;font-size:16px;line-height:1;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink);">{{ ev.title }}</span>
+              <div class="hatch-cross" style="width:28px;height:4px;background-color:var(--accent);"></div>
+            </div>
+            <sc-for list="{{ ev.dims }}" as="dm" hint-placeholder-count="0">
+              <div style="position:absolute;left:{{ dm.left }}px;top:{{ dm.top }}px;">
+                <x-import component-from-global-scope="TrazadoTechnicalDrawingSystem_c49611.DimensionLine" value="{{ dm.value }}" length="{{ dm.length }}" orientation="horizontal" label-position="inline" tone="{{ dm.tone }}" hint-size="40px,14px"></x-import>
+              </div>
+            </sc-for>
+            <sc-for list="{{ ev.dimOut }}" as="lb" hint-placeholder-count="0">
+              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-mono);font-size:10px;line-height:12px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ lb.text }}</span>
+            </sc-for>
+            <sc-for list="{{ ev.labels }}" as="lb" hint-placeholder-count="0">
+              <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:{{ lb.tr }};font-family:var(--font-mono);font-size:8.5px;line-height:1.2;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink);white-space:nowrap;background:var(--paper);padding:1px 3px;">{{ lb.text }}</span>
+            </sc-for>
+          </sc-for>
+        </sc-if>
+        <sc-for list="{{ sh.dims }}" as="dm" hint-placeholder-count="0">
+          <div style="position:absolute;left:{{ dm.left }}px;top:{{ dm.top }}px;">
+            <x-import component-from-global-scope="TrazadoTechnicalDrawingSystem_c49611.DimensionLine" value="{{ dm.value }}" length="{{ dm.length }}" orientation="{{ dm.orientation }}" label-position="{{ dm.pos }}" tone="{{ dm.tone }}" hint-size="40px,14px"></x-import>
+          </div>
+        </sc-for>
+        <sc-if value="{{ sh.isMeasures }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ sh.g.dimOut }}" as="lb" hint-placeholder-count="0">
+            <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:{{ lb.tr }};font-family:var(--font-mono);font-size:10px;line-height:12px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ lb.text }}</span>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ sh.isNails }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ sh.g.labels }}" as="lb" hint-placeholder-count="0">
+            <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-mono);font-size:7.5px;line-height:1;letter-spacing:0.02em;color:var(--ink);white-space:nowrap;">{{ lb.text }}</span>
+          </sc-for>
+          <div style="position:absolute;left:20px;top:16px;display:flex;flex-direction:column;gap:4px;">
+            <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);">Tent nails</span>
+            <div style="display:flex;align-items:baseline;gap:5px;">
+              <span style="font-family:var(--font-display);font-weight:700;font-size:44px;line-height:1;color:var(--accent);">57</span>
+              <span style="font-family:var(--font-display);font-weight:500;font-size:15px;color:var(--ink);text-transform:uppercase;">pcs</span>
+            </div>
+            <div class="hatch-cross" style="width:36px;height:5px;background-color:var(--accent);"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ sh.isPoles }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:20px;top:16px;display:flex;flex-direction:column;gap:4px;">
+            <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);">Poles</span>
+            <div style="display:flex;align-items:baseline;gap:5px;">
+              <span style="font-family:var(--font-display);font-weight:700;font-size:44px;line-height:1;color:var(--accent);">57</span>
+              <span style="font-family:var(--font-display);font-weight:500;font-size:15px;color:var(--ink);text-transform:uppercase;">pcs</span>
+            </div>
+            <div class="hatch-cross" style="width:36px;height:5px;background-color:var(--accent);"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ sh.isTire }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ sh.tireLabels }}" as="lb" hint-placeholder-count="0">
+            <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%) rotate(45deg);font-family:var(--font-mono);font-size:10px;line-height:12px;color:var(--ink);white-space:nowrap;background:var(--paper);padding:0 2px;">{{ lb.text }}</span>
+          </sc-for>
+          <div style="position:absolute;left:20px;top:16px;display:flex;flex-direction:column;gap:4px;">
+            <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);">Tireforts</span>
+            <div style="display:flex;align-items:baseline;gap:5px;">
+              <span style="font-family:var(--font-display);font-weight:700;font-size:44px;line-height:1;color:var(--accent);">10</span>
+              <span style="font-family:var(--font-display);font-weight:500;font-size:15px;color:var(--ink);text-transform:uppercase;">pcs</span>
+            </div>
+            <div class="hatch-cross" style="width:36px;height:5px;background-color:var(--accent);"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ sh.isWalls }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ sh.wallBadges }}" as="b" hint-placeholder-count="0">
+            <span style="position:absolute;left:{{ b.x }}px;top:{{ b.y }}px;transform:translate(-50%,-50%);font-family:var(--font-display);font-weight:600;font-size:11px;line-height:1;color:var(--ink);">{{ b.n }}</span>
+          </sc-for>
+          <div style="position:absolute;left:20px;top:16px;display:flex;flex-direction:column;gap:4px;">
+            <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);">Sidewall panels</span>
+            <div style="display:flex;align-items:baseline;gap:5px;">
+              <span style="font-family:var(--font-display);font-weight:700;font-size:44px;line-height:1;color:var(--accent);">8</span>
+              <span style="font-family:var(--font-display);font-weight:500;font-size:15px;color:var(--ink);text-transform:uppercase;">pcs</span>
+            </div>
+            <div class="hatch-cross" style="width:36px;height:5px;background-color:var(--accent);"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ sh.isLayout }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ sh.layoutLabels }}" as="lb" hint-placeholder-count="0">
+            <span style="position:absolute;left:{{ lb.x }}px;top:{{ lb.y }}px;transform:translate(-50%,-50%);font-family:var(--font-mono);font-weight:600;font-size:7.5px;line-height:1;letter-spacing:0.08em;color:var(--ink);white-space:nowrap;">{{ lb.text }}</span>
+          </sc-for>
+          <div style="position:absolute;right:20px;top:16px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);">Tent nails</span>
+            <div style="display:flex;align-items:baseline;gap:5px;">
+              <span style="font-family:var(--font-display);font-weight:700;font-size:44px;line-height:1;color:var(--accent);">57</span>
+              <span style="font-family:var(--font-display);font-weight:500;font-size:15px;color:var(--ink);text-transform:uppercase;">pcs</span>
+            </div>
+            <div class="hatch-cross" style="width:36px;height:5px;background-color:var(--accent);"></div>
+          </div>
+          <div style="position:absolute;left:345px;top:96px;width:230px;display:flex;flex-direction:column;font-family:var(--font-mono);">
+            <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px;">
+              <span style="font-family:var(--font-display);font-weight:600;font-size:16px;line-height:1;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink);">Abside nails</span>
+              <div class="hatch-cross" style="width:28px;height:4px;background-color:var(--accent);"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;padding-bottom:4px;border-bottom:1px solid var(--ink);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);">
+              <span>Nail</span>
+              <span style="text-align:right;">Center</span>
+              <span style="text-align:right;">Antenna</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--accent);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B1</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.00</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">11.75</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B2</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">15.79</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">10.81</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B3</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.05</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">10.49</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B4</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.46</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">10.35</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B5</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.88</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">10.35</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B6</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.93</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">10.08</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B7</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.93</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">9.90</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B8</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.92</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">9.86</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B9</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.92</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">9.97</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B10</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.93</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">10.21</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B11</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.82</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">10.47</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B12</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.80</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">10.92</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B13</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.85</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">11.54</span>
+            </div>
+            <div style="display:grid;grid-template-columns:40px 1fr 1fr;height:15px;border-bottom:1px solid var(--line-grid);font-size:9.5px;color:var(--ink);">
+              <span style="display:flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:11px;">B14</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">16.89</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;">12.21</span>
+            </div>
+            <span style="margin-top:5px;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);">Distances in metres</span>
+          </div>
+          <div style="position:absolute;left:345px;top:410px;width:230px;display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:4px;">
+              <span style="font-family:var(--font-display);font-weight:600;font-size:16px;line-height:1;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink);">Unnumbered nails</span>
+              <div class="hatch-cross" style="width:28px;height:4px;background-color:var(--accent);"></div>
+            </div>
+            <p style="margin:0;font-family:var(--font-mono);font-size:9.5px;line-height:1.45;color:var(--ink);text-wrap:pretty;">First nail is front door, 16m from the centre, then next nail is 1.62m apart. Start at the front door and work to the left. Return to the front door and repeat, working to the right.</p>
+          </div>
+        </sc-if>
+      </x-import>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;view&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;both&quot;,&quot;color&quot;,&quot;mono&quot;],&quot;default&quot;:&quot;both&quot;,&quot;tsType&quot;:&quot;'both'|'color'|'mono'&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    if (!window.TrazadoTechnicalDrawingSystem_c49611) {
+      this._t = setInterval(() => { if (window.TrazadoTechnicalDrawingSystem_c49611) { clearInterval(this._t); this.forceUpdate(); } }, 100);
+    }
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+  geometry(S, CX, CY) {
+    this._gc = this._gc || {}; const ck = S + '|' + CX + '|' + CY; if (this._gc[ck]) return this._gc[ck];
+    const R = 14, RO = 16.4, E = 18.42, AX = 5, AY = 4.93, STEP = 6.25;
+    const f = v => +v.toFixed(2);
+    const X = m => f(CX + m * S), Y = m => f(CY + m * S);
+    const P = (t, r) => { const a = t * Math.PI / 180; return [f(CX + r * S * Math.sin(a)), f(CY - r * S * Math.cos(a))]; };
+    const pt = p => p[0] + ' ' + p[1];
+    const seg = (a, b) => ({ x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
+    const rp = f(R * S), ro = f(RO * S);
+    const ring = `M ${pt(P(-81, R))} L ${pt(P(-62, RO))} A ${ro} ${ro} 0 0 1 ${pt(P(62, RO))} L ${pt(P(81, R))} A ${rp} ${rp} 0 0 0 ${pt(P(-81, R))} Z`;
+    const DA = 37.5, QX = 3.6;
+    const qL = [X(-QX), CY], qR = [X(QX), CY];
+    const arc = b => `A ${rp} ${rp} 0 0 1 ${pt(P(b, R))}`;
+    const center = `M ${pt(P(-DA, R))} ${arc(DA)} L ${pt(qR)} L ${pt(P(180 - DA, R))} ${arc(180 + DA)} L ${pt(qL)} Z`;
+    const left = `M ${pt(P(180 + DA, R))} ${arc(360 - DA)} L ${pt(qL)} Z`;
+    const right = `M ${pt(P(DA, R))} ${arc(180 - DA)} L ${pt(qR)} Z`;
+    const division = [seg(P(-DA, R), qL), seg(P(DA, R), qR), seg(P(180 - DA, R), qR), seg(P(180 + DA, R), qL)];
+    // 57 nails: upper half 14 per side (no nail at back door), lower half 14 per side + 1 at front door
+    const TBL = [16.009, 15.799, 16.054, 16.462, 16.886, 16.930, 16.930, 16.927, 16.926, 16.930, 16.827, 16.801, 16.851, 16.899];
+    const tipR = t => { const a = Math.abs(((t + 540) % 360) - 180); return a < 90 ? TBL[14 - Math.round(a / STEP)] : 16; };
+    const nailT = [], labels = [];
+    [-1, 1].forEach(sd => { for (let k = 1; k <= 14; k++) { const t = sd * k * STEP; nailT.push(t); const p = P(t, tipR(t) + 1.35); labels.push({ x: p[0], y: p[1], text: 'B' + (15 - k) }); } });
+    nailT.push(180);
+    [-1, 1].forEach(sd => { for (let k = 1; k <= 14; k++) nailT.push(180 + sd * k * STEP); });
+    const nails = nailT.map(t => seg(P(t, R), P(t, tipR(t))));
+    const vees = [];
+    [DA, -DA, 180 - DA, 180 + DA].forEach(D => [-1, 1].forEach(s => { const t = D + s * STEP; vees.push(seg(P(D, R), P(t, tipR(t)))); }));
+    const aw = f(0.75 * S);
+    const antennas = [];
+    [-1, 1].forEach(sx => [-1, 1].forEach(sy => antennas.push({ x: f(X(sx * AX) - aw / 2), y: f(Y(sy * AY) - aw / 2), w: aw })));
+    const wings = [];
+    [-1, 1].forEach(sx => { wings.push({ x: X(sx * 4.1 - 0.32), y: Y(-3.2), w: f(0.64 * S), h: f(2.4 * S) }); wings.push({ x: X(sx * 4.1 - 0.32), y: Y(0.8), w: f(0.64 * S), h: f(2.4 * S) }); });
+    const dome = { x: X(-5), y: Y(-0.68), w: f(10 * S), h: f(1.36 * S), rx: f(0.68 * S), cl1: X(-4.4), cl2: X(4.4) };
+    const shortCables = [], longCables = [];
+    [-1, 1].forEach(sx => {
+      longCables.push(seg([X(sx * AX), Y(-E)], [X(sx * AX), Y(E)]));
+      [-1, 1].forEach(sy => {
+        longCables.push(seg([X(sx * AX), Y(sy * AY)], [X(sx * E), Y(sy * AY)]));
+        shortCables.push(seg([X(sx * AX), Y(sy * AY)], [X(sx * 4.1), Y(sy * 3.2)]));
+      });
+    });
+    const t1 = f(CY + 19.6 * S), t2 = f(t1 + 24), XV = X(20.3);
+    const ext = [];
+    [[-E, t2], [-16, t1], [-14, t2], [-AX, t1], [AX, t1], [14, t2], [16, t1], [E, t2]].forEach(([m, y]) => ext.push(seg([X(m), CY], [X(m), y + 5])));
+    [-E, -14, 14, E].forEach(m => ext.push(seg([XV - 14, Y(m)], [XV + 8, Y(m)])));
+    const dims = [];
+    const dimOut = [{ x: X(-15), y: f(t1 - 10), text: '2.000', tr: 'translate(-50%,-50%)' }, { x: X(15), y: f(t1 - 10), text: '2.000', tr: 'translate(-50%,-50%)' }];
+    [[-16, -14, ''], [-14, -AX, '9.000'], [-AX, AX, '10.000'], [AX, 14, '9.000'], [14, 16, '']].forEach(([a, b, v]) => dims.push({ left: X(a), top: t1 - 7, length: f((b - a) * S), value: v, orientation: 'horizontal', pos: 'inline', tone: 'ink' }));
+    [[-E, -14, '4.420'], [-14, 14, '28.000', 1], [14, E, '4.420']].forEach(([a, b, v, acc]) => {
+      dims.push({ left: X(a), top: t2 - 7, length: f((b - a) * S), value: v, orientation: 'horizontal', pos: 'inline', tone: acc ? 'accent' : 'ink' });
+      dims.push({ left: XV - 7, top: Y(a), length: f((b - a) * S), value: v, orientation: 'vertical', pos: 'inline', tone: acc ? 'accent' : 'ink' });
+    });
+    const arrow = (x1, y1, x2, y2) => {
+      const a = Math.atan2(y2 - y1, x2 - x1), h = 5;
+      const p1 = [f(x2 - h * Math.cos(a - 0.45)), f(y2 - h * Math.sin(a - 0.45))], p2 = [f(x2 - h * Math.cos(a + 0.45)), f(y2 - h * Math.sin(a + 0.45))];
+      return { x1, y1, x2, y2, head: `${p1} ${x2},${y2} ${p2}` };
+    };
+    const top = Y(-E), bot = t2 + 18, lx = X(-E);
+    const arrows = [arrow(CX, top - 12, CX, top - 34), arrow(lx - 6, CY, lx - 26, CY), arrow(CX, bot, CX, bot + 20)];
+    const palY = top - 48, subX = lx - 42;
+    const mkFlow = (start, n, stp) => { const fl = []; for (let i = 0; i < n; i++) { const tl = start + stp * i; [[tl, 1], [360 - tl, -1]].forEach(([t, dir]) => { const a = P(t - 3.5 * dir, 19.2), b = P(t + 3.5 * dir, 19.2); fl.push(arrow(a[0], a[1], b[0], b[1])); }); } return fl; };
+    const flow = mkFlow(203, 8, 18.9), flowUp = mkFlow(279, 4, 18.5), flowDown = mkFlow(204, 4, 18.5);
+    const b1 = P(87.5, tipR(87.5)), ant = [X(AX), Y(-AY)];
+    const mlab = (a, b, off) => { const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy); let nx = dy / L, ny = -dx / L; if (ny > 0) { nx = -nx; ny = -ny; } const x = f(mx + nx * off), y = f(my + ny * off); return { x, y, tr: 'rotate(' + f(Math.atan2(dy, dx) * 180 / Math.PI) + ' ' + x + ' ' + y + ')' }; };
+    const kl = (t, r, text) => { const p = P(t, r); return { x: p[0], y: p[1], text }; };
+    const keyUp = [kl(-87.5, tipR(-87.5) + 1.9, 'B1'), kl(87.5, tipR(87.5) + 1.9, 'B1'), kl(-6.25, tipR(6.25) + 1.5, 'B14'), kl(6.25, tipR(6.25) + 1.5, 'B14'), kl(180, 17.5, 'DOOR'), { x: f(CX - 22), y: f(CY + 9), text: 'CENTER' }, { x: ant[0], y: f(ant[1] - 10), text: 'ANTENNA' }];
+    const keyDown = [kl(180 + STEP * 1.2, 17.9, 'DOOR')];
+    const dN = P(180, 16), dA = P(180 - 0.6, 16.8), dB = P(180 - STEP + 0.6, 16.8);
+    const doorLine = seg([CX, f(CY + 4)], [dN[0], f(dN[1] - 5)]);
+    const doorArrow = arrow(dA[0], dA[1], dB[0], dB[1]);
+    const doorLbl16 = { x: f(CX + 5), y: f(CY + 8 * S) };
+    const doorLbl151 = { x: f((dA[0] + dB[0]) / 2), y: f(dA[1] + 10) };
+    const diag = [], dd = [0.658, 0.752];
+    [-1, 1].forEach(sx => [-1, 1].forEach(sy => {
+      const A = [sx * AX, sy * AY], d = [sx * dd[0], sy * dd[1]];
+      const ad = A[0] * d[0] + A[1] * d[1], t = -ad + Math.sqrt(ad * ad + 576 - (A[0] * A[0] + A[1] * A[1]));
+      const B = [A[0] + d[0] * t, A[1] + d[1] * t];
+      diag.push({ x1: X(A[0]), y1: Y(A[1]), x2: X(B[0]), y2: Y(B[1]) });
+    }));
+    const dUL = diag[0], dAng = f(Math.atan2(dUL.y2 - dUL.y1, dUL.x2 - dUL.x1) * 180 / Math.PI + 180);
+    const dLen = Math.hypot(dUL.x2 - dUL.x1, dUL.y2 - dUL.y1), ux = (dUL.x2 - dUL.x1) / dLen, uy = (dUL.y2 - dUL.y1) / dLen;
+    const dLx = f(dUL.x1 + (dUL.x2 - dUL.x1) * 0.86 + uy * 7), dLy = f(dUL.y1 + (dUL.y2 - dUL.y1) * 0.86 - ux * 7);
+    const diagLbl = { x: dLx, y: dLy, tr: 'rotate(' + dAng + ' ' + dLx + ' ' + dLy + ')' };
+    const layoutExtra = { diag, diagLbl, doorLine, doorArrow, doorLbl16, doorLbl151, flow, flowUp, flowDown, keyUp, keyDown, upper: nails.slice(0, 28), lower: nails.slice(28), meas: [seg([CX, CY], b1), seg(ant, b1)], m16: mlab([CX, CY], b1, 4), m1175: mlab(ant, b1, 4), antM: { x: ant[0], y: ant[1] }, frontA: arrow(CX, f(CY + 20.4 * S), CX, f(CY + 22.2 * S)), frontY: f(CY + 23.8 * S), axisW: { x1: X(-19.8), x2: X(19.8) } };
+    const out = {
+      ...layoutExtra,
+      cx: CX, cy: CY, rp, ring, center, left, right, division, nails, vees, labels, antennas, wings, dome, arrows,
+      ext, dims, dimOut, shortCables, allCables: longCables.concat(shortCables),
+      axis: { x1: X(-E), x2: X(E) },
+      pal: { x: CX, y: palY, tr: `rotate(180 ${CX} ${palY})` },
+      sub: { x: subX, y: CY, tr: `rotate(90 ${subX} ${CY})` },
+      front: { x: CX, y: bot + 36 }
+    };
+    this._gc[ck] = out;
+    return out;
+  }
+  elevation(view, CX, G0, S, titleY) {
+    const f = v => +v.toFixed(2), side = view === 'side';
+    const X = m => f(CX + m * S), Y = m => f(G0 - m * S);
+    const p = (x, y) => X(x) + ' ' + Y(y);
+    const seg = (a, b, c, d) => ({ x1: X(a), y1: Y(b), x2: X(c), y2: Y(d) });
+    const H = 12.2, W = 3.5, E = 18.42;
+    const body = side
+      ? `M ${p(-14, 0)} L ${p(-14, W)} Q ${p(-8.4, 5)} ${p(-5, 9.25)} L ${p(5, 9.25)} Q ${p(8.4, 5)} ${p(14, W)} L ${p(14, 0)} Z`
+      : `M ${p(-14, 0)} L ${p(-14, W)} Q ${p(-8.8, 4.3)} ${p(-5, 6.8)} L ${p(-1, 8.9)} L ${p(1, 8.9)} L ${p(5, 6.8)} Q ${p(8.8, 4.3)} ${p(14, W)} L ${p(14, 0)} Z`;
+    const mastBoxes = [], members = [], trussOutline = [], rings = [], guys = [], dashed = [], leaders = [], labels = [], dims = [], dimOut = [], ext = [];
+    [-1, 1].forEach(d => {
+      const x0 = d * 5 - 0.15;
+      mastBoxes.push({ x: X(x0), y: Y(H), w: f(0.3 * S), h: f(H * S) });
+      for (let y = 0.45; y < H; y += 0.45) members.push(seg(x0, y, x0 + 0.3, y));
+      guys.push(seg(d * 5, H, d * E, 0));
+      dashed.push(seg(d * 14, W, d * 16, 0));
+      if (!side) { dashed.push(seg(d * 5, H - 0.3, d * 3.5, 9.05)); rings.push({ cx: X(d * 5), cy: Y(6.8), rx: f(0.55 * S), ry: f(0.28 * S) }); }
+    });
+    if (side) {
+      trussOutline.push(`M ${p(-4.85, 9.3)} L ${p(4.85, 9.3)} L ${p(4.85, 10.3)} L ${p(-4.85, 10.3)} Z`);
+      for (let x = -4.85; x < 4.8; x += 0.485) { members.push(seg(x, 9.3, x, 10.3)); members.push(seg(x, 9.3, x + 0.485, 10.3)); }
+      guys.push(seg(-5, H, 5, H));
+    } else {
+      const topY = x => { const a = Math.abs(x); return a <= 1 ? 9.9 : 9.9 - (a - 1) / 2.5 * 0.85; };
+      trussOutline.push(`M ${p(-3.5, 8.9)} L ${p(-3.5, 9.05)} L ${p(-1, 9.9)} L ${p(1, 9.9)} L ${p(3.5, 9.05)} L ${p(3.5, 8.9)} Z`);
+      [-2.8, -2.2, -1.6, -1, 0, 1, 1.6, 2.2, 2.8].forEach(x => members.push(seg(x, 8.9, x, topY(x))));
+      members.push(seg(-1, 9.9, 0, 8.9)); members.push(seg(0, 8.9, 1, 9.9));
+    }
+    const at = (t, a, b) => [f(a[0] + (b[0] - a[0]) * t), f(a[1] + (b[1] - a[1]) * t)];
+    const gp = at(0.52, [X(-5), Y(H)], [X(-E), Y(0)]);
+    const lx = X(-17.2), ly = f(gp[1] - 30);
+    leaders.push({ x1: f(lx + 58), y1: f(ly + 6), x2: gp[0], y2: gp[1] });
+    labels.push({ x: lx, y: ly, text: side ? '14.50 m \u00b7 \u00d812 mm' : '\u00d812 mm', tr: 'translate(0,0)' });
+    if (side) {
+      labels.push({ x: X(0), y: f(Y(H) - 6), text: '10.10', tr: 'translate(-50%,-100%)' });
+      leaders.push({ x1: X(-3.2), y1: Y(7.3), x2: X(-4.85), y2: Y(7.9) });
+      labels.push({ x: X(-3.3), y: Y(7.3), text: 'Mast 30\u00d730 cm', tr: 'translate(0,-50%)' });
+    }
+    const y1 = f(G0 + 22), y2 = f(G0 + 46);
+    const dm = (a, b, v, y, acc) => dims.push({ left: X(a), top: f(y - 7), length: f((b - a) * S), value: v, tone: acc ? 'accent' : 'ink' });
+    if (side) {
+      [[-16, -14, ''], [-14, -5, '9.000'], [-5, 5, '10.000'], [5, 14, '9.000'], [14, 16, '']].forEach(([a, b, v]) => dm(a, b, v, y1));
+      dimOut.push({ x: X(-15), y: f(y1 - 10), text: '2.000' }, { x: X(15), y: f(y1 - 10), text: '2.000' });
+      [-16, -5, 5, 16].forEach(m => ext.push(seg(m, 0, m, (G0 - y1 - 5) / S)));
+    }
+    const yc = side ? y2 : y1;
+    [[-E, -14, '4.420'], [-14, 14, '\u00d8 28.000', 1], [14, E, '4.420']].forEach(([a, b, v, acc]) => dm(a, b, v, yc, acc));
+    [-E, -14, 14, E].forEach(m => ext.push(seg(m, 0, m, (G0 - yc - 5) / S)));
+    if (!side) {
+      const yd = Y(7.9);
+      [[-3.5, -1], [-1, 1], [1, 3.5]].forEach(([a, b]) => dims.push({ left: X(a), top: f(yd - 7), length: f((b - a) * S), value: '', tone: 'ink' }));
+      dimOut.push({ x: X(-2.25), y: f(yd + 11), text: '2.50' }, { x: X(0), y: f(yd + 11), text: '2.00' }, { x: X(2.25), y: f(yd + 11), text: '2.50' });
+    }
+    return { title: side ? 'Side view' : 'Front view', titleY, body, mastBoxes, members, trussOutline, rings, guys, dashed, leaders, labels, dims, dimOut, ext,
+      eave: seg(-14, W, 14, W), ground: seg(-20.5, 0, 20.5, 0), groundBand: { x: X(-20.5), y: f(G0 + 0.5), w: f(41 * S) } };
+  }
+  poleMarks(g, S) {
+    const f = v => +v.toFixed(2), CX = g.cx, CY = g.cy, k = (14 - 0.45) / 14;
+    const div = g.division.map(d => d.x1 + ',' + d.y1);
+    const pts = g.nails.map(n => ({ x: f(CX + (n.x1 - CX) * k), y: f(CY + (n.y1 - CY) * k) }));
+    const front = pts.reduce((a, b) => (b.y > a.y ? b : a));
+    const next = pts.filter(p => p !== front && p.x > front.x).reduce((a, b) => (Math.hypot(b.x - front.x, b.y - front.y) < Math.hypot(a.x - front.x, a.y - front.y) ? b : a));
+    const pd = { x1: CX, y1: f(CY + 4), x2: front.x, y2: f(front.y - 4) };
+    const pdl = { x: f(CX), y: f(CY + (front.y - CY) * 0.62), tr: 'rotate(90 ' + CX + ' ' + f(CY + (front.y - CY) * 0.62) + ')' };
+    const out = (p, r) => [CX + (p.x - CX) * r / 13.55, CY + (p.y - CY) * r / 13.55];
+    const A = out(front, 14.55), B = out(next, 14.55), dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
+    const ax = A[0] + ux * 1.5, ay = A[1] + uy * 1.5, bx = B[0] - ux * 1.5, by = B[1] - uy * 1.5, an = Math.atan2(by - ay, bx - ax), h = 4.5;
+    const pa = { x1: f(ax), y1: f(ay), x2: f(bx), y2: f(by), head: f(bx - h * Math.cos(an - 0.45)) + ',' + f(by - h * Math.sin(an - 0.45)) + ' ' + f(bx) + ',' + f(by) + ' ' + f(bx - h * Math.cos(an + 0.45)) + ',' + f(by - h * Math.sin(an + 0.45)) };
+    const pal = { x: f((ax + bx) / 2), y: f((ay + by) / 2 + 10) };
+    const PA = (t, r) => { const a = t * Math.PI / 180; return [CX + r * S * Math.sin(a), CY - r * S * Math.cos(a)]; };
+    const arw = (t, dir) => { const A2 = PA(t - 3.4 * dir, 18.9), B2 = PA(t + 3.4 * dir, 18.9), an2 = Math.atan2(B2[1] - A2[1], B2[0] - A2[0]), hh = 4.5;
+      return { x1: f(A2[0]), y1: f(A2[1]), x2: f(B2[0]), y2: f(B2[1]), head: f(B2[0] - hh * Math.cos(an2 - 0.45)) + ',' + f(B2[1] - hh * Math.sin(an2 - 0.45)) + ' ' + f(B2[0]) + ',' + f(B2[1]) + ' ' + f(B2[0] - hh * Math.cos(an2 + 0.45)) + ',' + f(B2[1] - hh * Math.sin(an2 + 0.45)) }; };
+    const pflow = [];
+    [[200, 1], [222, 1], [244, 1], [263, 1], [277, -1], [296, -1], [318, -1], [340, -1]].forEach(([t, d]) => { pflow.push(arw(t, d)); pflow.push(arw(360 - t, -d)); });
+    return { pts, pd, pdl, pa, pal, pflow, count: pts.length };
+  }
+  tireMarks(g, S) {
+    const f = v => +v.toFixed(2), CX = g.cx, CY = g.cy;
+    const X = m => f(CX + m * S), Y = m => f(CY + m * S);
+    const seg = (a, b, c, d) => ({ x1: X(a), y1: Y(b), x2: X(c), y2: Y(d) });
+    const BW = 1.5, BL = 3, R = 14, FR = 18.42, SL = 18.42, SR = 18.42;
+    const box = (mx, my, rot) => { const cx = X(mx), cy = Y(my), w = f(BW * S), h = f(BL * S); return { x: f(cx - w / 2), y: f(cy - h / 2), w, h, tr: 'rotate(' + rot + ' ' + cx + ' ' + cy + ')' }; };
+    const boxes = [], guides = [];
+    [-1, 1].forEach(sy => [-1, 1].forEach(sx => boxes.push(box(sx * 4.25, sy * (FR + BL / 2), 0))));
+    boxes.push(box(-(SL + BL / 2), 0, 90), box(SR + BL / 2, 0, 90));
+    const q = Math.SQRT1_2;
+    const RC = Math.hypot(4.25, FR + BL / 2), DR = RC - BL / 2;
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sy]) => { boxes.push(box(sx * RC * q, sy * RC * q, sx * sy > 0 ? -45 : 45)); guides.push(seg(0, 0, sx * DR * q, sy * DR * q)); });
+    guides.push(seg(0, -FR, 0, FR), seg(-SL, 0, SR, 0), seg(-4.25, -FR, 4.25, -FR), seg(-4.25, FR, 4.25, FR));
+    const P = r => [X(r * q), Y(r * q)];
+    const ddim = { x1: X(0), y1: Y(0), x2: P(DR)[0], y2: P(DR)[1] };
+    const tk = r => { const p = P(r), d = 4; return { x1: f(p[0] - d), y1: f(p[1] + d), x2: f(p[0] + d), y2: f(p[1] - d) }; };
+    const dticks = [tk(R), tk(DR)];
+    const lab = (r, text) => { const p = P(r); return { x: p[0], y: p[1], text, tr: 'rotate(45 ' + p[0] + ' ' + p[1] + ')' }; };
+    const dlabels = [lab(9.5, '14.000'), lab((R + DR) / 2, '4.420')];
+    const dims = [];
+    const V = (a, b, v) => dims.push({ left: f(CX - 7), top: Y(a), length: f((b - a) * S), value: v, orientation: 'vertical', pos: 'inline', tone: 'ink' });
+    const Hd = (a, b, v) => dims.push({ left: X(a), top: f(CY - 7), length: f((b - a) * S), value: v, orientation: 'horizontal', pos: 'inline', tone: 'ink' });
+    V(-FR, -R, '4.420'); V(-R, -1.6, '14.000'); V(1.6, R, '14.000'); V(R, FR, '4.420');
+    Hd(-SL, -R, '4.420'); Hd(-R, -5.6, '14.000'); Hd(5.6, R, '14.000'); Hd(R, SR, '4.420');
+    const y0 = Y(FR + BL + 1.2), y1 = f(y0 + 16), a = 5;
+    const frontA = { x1: CX, y1: y0, x2: CX, y2: y1, head: (CX - a * 0.45) + ',' + f(y1 - a) + ' ' + CX + ',' + y1 + ' ' + (CX + a * 0.45) + ',' + f(y1 - a) };
+    return { boxes, guides, ddim, dticks, dlabels, dims, frontA, frontY: f(y1 + 14) };
+  }
+  wallMarks(g, S) {
+    const f = v => +v.toFixed(2);
+    const P = (t, r) => { const a = t * Math.PI / 180; return [f(g.cx + r * S * Math.sin(a)), f(g.cy - r * S * Math.cos(a))]; };
+    const J = [-12.5, 12.5, 50, 79, 148, 226, 263, 293];
+    const joints = J.map(t => { const a = P(t, 12.6), b = P(t, 15.4); return { x1: a[0], y1: a[1], x2: b[0], y2: b[1] }; });
+    const badges = J.map((t, i) => { const nx = i === J.length - 1 ? J[0] + 360 : J[i + 1]; const p = P((t + nx) / 2, 14); return { x: p[0], y: p[1], n: String(i + 1) }; });
+    return { joints, badges };
+  }
+  sheet(kind, theme, NS) {
+    const mono = theme === 'mono', nails = kind === 'nails', layout = kind === 'layout', elev = kind === 'elev', walls = kind === 'walls', tire = kind === 'tire', poles = kind === 'poles';
+    const g = layout ? this.geometry(7.8, 162, 164) : (walls || poles) ? this.geometry(12, 297, 290) : tire ? this.geometry(10.5, 297, 262) : this.geometry(11.5, 292, 290);
+    const g2 = layout ? this.geometry(7.8, 162, 453) : null;
+    const h = React.createElement;
+    const col = (label, first, child) => h('div', { style: { display: 'flex', flexDirection: 'column', gap: 7, paddingLeft: first ? 0 : 14, borderLeft: first ? 'none' : '1px solid var(--line-grid)', minWidth: 0 } },
+      h('span', { style: { fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--ink-soft)' } }, label), child);
+    const notes = poles
+      ? ['First pole is front door, 16m from the centre, then next pole is 1.51m apart. Start at the front door and work to the left. Return to the front door and repeat, working to the right.', 'Repeat from back door.']
+      : tire
+      ? ['10 tireforts: 2 front, 2 rear, 2 sides, 4 diagonal.', 'All tireforts: 4.42 m beyond the tent edge.']
+      : walls
+      ? ['8 sidewall panels, numbered clockwise from the back.', 'Panel joints are marked across the tent edge.']
+      : elev
+      ? ['Guy cables 14.50 m, \u00d812 mm, anchored 4.42 m beyond the tent edge.', 'Wall guys anchored 2.00 m beyond the tent edge.', 'Masts: lattice, 30 \u00d7 30 cm.']
+      : layout
+      ? ['Start at the front door and work to the left. Return to the front door and repeat, working to the right. Unnumbered nails: first nail 16.00 m from the centre, then 1.51 m apart.']
+      : nails
+      ? ['The back door doesn\u2019t use a nail (it\u2019s an arch put up right after Konsum Crew arrives).', 'All keys hang on a nail, and are also tied to the nails on the sides.', 'The front door uses a nail until the festival starts.']
+      : ['All dimensions in metres.', 'Nail line 2.00 m beyond tent edge.', 'Cables anchored 4.42 m beyond tent edge.'];
+    const nailItem = nails ? { label: 'Nail (57)', shape: 'dot', fill: 'var(--accent)' } : { label: 'Nail (57)', shape: 'dot', fill: 'var(--ink)' };
+    const legend = mono
+      ? [{ label: 'Tent, centre', pattern: 'hatch-cross' }, { label: 'Tent, sides', pattern: 'hatch-45' }, { label: 'Abside', pattern: 'hatch-dots' }, { label: 'Dome', fill: 'var(--ink)' }, { label: 'Antenna (4)', fill: 'var(--ink)' }, nailItem]
+      : [{ label: 'Tent, centre', fill: 'var(--plan-fill)' }, { label: 'Tent, sides', fill: 'color-mix(in srgb, var(--plan-fill) 50%, var(--paper))' }, { label: 'Abside', pattern: 'hatch-45' }, { label: 'Dome', fill: 'var(--ink)' }, { label: 'Antenna (4)', fill: 'var(--ink)' }, nailItem];
+    if (kind === 'measures') legend.splice(4, 0, { label: 'Cable', shape: 'line', fill: 'var(--ink)', weight: 1 });
+    if (layout) legend.splice(0, legend.length,
+      mono ? { label: 'Tent', fill: 'var(--paper)' } : { label: 'Tent', fill: 'var(--plan-fill)' },
+      mono ? { label: 'Abside', pattern: 'hatch-dots' } : { label: 'Abside', pattern: 'hatch-45' },
+      { label: 'Antenna (4)', fill: 'var(--ink)' },
+      { label: 'Nail, this step', shape: 'dot', fill: 'var(--accent)' },
+      { label: 'Nail, other half', shape: 'dot', fill: 'var(--paper)', outline: true },
+      { label: 'Measure line', shape: 'line', fill: 'var(--accent)', weight: 1 });
+    if (poles) legend.splice(0, legend.length,
+      mono ? { label: 'Tent, centre', pattern: 'hatch-cross' } : { label: 'Tent, centre', fill: 'var(--plan-fill)' },
+      mono ? { label: 'Tent, sides', pattern: 'hatch-45' } : { label: 'Tent, sides', fill: 'color-mix(in srgb, var(--plan-fill) 50%, var(--paper))' },
+      mono ? { label: 'Abside', pattern: 'hatch-dots' } : { label: 'Abside', pattern: 'hatch-45' },
+      { label: 'Dome', fill: 'var(--ink)' },
+      { label: 'Pole (57)', shape: 'dot', fill: mono ? 'var(--ink)' : 'var(--accent)' },
+      { label: 'Nail (57)', shape: 'dot', fill: 'var(--ink)' });
+    if (tire) legend.splice(0, legend.length,
+      mono ? { label: 'Tent, centre', pattern: 'hatch-cross' } : { label: 'Tent, centre', fill: 'var(--plan-fill)' },
+      mono ? { label: 'Tent, sides', pattern: 'hatch-45' } : { label: 'Tent, sides', fill: 'color-mix(in srgb, var(--plan-fill) 50%, var(--paper))' },
+      mono ? { label: 'Abside', pattern: 'hatch-dots' } : { label: 'Abside', pattern: 'hatch-45' },
+      { label: 'Dome', fill: 'var(--ink)' },
+      { label: 'Tirefort (10)', fill: mono ? 'var(--ink)' : 'var(--accent)' },
+      { label: 'Nail (57)', shape: 'dot', fill: 'var(--ink)' });
+    if (walls) legend.splice(0, legend.length,
+      mono ? { label: 'Tent', pattern: 'hatch-cross' } : { label: 'Tent, centre', fill: 'var(--plan-fill)' },
+      ...(mono ? [] : [{ label: 'Tent, sides', fill: 'color-mix(in srgb, var(--plan-fill) 50%, var(--paper))' }]),
+      mono ? { label: 'Abside', pattern: 'hatch-dots' } : { label: 'Abside', pattern: 'hatch-45' },
+      { label: 'Sidewall', shape: 'line', fill: mono ? 'var(--ink)' : 'var(--accent)', weight: 3 },
+      { label: 'Panel joint', shape: 'line', fill: 'var(--ink)', weight: 3 },
+      { label: 'Dome', fill: 'var(--ink)' },
+      { label: 'Nail (57)', shape: 'dot', fill: 'var(--ink)' });
+    if (elev) legend.splice(0, legend.length,
+      mono ? { label: 'Tent', pattern: 'hatch-45' } : { label: 'Tent', fill: 'var(--plan-fill)' },
+      { label: 'Tent outline', shape: 'line', fill: 'var(--accent)', weight: 2 },
+      { label: 'Mast & dome', fill: 'var(--paper)', outline: true },
+      { label: 'Cable', shape: 'line', fill: 'var(--ink)', weight: 1 });
+    const header = NS ? h(NS.TitleBlock, { size: 'lg', project: 'Konsum', sheetTitle: poles ? 'Poles' : tire ? 'Tireforts' : walls ? 'Sidewalls' : elev ? 'Front & Side View' : layout ? 'Nail Layout' : nails ? 'Tent Nails' : 'Measures', sheetNumber: '', status: 'Edit 2026', statusPosition: 'right' }) : null;
+    const footer = !NS ? null : layout
+      ? col('Legend', true, h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '5px 12px' } }, legend.map((it, i) => h(NS.Legend, { key: i, direction: 'column', size: 12, items: [it] }))))
+      : h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1.25fr', gap: 14 } },
+      col('Notes', true, h('ol', { style: { margin: 0, paddingLeft: 14, display: 'flex', flexDirection: 'column', gap: 3, fontFamily: 'var(--font-mono)', fontSize: nails ? 8.5 : 9.5, lineHeight: 1.35, color: 'var(--ink)' } }, notes.map((n, i) => h('li', { key: i }, n)))),
+      col('Legend', false, h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px 12px' } }, legend.map((it, i) => h(NS.Legend, { key: i, direction: 'column', size: 12, items: [it] })))));
+    const key = kind + '-' + theme;
+    return {
+      key, theme, header, footer, g,
+      isElev: elev, elevFill: mono ? `url(#h45-${key})` : 'var(--plan-fill)',
+      elevs: elev ? [this.elevation('side', 297, 222, 14, 8), this.elevation('front', 297, 505, 14, 290)] : [],
+      views: elev ? [] : layout
+        ? [{ g, up: true, down: false, hi: g.upper, lo: g.lower, flow: g.flowUp }, { g: g2, up: false, down: true, hi: g2.lower, lo: g2.upper, flow: g2.flowDown }]
+        : [{ g, up: false, down: false, hi: [], lo: [], flow: [], walls, tire, poles, ...(poles ? this.poleMarks(g, 12) : {}), ...(walls ? this.wallMarks(g, 12) : {}), ...(tire ? this.tireMarks(g, 10.5) : {}) }],
+      isPoles: poles, poleFill: mono ? 'var(--ink)' : 'var(--accent)', isTire: tire, tireLabels: tire ? this.tireMarks(g, 10.5).dlabels : [], tireFill: mono ? 'var(--ink)' : 'var(--accent)',
+      wallBadges: walls ? this.wallMarks(g, 12).badges : [],
+      isWalls: walls, wallStroke: mono ? 'var(--ink)' : 'var(--accent)',
+      layoutLabels: layout ? g.keyUp.concat(g2.keyDown) : [],
+      isNails: nails, isMeasures: kind === 'measures', isLayout: layout, showDome: !layout,
+      caption: (poles ? 'Poles' : tire ? 'Tireforts' : walls ? 'Sidewalls' : elev ? 'Front & Side View' : layout ? 'Nail Layout' : nails ? 'Tent Nails' : 'Measures') + (mono ? ' \u00b7 B&W' : ' \u00b7 Color'),
+      showDivision: false,
+      cables: layout ? [] : (nails || walls || tire || poles) ? g.shortCables : g.allCables,
+      ext: kind === 'measures' ? g.ext : [],
+      dims: kind === 'measures' ? g.dims : tire ? this.tireMarks(g, 10.5).dims : [],
+      ringFill: `url(#${mono ? 'hd' : 'h45'}-${key})`,
+      centerFill: mono ? (layout ? 'var(--paper)' : `url(#hx-${key})`) : 'var(--plan-fill)',
+      sideFill: mono ? (layout ? 'var(--paper)' : `url(#h45-${key})`) : (layout ? 'var(--plan-fill)' : 'color-mix(in srgb, var(--plan-fill) 50%, var(--paper))')
+    };
+  }
+  renderVals() {
+    const NS = window.TrazadoTechnicalDrawingSystem_c49611;
+        const view = this.props.view ?? 'both';
+    const themes = view === 'color' ? ['color'] : view === 'mono' ? ['mono'] : ['color', 'mono'];
+    const sheets = [];
+    ['nails', 'layout', 'poles', 'measures', 'elev', 'walls', 'tire'].forEach(k => themes.forEach(t => sheets.push(this.sheet(k, t, NS))));
+    return { sheets };
+  }
+}
+</script>
+</body>
+</html>

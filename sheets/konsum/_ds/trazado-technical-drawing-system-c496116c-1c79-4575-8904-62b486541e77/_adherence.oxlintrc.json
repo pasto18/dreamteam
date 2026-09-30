@@ -1,0 +1,247 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "components/drawing/**",
+              "ui_kits/sheets/**",
+              "ui_kits/subardo/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Oswald|IBM Plex Mono|Caveat))/i]",
+        "message": "Font not provided by the design system. Available: Oswald, IBM Plex Mono, Caveat."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='AnnotationCallout'] > JSXAttribute > JSXIdentifier[name!=/^(?:text|direction|leaderLength|key|ref|className|style|children)$/]",
+        "message": "<AnnotationCallout> doesn't accept that prop. Declared props: text, direction, leaderLength."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='AnnotationCallout'] > JSXAttribute[name.name='direction'] > Literal[value!=/^(?:left|right)$/]",
+        "message": "<AnnotationCallout> direction must be one of 'left' | 'right'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='DimensionLine'] > JSXAttribute > JSXIdentifier[name!=/^(?:value|orientation|length|labelPosition|tone|key|ref|className|style|children)$/]",
+        "message": "<DimensionLine> doesn't accept that prop. Declared props: value, orientation, length, labelPosition, tone."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='DimensionLine'] > JSXAttribute[name.name='orientation'] > Literal[value!=/^(?:horizontal|vertical)$/]",
+        "message": "<DimensionLine> orientation must be one of 'horizontal' | 'vertical'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='DimensionLine'] > JSXAttribute[name.name='labelPosition'] > Literal[value!=/^(?:inline|above)$/]",
+        "message": "<DimensionLine> labelPosition must be one of 'inline' | 'above'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='DimensionLine'] > JSXAttribute[name.name='tone'] > Literal[value!=/^(?:ink|accent)$/]",
+        "message": "<DimensionLine> tone must be one of 'ink' | 'accent'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='LegendItem'] > JSXAttribute > JSXIdentifier[name!=/^(?:label|pattern|fill|shape|weight|outline|key|ref|className|style|children)$/]",
+        "message": "<LegendItem> doesn't accept that prop. Declared props: label, pattern, fill, shape, weight, outline."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='LegendItem'] > JSXAttribute[name.name='pattern'] > Literal[value!=/^(?:hatch-45|hatch-cross|dots|vertical|brick)$/]",
+        "message": "<LegendItem> pattern must be one of 'hatch-45' | 'hatch-cross' | 'dots' | 'vertical' | 'brick'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='LegendItem'] > JSXAttribute[name.name='shape'] > Literal[value!=/^(?:square|dot|line)$/]",
+        "message": "<LegendItem> shape must be one of 'square' | 'dot' | 'line'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='RevisionStamp'] > JSXAttribute > JSXIdentifier[name!=/^(?:label|date|size|key|ref|className|style|children)$/]",
+        "message": "<RevisionStamp> doesn't accept that prop. Declared props: label, date, size."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='SheetFrame'] > JSXAttribute > JSXIdentifier[name!=/^(?:theme|header|footer|children|cropMarks|border|key|ref|className|style|children)$/]",
+        "message": "<SheetFrame> doesn't accept that prop. Declared props: theme, header, footer, children, cropMarks, border."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='SheetFrame'] > JSXAttribute[name.name='theme'] > Literal[value!=/^(?:color|mono)$/]",
+        "message": "<SheetFrame> theme must be one of 'color' | 'mono'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='TitleBlock'] > JSXAttribute > JSXIdentifier[name!=/^(?:project|sheetTitle|sheetNumber|date|meta|status|statusPosition|size|key|ref|className|style|children)$/]",
+        "message": "<TitleBlock> doesn't accept that prop. Declared props: project, sheetTitle, sheetNumber, date, meta, status, statusPosition, size."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='TitleBlock'] > JSXAttribute[name.name='statusPosition'] > Literal[value!=/^(?:below|right)$/]",
+        "message": "<TitleBlock> statusPosition must be one of 'below' | 'right'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='TitleBlock'] > JSXAttribute[name.name='size'] > Literal[value!=/^(?:md|lg)$/]",
+        "message": "<TitleBlock> size must be one of 'md' | 'lg'."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {
+      "AnnotationCallout": {
+        "replaces": []
+      },
+      "DimensionLine": {
+        "replaces": []
+      },
+      "LegendItem": {
+        "replaces": []
+      },
+      "RevisionStamp": {
+        "replaces": []
+      },
+      "SheetFrame": {
+        "replaces": []
+      },
+      "TitleBlock": {
+        "replaces": []
+      }
+    },
+    "tokens": [
+      "--accent",
+      "--accent-ink",
+      "--accent-soft",
+      "--accent-tint",
+      "--band-bottom",
+      "--band-top",
+      "--fill-accent",
+      "--fill-accent-ink",
+      "--fill-highlight",
+      "--font-display",
+      "--font-hand",
+      "--font-mono",
+      "--ink",
+      "--ink-faint",
+      "--ink-soft",
+      "--leading-body",
+      "--leading-tight",
+      "--line-crop",
+      "--line-grid",
+      "--line-hair",
+      "--line-heavy",
+      "--line-mid",
+      "--line-thin",
+      "--paper",
+      "--paper-raised",
+      "--pattern-brick",
+      "--pattern-dots",
+      "--pattern-hatch-45",
+      "--pattern-hatch-cross",
+      "--pattern-vertical",
+      "--plan-fill",
+      "--radius-0",
+      "--radius-1",
+      "--sheet-h",
+      "--sheet-w",
+      "--space-1",
+      "--space-2",
+      "--space-3",
+      "--space-4",
+      "--space-5",
+      "--space-6",
+      "--space-7",
+      "--space-8",
+      "--status-stamp",
+      "--text-annotation",
+      "--text-body",
+      "--text-label",
+      "--text-subtitle",
+      "--text-title",
+      "--tracking-label",
+      "--tracking-wide"
+    ],
+    "tokenKinds": {
+      "--font-display": "font",
+      "--font-mono": "font",
+      "--font-hand": "font",
+      "--text-title": "font",
+      "--text-subtitle": "font",
+      "--text-label": "font",
+      "--text-annotation": "font",
+      "--text-body": "font",
+      "--tracking-wide": "font",
+      "--tracking-label": "font",
+      "--leading-tight": "font",
+      "--leading-body": "font",
+      "--paper": "color",
+      "--paper-raised": "color",
+      "--ink": "color",
+      "--ink-soft": "color",
+      "--ink-faint": "color",
+      "--line-grid": "color",
+      "--line-crop": "color",
+      "--accent": "color",
+      "--accent-ink": "color",
+      "--accent-soft": "color",
+      "--accent-tint": "color",
+      "--status-stamp": "color",
+      "--plan-fill": "color",
+      "--fill-accent": "color",
+      "--fill-accent-ink": "color",
+      "--fill-highlight": "color",
+      "--space-1": "spacing",
+      "--space-2": "spacing",
+      "--space-3": "spacing",
+      "--space-4": "spacing",
+      "--space-5": "spacing",
+      "--space-6": "spacing",
+      "--space-7": "spacing",
+      "--space-8": "spacing",
+      "--sheet-w": "spacing",
+      "--sheet-h": "spacing",
+      "--band-top": "spacing",
+      "--band-bottom": "spacing",
+      "--radius-0": "radius",
+      "--radius-1": "radius",
+      "--line-hair": "spacing",
+      "--line-thin": "spacing",
+      "--line-mid": "spacing",
+      "--line-heavy": "spacing",
+      "--pattern-hatch-45": "other",
+      "--pattern-hatch-cross": "other",
+      "--pattern-dots": "other",
+      "--pattern-vertical": "other",
+      "--pattern-brick": "other"
+    },
+    "fontFamilies": [
+      "Caveat",
+      "IBM Plex Mono",
+      "Oswald"
+    ]
+  }
+}
